@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AppShell from "@/components/layout/app-shell";
+import { createContent } from "@/app/content/actions/create-content";
 
 const tools = [
   {
@@ -31,10 +32,19 @@ const tools = [
   },
 ];
 
+const platforms = [
+  "Instagram",
+  "YouTube",
+  "LinkedIn",
+  "X",
+  "Blog",
+];
+
 export default function AIStudioPage() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
   const [activeTool, setActiveTool] = useState("AI Studio");
+  const [platform, setPlatform] = useState("Instagram");
   const [isGenerating, setIsGenerating] = useState(false);
 
   function selectTool(title: string, toolPrompt: string) {
@@ -78,21 +88,37 @@ export default function AIStudioPage() {
     }
   }
 
-  function handleCreateContent() {
-    const title =
-      prompt
-        .replace(
-          /^(Generate 10 strong content ideas about |Write a complete content draft about |Generate 10 attention-grabbing hooks about |Generate 10 clickable titles about |Repurpose this content for another platform: )/i,
-          "",
-        )
-        .trim() || "AI Generated Content";
+  function getContentTitle() {
+    const cleanedPrompt = prompt
+      .replace(
+        /^(Generate 10 strong content ideas about |Write a complete content draft about |Generate 10 attention-grabbing hooks about |Generate 10 clickable titles about |Repurpose this content for another platform: )/i,
+        "",
+      )
+      .trim();
 
-    const params = new URLSearchParams({
-      title,
-      body: result,
-    });
+    if (cleanedPrompt) {
+      return cleanedPrompt.length > 100
+        ? `${cleanedPrompt.slice(0, 97)}...`
+        : cleanedPrompt;
+    }
 
-    window.location.href = `/content/new?${params.toString()}`;
+    return "AI Generated Content";
+  }
+
+  async function handleCreateContent() {
+    if (!result.trim()) return;
+
+    try {
+      const content = await createContent({
+        title: getContentTitle(),
+        body: result.trim(),
+        platform: platform || null,
+      });
+
+      window.location.href = `/content/${content.id}`;
+    } catch (error) {
+      console.error("Create content error:", error);
+    }
   }
 
   return (
@@ -144,10 +170,24 @@ export default function AIStudioPage() {
               className="mt-6 min-h-36 w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-400"
             />
 
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-xs text-zinc-400">
-                {prompt.length} characters
-              </p>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <p className="text-xs text-zinc-400">
+                  {prompt.length} characters
+                </p>
+
+                <select
+                  value={platform}
+                  onChange={(event) => setPlatform(event.target.value)}
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-600 outline-none focus:border-zinc-400"
+                >
+                  {platforms.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <button
                 type="button"
@@ -190,7 +230,8 @@ export default function AIStudioPage() {
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  className="rounded-xl border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+                  disabled={isGenerating}
+                  className="rounded-xl border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Regenerate
                 </button>
@@ -198,7 +239,8 @@ export default function AIStudioPage() {
                 <button
                   type="button"
                   onClick={handleCreateContent}
-                  className="rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+                  disabled={!result.trim() || isGenerating}
+                  className="rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Create Content
                 </button>
