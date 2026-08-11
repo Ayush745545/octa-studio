@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Idea {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  status      String    @default("INBOX")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  contents    Content[]
+}
+
+model Content {
+  id        String   @id @default(cuid())
+  title     String
+  body      String?
+  status    String   @default("DRAFT")
+  platform  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ideaId String?
+  idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+}

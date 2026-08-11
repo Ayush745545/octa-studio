@@ -1,33 +1,14 @@
 import AppShell from "@/components/layout/app-shell";
+import { prisma } from "@/lib/prisma";
+import NewIdeaModal from "@/components/ideas/new-idea-modal";
 
-const ideas = [
-  {
-    id: "1",
-    title: "AI coding assistant for solo developers",
-    description:
-      "A focused assistant that turns a product idea into an implementation plan.",
-    category: "AI",
-    status: "Inbox",
-  },
-  {
-    id: "2",
-    title: "Cybersecurity newsletter for beginners",
-    description:
-      "A weekly newsletter explaining practical cybersecurity concepts simply.",
-    category: "Content",
-    status: "Inbox",
-  },
-  {
-    id: "3",
-    title: "Creator analytics dashboard",
-    description:
-      "A simple dashboard that explains what content is actually working.",
-    category: "SaaS",
-    status: "Inbox",
-  },
-];
+export default async function IdeasPage() {
+  const ideas = await prisma.idea.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
-export default function IdeasPage() {
   return (
     <AppShell>
       <div className="min-h-screen">
@@ -36,15 +17,15 @@ export default function IdeasPage() {
             <p className="text-sm font-medium text-zinc-500">Workspace</p>
           </div>
 
-          <button className="rounded-lg bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800">
-            + New Idea
-          </button>
+          <NewIdeaModal />
         </header>
 
         <main className="px-8 py-10">
           <div className="max-w-5xl">
             <div>
-              <p className="text-sm font-medium text-zinc-500">Idea Inbox</p>
+              <p className="text-sm font-medium text-zinc-500">
+                Idea Inbox
+              </p>
 
               <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
                 Ideas worth exploring.
@@ -57,38 +38,58 @@ export default function IdeasPage() {
             </div>
 
             <div className="mt-10 space-y-4">
-              {ideas.map((idea) => (
-                <article
-                  key={idea.id}
-                  className="rounded-2xl border border-zinc-200 bg-white p-6 transition hover:border-zinc-300"
-                >
-                  <div className="flex items-start justify-between gap-6">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
-                          {idea.category}
-                        </span>
+              {ideas.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-10 text-center">
+                  <p className="text-sm font-medium text-zinc-900">
+                    No ideas yet.
+                  </p>
 
-                        <span className="text-xs text-zinc-400">
-                          {idea.status}
-                        </span>
+                  <p className="mt-2 text-sm text-zinc-500">
+                    Capture your first idea to start building your content
+                    pipeline.
+                  </p>
+                </div>
+              ) : (
+                ideas.map((idea) => (
+                  <article
+                    key={idea.id}
+                    className="rounded-2xl border border-zinc-200 bg-white p-6 transition hover:border-zinc-300"
+                  >
+                    <div className="flex items-start justify-between gap-6">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          {idea.category && (
+                            <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
+                              {idea.category}
+                            </span>
+                          )}
+
+                          <span className="text-xs text-zinc-400">
+                            {idea.status}
+                          </span>
+                        </div>
+
+                        <h2 className="mt-3 text-lg font-semibold text-zinc-950">
+                          {idea.title}
+                        </h2>
+
+                        {idea.description && (
+                          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
+                            {idea.description}
+                          </p>
+                        )}
                       </div>
 
-                      <h2 className="mt-3 text-lg font-semibold text-zinc-950">
-                        {idea.title}
-                      </h2>
-
-                      <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                        {idea.description}
-                      </p>
+                      <a
+                        href={`/ideas/${idea.id}`}
+                        className="shrink-0 rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
+                      >
+                        Open
+                      </a>
                     </div>
-
-                    <button className="shrink-0 rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950">
-                      Open
-                    </button>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                ))
+              )}
             </div>
           </div>
         </main>
