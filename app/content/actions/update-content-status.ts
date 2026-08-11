@@ -7,7 +7,6 @@ const VALID_STATUSES = [
   "DRAFT",
   "READY",
   "SCHEDULED",
-  "PUBLISHED",
 ] as const;
 
 type ContentStatus = (typeof VALID_STATUSES)[number];

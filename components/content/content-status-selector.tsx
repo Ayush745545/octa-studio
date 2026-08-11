@@ -8,7 +8,6 @@ const STATUSES = [
   "DRAFT",
   "READY",
   "SCHEDULED",
-  "PUBLISHED",
 ] as const;
 
 type ContentStatus = (typeof STATUSES)[number];

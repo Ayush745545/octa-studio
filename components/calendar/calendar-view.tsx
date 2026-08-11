@@ -58,9 +58,68 @@ export default function CalendarView({
   const [selectedContent, setSelectedContent] =
     useState<CalendarContent | null>(null);
 
+  const [draggedContent, setDraggedContent] =
+    useState<CalendarContent | null>(null);
+
+  const [dragOverDate, setDragOverDate] =
+    useState<string | null>(null);
+
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
+
   const [isPending, startTransition] = useTransition();
+
+  function handleDragStart(content: CalendarContent) {
+    setDraggedContent(content);
+  }
+
+  function handleDragEnd() {
+    setDraggedContent(null);
+    setDragOverDate(null);
+  }
+
+  function handleDragOver(
+    event: React.DragEvent<HTMLDivElement>,
+    dateKey: string,
+  ) {
+    event.preventDefault();
+    setDragOverDate(dateKey);
+  }
+
+  function handleDrop(
+    event: React.DragEvent<HTMLDivElement>,
+    dateKey: string,
+  ) {
+    event.preventDefault();
+
+    if (!draggedContent) return;
+
+    const originalDate = new Date(draggedContent.scheduledAt);
+    const [year, month, day] = dateKey.split("-").map(Number);
+
+    const newDate = new Date(
+      year,
+      month - 1,
+      day,
+      originalDate.getHours(),
+      originalDate.getMinutes(),
+      originalDate.getSeconds(),
+    );
+
+    const scheduledAt =
+      `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, "0")}` +
+      `-${String(newDate.getDate()).padStart(2, "0")}` +
+      `T${String(newDate.getHours()).padStart(2, "0")}:${String(newDate.getMinutes()).padStart(2, "0")}`;
+
+    startTransition(async () => {
+      try {
+        await rescheduleContent(draggedContent.id, scheduledAt);
+      } finally {
+        setDraggedContent(null);
+        setDragOverDate(null);
+      }
+    });
+  }
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -204,7 +263,22 @@ export default function CalendarView({
             return (
               <div
                 key={key}
-                className="min-h-36 border-b border-r border-zinc-100 p-3 transition hover:bg-zinc-50"
+                onDragEnter={(event) => {
+                  event.preventDefault();
+                  setDragOverDate(key);
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "move";
+                  handleDragOver(event, key);
+                }}
+                onDragLeave={() => setDragOverDate(null)}
+                onDrop={(event) => handleDrop(event, key)}
+                className={`min-h-36 border-b border-r border-zinc-100 p-3 transition ${
+                  dragOverDate === key
+                    ? "bg-zinc-100 ring-2 ring-inset ring-zinc-300"
+                    : "hover:bg-zinc-50"
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <span
@@ -226,52 +300,71 @@ export default function CalendarView({
 
                 <div className="mt-3 space-y-2">
                   {items.map((content) => {
-                    const scheduledDate = new Date(
-                      content.scheduledAt,
-                    );
+                const scheduledDate = new Date(content.scheduledAt);
 
-                    return (
-                      <button
-                        key={content.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedContent(content);
-                          setNewDate(
-                            scheduledDate.toISOString().slice(0, 10),
-                          );
-                          setNewTime(
-                            `${String(scheduledDate.getHours()).padStart(2, "0")}:${String(
-                              scheduledDate.getMinutes(),
-                            ).padStart(2, "0")}`,
-                          );
-                        }}
-                        className="group block w-full rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-left transition hover:border-zinc-400 hover:bg-white"
-                      >
-                        <p className="line-clamp-2 text-xs font-medium leading-4 text-zinc-900">
-                          {content.title}
-                        </p>
+                return (
+                  <div
+                    key={content.id}
+                    role="button"
+                    tabIndex={0}
+                    draggable={true}
+                    onDragStart={(event) => {
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData("text/plain", content.id);
+                      handleDragStart(content);
+                    }}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => {
+                      setSelectedContent(content);
+                      setNewDate(
+                        `${scheduledDate.getFullYear()}-${String(
+                          scheduledDate.getMonth() + 1,
+                        ).padStart(2, "0")}-${String(
+                          scheduledDate.getDate(),
+                        ).padStart(2, "0")}`,
+                      );
+                      setNewTime(
+                        `${String(scheduledDate.getHours()).padStart(
+                          2,
+                          "0",
+                        )}:${String(scheduledDate.getMinutes()).padStart(
+                          2,
+                          "0",
+                        )}`,
+                      );
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        setSelectedContent(content);
+                      }
+                    }}
+                    className="group block w-full cursor-grab rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-left transition hover:border-zinc-400 hover:bg-white active:cursor-grabbing"
+                  >
+                    <p className="line-clamp-2 text-xs font-medium leading-4 text-zinc-900">
+                      {content.title}
+                    </p>
 
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="text-[10px] text-zinc-400">
-                            {content.platform || "General"}
-                          </span>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <span className="text-[10px] text-zinc-400">
+                        {content.platform || "General"}
+                      </span>
 
-                          <span className="text-[10px] font-medium text-zinc-500">
-                            {(() => {
-                              const hours = scheduledDate.getHours();
-                              const minutes = String(
-                                scheduledDate.getMinutes(),
-                              ).padStart(2, "0");
-                              const hour12 = hours % 12 || 12;
-                              const period = hours >= 12 ? "PM" : "AM";
+                      <span className="text-[10px] font-medium text-zinc-500">
+                        {(() => {
+                          const hours = scheduledDate.getHours();
+                          const minutes = String(
+                            scheduledDate.getMinutes(),
+                          ).padStart(2, "0");
+                          const hour12 = hours % 12 || 12;
+                          const period = hours >= 12 ? "PM" : "AM";
 
-                              return `${hour12}:${minutes} ${period}`;
-                            })()}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                          return `${hour12}:${minutes} ${period}`;
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
                 </div>
               </div>
             );

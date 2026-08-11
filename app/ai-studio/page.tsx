@@ -50,12 +50,92 @@ const platforms = [
   "Blog",
 ];
 
+const contentTypes = [
+  "Post",
+  "Reel",
+  "Video",
+  "Article",
+  "Thread",
+  "Caption",
+];
+
+const tones = [
+  "Professional",
+  "Casual",
+  "Educational",
+  "Engaging",
+  "Viral",
+];
+
+const lengths = [
+  "Short",
+  "Medium",
+  "Long",
+];
+
+const presets = [
+  {
+    name: "Viral Post",
+    icon: "🚀",
+    platform: "Instagram",
+    contentType: "Post",
+    tone: "Viral",
+    length: "Medium",
+  },
+  {
+    name: "Educational",
+    icon: "🎓",
+    platform: "LinkedIn",
+    contentType: "Post",
+    tone: "Educational",
+    length: "Medium",
+  },
+  {
+    name: "Thread",
+    icon: "🧵",
+    platform: "X",
+    contentType: "Thread",
+    tone: "Engaging",
+    length: "Medium",
+  },
+  {
+    name: "Reel Script",
+    icon: "🎬",
+    platform: "Instagram",
+    contentType: "Reel",
+    tone: "Viral",
+    length: "Medium",
+  },
+  {
+    name: "YouTube Script",
+    icon: "▶",
+    platform: "YouTube",
+    contentType: "Video",
+    tone: "Engaging",
+    length: "Long",
+  },
+  {
+    name: "LinkedIn",
+    icon: "💼",
+    platform: "LinkedIn",
+    contentType: "Post",
+    tone: "Professional",
+    length: "Medium",
+  },
+];
+
 export default function AIStudioPage() {
   const [prompt, setPrompt] = useState("");
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState("")
+  const [isCopied, setIsCopied] = useState(false);
   const [activeTool, setActiveTool] = useState("Generate Ideas");
   const [platform, setPlatform] = useState("Instagram");
+  const [contentType, setContentType] = useState("Post");
+  const [tone, setTone] = useState("Engaging");
+  const [length, setLength] = useState("Medium");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   function selectTool(title: string) {
     setActiveTool(title);
@@ -63,19 +143,37 @@ export default function AIStudioPage() {
     setResult("");
   }
 
+  function applyPreset(preset: (typeof presets)[number]) {
+    setPlatform(preset.platform);
+    setContentType(preset.contentType);
+    setTone(preset.tone);
+    setLength(preset.length);
+    setResult("");
+    setError("");
+  }
+
+
+  async function handleCopyResult() {
+    navigator.clipboard.writeText(result);
+    setIsCopied(true);
+
+    window.setTimeout(() => {
+      setIsCopied(false);
+    }, 1600);
+  }
 
   async function handleGenerate() {
+    setIsCopied(false);
     if (!prompt.trim() || isGenerating) return;
 
     setIsGenerating(true);
     setResult("");
+    setError("");
 
     try {
       const tool = tools.find((item) => item.title === activeTool);
 
       if (!tool) throw new Error("Unknown AI workflow.");
-
-      const finalPrompt = tool.prompt(prompt.trim(), platform);
 
       const response = await fetch("/api/ai/generate", {
         method: "POST",
@@ -83,7 +181,12 @@ export default function AIStudioPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          prompt: finalPrompt,
+          prompt: prompt.trim(),
+          tool: activeTool,
+          platform,
+          contentType,
+          tone,
+          length,
         }),
       });
 
@@ -95,7 +198,7 @@ export default function AIStudioPage() {
 
       setResult(data.result);
     } catch (error) {
-      setResult(
+      setError(
         error instanceof Error
           ? error.message
           : "Something went wrong while generating content.",
@@ -107,34 +210,22 @@ export default function AIStudioPage() {
 
 
   function getContentTitle() {
-  let title = prompt.trim();
+    const cleaned = prompt.trim().replace(/\\s+/g, " ");
 
-  const prefixes = [
-    "type:",
-    "topic:",
-    "subject:",
-    "brief:",
-    "idea:",
-    "prompt:",
-  ];
-
-  for (const prefix of prefixes) {
-    if (title.toLowerCase().startsWith(prefix)) {
-      title = title.slice(prefix.length).trim();
-      break;
+    if (!cleaned) {
+      return `${activeTool} — ${platform}`;
     }
+
+    return cleaned.length > 80
+      ? `${cleaned.slice(0, 77)}...`
+      : cleaned;
   }
 
-  if (!title) {
-    return "AI Generated Content";
-  }
-
-  return title.length > 100
-    ? `${title.slice(0, 97)}...`
-    : title;
-}
   async function handleCreateContent() {
-    if (!result.trim()) return;
+    if (!result.trim() || isCreating) return;
+
+    setIsCreating(true);
+    setError("");
 
     try {
       const content = await createContent({
@@ -146,6 +237,14 @@ export default function AIStudioPage() {
       window.location.href = `/content/${content.id}`;
     } catch (error) {
       console.error("Create content error:", error);
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Could not create content.",
+      );
+
+      setIsCreating(false);
     }
   }
 
@@ -174,6 +273,52 @@ export default function AIStudioPage() {
             </p>
           </div>
 
+          <section className="mt-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-sm text-zinc-400">
+                  Quick presets
+                </p>
+                <h2 className="mt-1 text-xl font-semibold tracking-tight text-zinc-950">
+                  Start with a workflow.
+                </h2>
+              </div>
+
+              <span className="text-xs text-zinc-400">
+                One click setup
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {presets.map((preset) => (
+                <button
+                  key={preset.name}
+                  type="button"
+                  onClick={() => applyPreset(preset)}
+                  className="group rounded-2xl border border-zinc-200 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg">
+                      {preset.icon}
+                    </span>
+
+                    <span className="text-xs text-zinc-300 transition group-hover:text-zinc-600">
+                      Apply →
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-sm font-medium text-zinc-950">
+                    {preset.name}
+                  </p>
+
+                  <p className="mt-1 text-xs text-zinc-400">
+                    {preset.platform} · {preset.contentType} · {preset.tone}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </section>
+
           <section className="mt-10 rounded-2xl border border-zinc-200 bg-zinc-50 p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -201,6 +346,74 @@ export default function AIStudioPage() {
               className="mt-6 min-h-36 w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-400"
             />
 
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div>
+                <label
+                  htmlFor="content-type"
+                  className="mb-1.5 block text-xs font-medium text-zinc-500"
+                >
+                  Content type
+                </label>
+
+                <select
+                  id="content-type"
+                  value={contentType}
+                  onChange={(event) => setContentType(event.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-xs font-medium text-zinc-700 outline-none focus:border-zinc-400"
+                >
+                  {contentTypes.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="content-tone"
+                  className="mb-1.5 block text-xs font-medium text-zinc-500"
+                >
+                  Tone
+                </label>
+
+                <select
+                  id="content-tone"
+                  value={tone}
+                  onChange={(event) => setTone(event.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-xs font-medium text-zinc-700 outline-none focus:border-zinc-400"
+                >
+                  {tones.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="content-length"
+                  className="mb-1.5 block text-xs font-medium text-zinc-500"
+                >
+                  Length
+                </label>
+
+                <select
+                  id="content-length"
+                  value={length}
+                  onChange={(event) => setLength(event.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-xs font-medium text-zinc-700 outline-none focus:border-zinc-400"
+                >
+                  {lengths.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <p className="text-xs text-zinc-400">
@@ -210,6 +423,7 @@ export default function AIStudioPage() {
                 <select
                   value={platform}
                   onChange={(event) => setPlatform(event.target.value)}
+                  aria-label="Platform"
                   className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-600 outline-none focus:border-zinc-400"
                 >
                   {platforms.map((item) => (
@@ -231,37 +445,64 @@ export default function AIStudioPage() {
             </div>
           </section>
 
+          {error && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
           {result && (
             <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-zinc-950">
                     Generated result
                   </p>
 
                   <p className="mt-1 text-xs text-zinc-400">
-                    Review the result before sending it into ContentOS.
+                    Review and refine before sending it into ContentOS.
                   </p>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-medium text-zinc-500">
+                      {platform}
+                    </span>
+
+                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-medium text-zinc-500">
+                      {contentType}
+                    </span>
+
+                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-medium text-zinc-500">
+                      {tone}
+                    </span>
+
+                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-medium text-zinc-500">
+                      {length}
+                    </span>
+                  </div>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => navigator.clipboard.writeText(result)}
+                  onClick={handleCopyResult}
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-950"
                 >
-                  Copy
+                  {isCopied ? "Copied ✓" : "Copy"}
                 </button>
               </div>
 
-              <div className="mt-5 whitespace-pre-wrap rounded-xl bg-zinc-50 p-5 text-sm leading-7 text-zinc-700">
-                {result}
-              </div>
+              <textarea
+                value={result}
+                onChange={(event) => setResult(event.target.value)}
+                className="mt-5 min-h-72 w-full resize-y rounded-xl border border-zinc-200 bg-zinc-50 p-5 text-sm leading-7 text-zinc-700 outline-none transition focus:border-zinc-400"
+                placeholder="Your generated content will appear here..."
+              />
 
               <div className="mt-5 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  disabled={isGenerating}
+                  disabled={isGenerating || isCreating}
                   className="rounded-xl border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Regenerate
@@ -270,10 +511,10 @@ export default function AIStudioPage() {
                 <button
                   type="button"
                   onClick={handleCreateContent}
-                  disabled={!result.trim() || isGenerating}
+                  disabled={!result.trim() || isGenerating || isCreating}
                   className="rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Create Content
+                  {isCreating ? "Creating..." : "Create Content"}
                 </button>
               </div>
             </section>

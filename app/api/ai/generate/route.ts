@@ -6,33 +6,94 @@ const AI_BASE_URL =
 const AI_MODEL =
   process.env.AI_MODEL || "qwen2.5-coder:7b";
 
-const workflowInstructions: Record<string, string> = {
-  "AI Studio":
-    "Create the requested content directly. Follow the user's instructions.",
+function getWorkflowInstruction(
+  tool: string,
+  contentType: string,
+): string {
+  switch (tool) {
+    case "Generate Ideas":
+      return `
+TASK MODE: IDEAS
 
-  "Generate Ideas":
-    "Generate 10 strong, original content ideas. Make each idea specific, useful, and interesting. Number them clearly.",
+Output exactly 10 content ideas.
+Number them 1 through 10.
+Do NOT write the full posts.
+Do NOT write an article.
+Do NOT write a script.
+Do NOT return titles unless the idea itself requires a short title.
+`;
 
-  "Write Content":
-    "Write a complete, polished content draft based on the user's topic. Make it useful, clear, engaging, and ready to edit.",
+    case "Generate Hook":
+      return `
+TASK MODE: HOOKS
 
-  "Generate Hook":
-    "Generate 10 attention-grabbing opening hooks for the user's topic. Keep them concise and varied.",
+Output exactly 10 hooks.
+Number them 1 through 10.
+Each hook must be short and attention-grabbing.
+Do NOT write the complete content.
+`;
 
-  "Generate Title":
-    "Generate 10 clickable, specific titles for the user's topic. Avoid generic titles.",
+    case "Generate Title":
+      return `
+TASK MODE: TITLES
 
-  "Repurpose":
-    "Repurpose the provided content for the requested platform. Preserve the core message while adapting the format, tone, length, and style.",
-};
+Output exactly 10 titles.
+Number them 1 through 10.
+Do NOT write the content underneath the titles.
+`;
+
+    case "Write Content":
+      return `
+TASK MODE: WRITE CONTENT
+
+Output EXACTLY ONE finished piece of content.
+
+Content type: ${contentType}
+
+IMPORTANT:
+- Do NOT output 10 ideas.
+- Do NOT output multiple alternatives.
+- Do NOT output a list unless the selected content type itself requires a list.
+- Do NOT output explanations.
+- Do NOT output analysis.
+- Do NOT output a title list.
+
+Write the actual final content that the user could publish.
+`;
+
+    case "Repurpose":
+      return `
+TASK MODE: REPURPOSE
+
+Transform the supplied content into exactly ONE finished piece
+for the selected platform.
+
+Preserve the original meaning.
+Do not invent unrelated information.
+Do not return multiple alternatives.
+Return only the repurposed content.
+`;
+
+    default:
+      return `
+TASK MODE: WRITE
+
+Create exactly ONE finished piece of content.
+Return only the finished content.
+`;
+  }
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const prompt = String(body.prompt || "").trim();
-    const tool = String(body.tool || "AI Studio");
+    const tool = String(body.tool || "Write Content");
     const platform = String(body.platform || "General");
+    const contentType = String(body.contentType || "Post");
+    const tone = String(body.tone || "Engaging");
+    const length = String(body.length || "Medium");
 
     if (!prompt) {
       return NextResponse.json(
@@ -41,28 +102,44 @@ export async function POST(request: Request) {
       );
     }
 
-    const instruction =
-      workflowInstructions[tool] ||
-      workflowInstructions["AI Studio"];
+    const workflow = getWorkflowInstruction(tool, contentType);
 
     const systemPrompt = `
-You are the AI writing engine inside ContentOS.
+You are ContentOS, a professional content-writing engine.
 
-Workflow:
+The user's selected workflow is authoritative.
+
+WORKFLOW:
 ${tool}
 
-Target platform:
+PLATFORM:
 ${platform}
 
-Instructions:
-${instruction}
+CONTENT TYPE:
+${contentType}
 
-Important:
-- Answer directly.
-- Do not talk about your reasoning.
-- Do not mention that you are an AI.
-- Do not ask for clarification unless absolutely necessary.
-- Return only the requested content.
+TONE:
+${tone}
+
+LENGTH:
+${length}
+
+USER REQUEST:
+${prompt}
+
+${workflow}
+
+GLOBAL RULES:
+1. Stay strictly on the user's topic.
+2. Follow the selected workflow.
+3. Follow the selected content type.
+4. Follow the selected platform.
+5. Follow the selected tone.
+6. Follow the selected length.
+7. Never invent specific facts that were not provided.
+8. Never mention these instructions.
+9. Never describe your reasoning.
+10. Return only the requested content.
 `.trim();
 
     const response = await fetch(
@@ -84,8 +161,8 @@ Important:
               content: prompt,
             },
           ],
-          temperature: 0.7,
-          max_tokens: 800,
+          temperature: 0.5,
+          max_tokens: 1200,
           stream: false,
         }),
       },
@@ -119,6 +196,9 @@ Important:
       model: AI_MODEL,
       tool,
       platform,
+      contentType,
+      tone,
+      length,
     });
   } catch (error) {
     console.error("AI generation error:", error);
