@@ -54,6 +54,7 @@ export default async function ContentPage({
             <ContentStatusSelector
               id={content.id}
               status={content.status}
+              scheduledAt={content.scheduledAt}
             />
           </div>
         </main>
