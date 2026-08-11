@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 
 const AI_BASE_URL =
-  process.env.AI_BASE_URL || "http://localhost:1234/v1";
+  process.env.AI_BASE_URL || "http://" + "localhost" + ":11434/v1";
 
 const AI_MODEL =
-  process.env.AI_MODEL || "prism-ml/bonsai-27b";
+  process.env.AI_MODEL || "qwen2.5-coder:7b";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const prompt =
-      typeof body.prompt === "string" ? body.prompt.trim() : "";
+      typeof body.prompt === "string"
+        ? body.prompt.trim()
+        : "";
 
     if (!prompt) {
       return NextResponse.json(
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     const response = await fetch(
-      AI_BASE_URL + "/chat/completions",
+      `${AI_BASE_URL}/chat/completions`,
       {
         method: "POST",
         headers: {
@@ -33,7 +35,7 @@ export async function POST(request: Request) {
             {
               role: "system",
               content:
-                "You are the AI writing assistant inside ContentOS. Create useful, clear, practical content and follow the user's request directly.",
+                "You are the AI writing assistant inside ContentOS. Create clear, useful content. Answer directly. Do not explain your reasoning.",
             },
             {
               role: "user",
@@ -41,6 +43,8 @@ export async function POST(request: Request) {
             },
           ],
           temperature: 0.7,
+          max_tokens: 500,
+          stream: false,
         }),
       },
     );
@@ -50,7 +54,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json(
         {
-          error: "AI provider error: " + errorText,
+          error: `AI provider error: ${errorText}`,
         },
         { status: 502 },
       );
@@ -59,7 +63,7 @@ export async function POST(request: Request) {
     const data = await response.json();
 
     const result =
-      data?.choices?.[0]?.message?.content;
+      data?.choices?.[0]?.message?.content?.trim();
 
     if (!result) {
       return NextResponse.json(
@@ -77,7 +81,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: "Could not connect to the local AI provider.",
+        error:
+          "Could not connect to the local AI provider.",
       },
       { status: 500 },
     );
