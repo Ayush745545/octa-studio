@@ -8,27 +8,37 @@ const tools = [
   {
     title: "Generate Ideas",
     description: "Turn a topic into fresh content ideas.",
-    prompt: "Generate 10 strong content ideas about ",
+    placeholder: "Example: AI tools for developers",
+    prompt: (input: string, platform: string) =>
+      `Generate 10 strong content ideas about ${input} for ${platform}.`,
   },
   {
     title: "Write Content",
     description: "Create a first draft from a simple brief.",
-    prompt: "Write a complete content draft about ",
+    placeholder: "Example: The future of AI coding",
+    prompt: (input: string, platform: string) =>
+      `Write a complete ${platform} content draft about ${input}.`,
   },
   {
     title: "Generate Hook",
-    description: "Create strong opening hooks that grab attention.",
-    prompt: "Generate 10 attention-grabbing hooks about ",
+    description: "Create strong opening hooks.",
+    placeholder: "Example: AI coding tools",
+    prompt: (input: string, platform: string) =>
+      `Generate 10 attention-grabbing hooks about ${input} for ${platform}.`,
   },
   {
     title: "Generate Title",
     description: "Turn your topic into clickable titles.",
-    prompt: "Generate 10 clickable titles about ",
+    placeholder: "Example: AI tools developers should know",
+    prompt: (input: string, platform: string) =>
+      `Generate 10 clickable ${platform} titles about ${input}.`,
   },
   {
     title: "Repurpose",
     description: "Transform existing content for another platform.",
-    prompt: "Repurpose this content for another platform: ",
+    placeholder: "Paste the content you want to repurpose...",
+    prompt: (input: string, platform: string) =>
+      `Repurpose this content for ${platform}:\n\n${input}`,
   },
 ];
 
@@ -47,26 +57,33 @@ export default function AIStudioPage() {
   const [platform, setPlatform] = useState("Instagram");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  function selectTool(title: string, toolPrompt: string) {
+  function selectTool(title: string) {
     setActiveTool(title);
-    setPrompt(toolPrompt);
+    setPrompt("");
     setResult("");
   }
 
+
   async function handleGenerate() {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || isGenerating) return;
 
     setIsGenerating(true);
     setResult("");
 
     try {
+      const tool = tools.find((item) => item.title === activeTool);
+
+      if (!tool) throw new Error("Unknown AI workflow.");
+
+      const finalPrompt = tool.prompt(prompt.trim(), platform);
+
       const response = await fetch("/api/ai/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          prompt: prompt.trim(),
+          prompt: finalPrompt,
         }),
       });
 
@@ -87,6 +104,7 @@ export default function AIStudioPage() {
       setIsGenerating(false);
     }
   }
+
 
   function getContentTitle() {
     const cleanedPrompt = prompt
@@ -166,7 +184,10 @@ export default function AIStudioPage() {
             <textarea
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
-              placeholder="Example: Create a YouTube video about the 5 best AI coding tools..."
+              placeholder={
+  tools.find((tool) => tool.title === activeTool)?.placeholder ||
+  "Tell AI what you want to create..."
+}
               className="mt-6 min-h-36 w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-400"
             />
 
@@ -262,7 +283,7 @@ export default function AIStudioPage() {
                 <button
                   key={tool.title}
                   type="button"
-                  onClick={() => selectTool(tool.title, tool.prompt)}
+                  onClick={() => selectTool(tool.title)}
                   className="group rounded-2xl border border-zinc-200 bg-white p-6 text-left transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm"
                 >
                   <div className="flex items-start justify-between">
