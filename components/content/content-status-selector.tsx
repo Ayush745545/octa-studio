@@ -26,18 +26,14 @@ export default function ContentStatusSelector({
 }: ContentStatusSelectorProps) {
   const [isPending, startTransition] = useTransition();
 
-  const existingDate = scheduledAt
-    ? new Date(scheduledAt)
-    : null;
+  const existingDate = scheduledAt ? new Date(scheduledAt) : null;
 
   const [scheduleDate, setScheduleDate] = useState(
     existingDate ? existingDate.toISOString().slice(0, 10) : "",
   );
 
   const [scheduleTime, setScheduleTime] = useState(
-    existingDate
-      ? existingDate.toTimeString().slice(0, 5)
-      : "",
+    existingDate ? existingDate.toTimeString().slice(0, 5) : "",
   );
 
   function handleChange(nextStatus: ContentStatus) {
@@ -98,9 +94,7 @@ export default function ContentStatusSelector({
               type="date"
               value={scheduleDate}
               disabled={isPending}
-              onChange={(event) =>
-                setScheduleDate(event.target.value)
-              }
+              onChange={(event) => setScheduleDate(event.target.value)}
               className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400 disabled:opacity-60"
             />
           </div>
@@ -118,20 +112,14 @@ export default function ContentStatusSelector({
               type="time"
               value={scheduleTime}
               disabled={isPending}
-              onChange={(event) =>
-                setScheduleTime(event.target.value)
-              }
+              onChange={(event) => setScheduleTime(event.target.value)}
               className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400 disabled:opacity-60"
             />
           </div>
 
           <button
             type="button"
-            disabled={
-              isPending ||
-              !scheduleDate ||
-              !scheduleTime
-            }
+            disabled={isPending || !scheduleDate || !scheduleTime}
             onClick={handleSchedule}
             className="w-full rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >

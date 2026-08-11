@@ -53,7 +53,7 @@ const platforms = [
 export default function AIStudioPage() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
-  const [activeTool, setActiveTool] = useState("AI Studio");
+  const [activeTool, setActiveTool] = useState("Generate Ideas");
   const [platform, setPlatform] = useState("Instagram");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -107,22 +107,32 @@ export default function AIStudioPage() {
 
 
   function getContentTitle() {
-    const cleanedPrompt = prompt
-      .replace(
-        /^(Generate 10 strong content ideas about |Write a complete content draft about |Generate 10 attention-grabbing hooks about |Generate 10 clickable titles about |Repurpose this content for another platform: )/i,
-        "",
-      )
-      .trim();
+  let title = prompt.trim();
 
-    if (cleanedPrompt) {
-      return cleanedPrompt.length > 100
-        ? `${cleanedPrompt.slice(0, 97)}...`
-        : cleanedPrompt;
+  const prefixes = [
+    "type:",
+    "topic:",
+    "subject:",
+    "brief:",
+    "idea:",
+    "prompt:",
+  ];
+
+  for (const prefix of prefixes) {
+    if (title.toLowerCase().startsWith(prefix)) {
+      title = title.slice(prefix.length).trim();
+      break;
     }
+  }
 
+  if (!title) {
     return "AI Generated Content";
   }
 
+  return title.length > 100
+    ? `${title.slice(0, 97)}...`
+    : title;
+}
   async function handleCreateContent() {
     if (!result.trim()) return;
 
