@@ -49,16 +49,33 @@ export default function AIStudioPage() {
     setIsGenerating(true);
     setResult("");
 
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    try {
+      const response = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+        }),
+      });
 
-    setResult(
-      `AI generation preview\n\n${prompt.trim()}\n\n` +
-        `This is where the generated result will appear. ` +
-        `The AI provider can be connected here without changing ` +
-        `the existing Ideas, Content, or Calendar workflow.`,
-    );
+      const data = await response.json();
 
-    setIsGenerating(false);
+      if (!response.ok) {
+        throw new Error(data.error || "Generation failed.");
+      }
+
+      setResult(data.result);
+    } catch (error) {
+      setResult(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while generating content.",
+      );
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   function handleCreateContent() {
