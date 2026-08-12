@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppShell from "@/components/layout/app-shell";
 import { createContent } from "@/app/content/actions/create-content";
 
@@ -128,6 +128,21 @@ export default function AIStudioPage() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("")
   const [isCopied, setIsCopied] = useState(false);
+  const [copiedHistoryId, setCopiedHistoryId] = useState<string | null>(null);
+
+  const [history, setHistory] = useState<
+    {
+      id: string;
+      prompt: string;
+      result: string;
+      platform: string;
+      contentType: string;
+      tone: string;
+      length: string;
+      createdAt: string;
+    }[]
+  >([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [activeTool, setActiveTool] = useState("Generate Ideas");
   const [platform, setPlatform] = useState("Instagram");
   const [contentType, setContentType] = useState("Post");
@@ -136,6 +151,56 @@ export default function AIStudioPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("contentos-ai-history");
+
+      if (saved) {
+        const parsed = JSON.parse(saved);
+
+        if (Array.isArray(parsed)) {
+          setHistory(parsed.slice(0, 10));
+        }
+      }
+    } catch {
+      // Ignore invalid localStorage data.
+    } finally {
+      setHistoryLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!historyLoaded) return;
+
+    try {
+      window.localStorage.setItem(
+        "contentos-ai-history",
+        JSON.stringify(history.slice(0, 10)),
+      );
+    } catch {
+      // Ignore localStorage errors.
+    }
+  }, [history, historyLoaded]);
+
+  function restoreHistoryItem(item: (typeof history)[number]) {
+    setPrompt(item.prompt);
+    setResult(item.result);
+    setPlatform(item.platform);
+    setContentType(item.contentType);
+    setTone(item.tone);
+    setLength(item.length);
+    setIsCopied(false);
+    setError("");
+  }
+
+  function deleteHistoryItem(id: string) {
+    setHistory((current) => current.filter((item) => item.id !== id));
+  }
+
+  function clearHistory() {
+    setHistory([]);
+  }
 
   function selectTool(title: string) {
     setActiveTool(title);
@@ -197,6 +262,20 @@ export default function AIStudioPage() {
       }
 
       setResult(data.result);
+
+    setHistory((current) => [
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        prompt: prompt.trim(),
+        result: data.result,
+        platform,
+        contentType,
+        tone,
+        length,
+        createdAt: new Date().toISOString(),
+      },
+      ...current,
+    ].slice(0, 10));
     } catch (error) {
       setError(
         error instanceof Error
@@ -516,6 +595,133 @@ export default function AIStudioPage() {
                 >
                   {isCreating ? "Creating..." : "Create Content"}
                 </button>
+              </div>
+            </section>
+          )}
+
+          {history.length > 0 && (
+            <section className="mt-8">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm text-zinc-400">
+                    Recent generations
+                  </p>
+
+                  <h2 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950">
+                    Generation history
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setHistory([])}
+                  className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-950"
+                >
+                  Clear history
+                </button>
+              </div>
+
+              <div className="mt-5 space-y-3">
+                {history.map((item) => (
+                  <div
+                    key={item.id}
+                    className="group rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-zinc-300 hover:shadow-sm"
+                  >
+                    <div className="flex items-start gap-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPrompt(item.prompt);
+                          setResult(item.result);
+                          setPlatform(item.platform);
+                          setContentType(item.contentType);
+                          setTone(item.tone);
+                          setLength(item.length);
+                          setIsCopied(false);
+                        }}
+                        className="min-w-0 flex-1 text-left"
+                      >
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-medium text-zinc-950">
+                            {item.prompt}
+                          </p>
+
+                          <span className="shrink-0 text-[11px] text-zinc-400">
+                            Reuse
+                          </span>
+                        </div>
+
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <span className="rounded-full bg-zinc-50 px-2.5 py-1 text-[11px] font-medium text-zinc-500">
+                            {item.platform}
+                          </span>
+
+                          <span className="rounded-full bg-zinc-50 px-2.5 py-1 text-[11px] font-medium text-zinc-500">
+                            {item.contentType}
+                          </span>
+
+                          <span className="rounded-full bg-zinc-50 px-2.5 py-1 text-[11px] font-medium text-zinc-500">
+                            {item.tone}
+                          </span>
+
+                          <span className="rounded-full bg-zinc-50 px-2.5 py-1 text-[11px] font-medium text-zinc-500">
+                            {item.length}
+                          </span>
+                        </div>
+                      </button>
+
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(item.result);
+                            setCopiedHistoryId(item.id);
+
+                            window.setTimeout(() => {
+                              setCopiedHistoryId((current) =>
+                                current === item.id ? null : current,
+                              );
+                            }, 1600);
+                          }}
+                          className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-950"
+                        >
+                          {copiedHistoryId === item.id ? "Copied ✓" : "Copy"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => deleteHistoryItem(item.id)}
+                          aria-label="Delete generation"
+                          className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 transition hover:border-red-200 hover:text-red-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPrompt(item.prompt);
+                        setResult(item.result);
+                        setPlatform(item.platform);
+                        setContentType(item.contentType);
+                        setTone(item.tone);
+                        setLength(item.length);
+                        setIsCopied(false);
+                      }}
+                      className="mt-4 block w-full text-left"
+                    >
+                      <p className="line-clamp-2 text-xs leading-5 text-zinc-400 transition group-hover:text-zinc-500">
+                        {item.result}
+                      </p>
+
+                      <p className="mt-3 text-[11px] text-zinc-300">
+                        {new Date(item.createdAt).toLocaleString()}
+                      </p>
+                    </button>
+                  </div>
+                ))}
               </div>
             </section>
           )}
