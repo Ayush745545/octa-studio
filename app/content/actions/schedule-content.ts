@@ -13,6 +13,10 @@ export async function scheduleContent(
     throw new Error("Invalid scheduled date");
   }
 
+  if (date <= new Date()) {
+    throw new Error("Content must be scheduled in the future.");
+  }
+
   const content = await prisma.content.update({
     where: { id },
     data: {

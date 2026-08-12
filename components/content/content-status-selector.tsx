@@ -4,11 +4,7 @@ import { useState, useTransition } from "react";
 import { updateContentStatus } from "@/app/content/actions/update-content-status";
 import { scheduleContent } from "@/app/content/actions/schedule-content";
 
-const STATUSES = [
-  "DRAFT",
-  "READY",
-  "SCHEDULED",
-] as const;
+const STATUSES = ["DRAFT", "READY"] as const;
 
 type ContentStatus = (typeof STATUSES)[number];
 
@@ -24,14 +20,20 @@ export default function ContentStatusSelector({
   scheduledAt,
 }: ContentStatusSelectorProps) {
   const [isPending, startTransition] = useTransition();
+  const [scheduleDate, setScheduleDate] = useState(
+    scheduledAt ? new Date(scheduledAt).toISOString().slice(0, 10) : "",
+  );
+  const [scheduleTime, setScheduleTime] = useState(
+    scheduledAt
+      ? new Date(scheduledAt).toISOString().slice(11, 16)
+      : "",
+  );
+  const [error, setError] = useState("");
 
   if (status === "PUBLISHED") {
     return (
       <div className="max-w-md rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-        <p className="text-xs font-medium text-zinc-400">
-          Status
-        </p>
-
+        <p className="text-xs font-medium text-zinc-400">Status</p>
         <p className="mt-1 text-sm font-medium text-zinc-800">
           Published
         </p>
@@ -39,36 +41,52 @@ export default function ContentStatusSelector({
     );
   }
 
-  const existingDate = scheduledAt ? new Date(scheduledAt) : null;
-
-  const [scheduleDate, setScheduleDate] = useState(
-    existingDate ? existingDate.toISOString().slice(0, 10) : "",
-  );
-
-  const [scheduleTime, setScheduleTime] = useState(
-    existingDate ? existingDate.toTimeString().slice(0, 5) : "",
-  );
-
   function handleChange(nextStatus: ContentStatus) {
+    setError("");
+
     startTransition(async () => {
-      await updateContentStatus(id, nextStatus);
+      try {
+        await updateContentStatus(id, nextStatus);
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to update status.",
+        );
+      }
     });
   }
 
   function handleSchedule() {
+    setError("");
+
     if (!scheduleDate || !scheduleTime) {
+      setError("Choose a date and time.");
       return;
     }
 
-    // The calendar UI uses Asia/Kolkata, so persist the selected
-    // date/time explicitly as IST instead of relying on server timezone.
     const scheduled = `${scheduleDate}T${scheduleTime}:00+05:30`;
+    const date = new Date(scheduled);
+
+    if (Number.isNaN(date.getTime())) {
+      setError("Invalid schedule date.");
+      return;
+    }
+
+    if (date <= new Date()) {
+      setError("Choose a future date and time.");
+      return;
+    }
 
     startTransition(async () => {
       try {
         await scheduleContent(id, scheduled);
       } catch (error) {
-        console.error("Failed to schedule content:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to schedule content.",
+        );
       }
     });
   }
@@ -98,54 +116,68 @@ export default function ContentStatusSelector({
         ))}
       </select>
 
-      {status === "SCHEDULED" && (
-        <div className="mt-5 space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-          <div>
-            <label
-              htmlFor="schedule-date"
-              className="text-sm font-medium text-zinc-700"
-            >
-              Schedule date
-            </label>
+      <div className="mt-5 space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
+        <div>
+          <p className="text-sm font-medium text-zinc-800">
+            Schedule content
+          </p>
 
-            <input
-              id="schedule-date"
-              type="date"
-              value={scheduleDate}
-              disabled={isPending}
-              onChange={(event) => setScheduleDate(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400 disabled:opacity-60"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="schedule-time"
-              className="text-sm font-medium text-zinc-700"
-            >
-              Schedule time
-            </label>
-
-            <input
-              id="schedule-time"
-              type="time"
-              value={scheduleTime}
-              disabled={isPending}
-              onChange={(event) => setScheduleTime(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400 disabled:opacity-60"
-            />
-          </div>
-
-          <button
-            type="button"
-            disabled={isPending || !scheduleDate || !scheduleTime}
-            onClick={handleSchedule}
-            className="w-full rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isPending ? "Saving..." : "Schedule Content"}
-          </button>
+          <p className="mt-1 text-xs text-zinc-400">
+            Choose when this content should be published.
+          </p>
         </div>
-      )}
+
+        <div>
+          <label
+            htmlFor="schedule-date"
+            className="text-sm font-medium text-zinc-700"
+          >
+            Schedule date
+          </label>
+
+          <input
+            id="schedule-date"
+            type="date"
+            value={scheduleDate}
+            disabled={isPending}
+            onChange={(event) => setScheduleDate(event.target.value)}
+            className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400 disabled:opacity-60"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="schedule-time"
+            className="text-sm font-medium text-zinc-700"
+          >
+            Schedule time
+          </label>
+
+          <input
+            id="schedule-time"
+            type="time"
+            value={scheduleTime}
+            disabled={isPending}
+            onChange={(event) => setScheduleTime(event.target.value)}
+            className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400 disabled:opacity-60"
+          />
+        </div>
+
+        {error && (
+          <p className="text-xs font-medium text-red-600">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="button"
+          disabled={isPending || !scheduleDate || !scheduleTime}
+          onClick={handleSchedule}
+          className="w-full rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isPending ? "Scheduling..." : "Schedule Content"}
+        </button>
+      </div>
     </div>
   );
 }
