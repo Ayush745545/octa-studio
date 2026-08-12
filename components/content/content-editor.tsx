@@ -1,40 +1,56 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { updateContent } from "@/app/content/actions/update-content";
+
+interface MediaItem {
+  id: string;
+  url: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  type: string;
+}
 
 interface ContentEditorProps {
   id: string;
   initialTitle: string;
   initialBody: string;
   initialPlatform: string;
+  initialMedia?: MediaItem[];
   disabled?: boolean;
 }
 
 const aiActions = [
   {
     label: "Improve",
-    instruction: "Improve this content while keeping the original meaning. Make it clearer, more engaging, natural, and professional.",
+    instruction:
+      "Improve this content while keeping the original meaning. Make it clearer, more engaging, natural, and professional.",
   },
   {
     label: "Rewrite",
-    instruction: "Rewrite this content from scratch while preserving the core message. Make it fresh, natural, and engaging.",
+    instruction:
+      "Rewrite this content from scratch while preserving the core message. Make it fresh, natural, and engaging.",
   },
   {
     label: "Shorten",
-    instruction: "Shorten this content significantly while keeping the most important information and message.",
+    instruction:
+      "Shorten this content significantly while keeping the most important information and message.",
   },
   {
     label: "Expand",
-    instruction: "Expand this content with useful detail, examples, and stronger explanations. Do not add meaningless filler.",
+    instruction:
+      "Expand this content with useful detail, examples, and stronger explanations. Do not add meaningless filler.",
   },
   {
     label: "Fix Grammar",
-    instruction: "Fix grammar, spelling, punctuation, awkward wording, and sentence structure. Keep the original meaning and tone.",
+    instruction:
+      "Fix grammar, spelling, punctuation, awkward wording, and sentence structure. Keep the original meaning and tone.",
   },
   {
     label: "Make Engaging",
-    instruction: "Make this content more engaging and attention-grabbing. Improve the opening, flow, clarity, and readability.",
+    instruction:
+      "Make this content more engaging and attention-grabbing. Improve the opening, flow, clarity, and readability.",
   },
 ];
 
@@ -43,11 +59,19 @@ export default function ContentEditor({
   initialTitle,
   initialBody,
   initialPlatform,
+  initialMedia = [],
   disabled = false,
 }: ContentEditorProps) {
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [platform, setPlatform] = useState(initialPlatform);
+
+  const [media, setMedia] = useState<MediaItem[]>(initialMedia);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [isPending, startTransition] = useTransition();
   const [aiAction, setAiAction] = useState<string | null>(null);
   const [aiError, setAiError] = useState("");
@@ -101,6 +125,51 @@ Return only the improved content. Do not explain what you changed.`,
     }
   }
 
+  async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setUploadError("");
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+
+      formData.append("file", file);
+      formData.append("contentId", id);
+
+      const response = await fetch("/api/media/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed.");
+      }
+
+      if (!data.media) {
+        throw new Error("Upload succeeded but media data was missing.");
+      }
+
+      setMedia((current) => [data.media, ...current]);
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "Media upload failed.",
+      );
+    } finally {
+      setIsUploading(false);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }
+
   function handleSave() {
     startTransition(async () => {
       await updateContent({
@@ -112,8 +181,21 @@ Return only the improved content. Do not explain what you changed.`,
     });
   }
 
+  function formatFileSize(bytes: number) {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   return (
     <div className="space-y-8">
+      {/* Title */}
       <div>
         <label
           htmlFor="content-title"
@@ -132,6 +214,7 @@ Return only the improved content. Do not explain what you changed.`,
         />
       </div>
 
+      {/* Content */}
       <div>
         <div className="flex items-center justify-between">
           <label
@@ -154,9 +237,99 @@ Return only the improved content. Do not explain what you changed.`,
             setAiError("");
           }}
           disabled={disabled}
-          className="mt-2 min-h-[420px w-full resize-y rounded-xl border border-zinc-200 bg-white px-4 py-4 text-base leading-7 text-zinc-800 outline-none transition focus:border-zinc-400"
+          className="mt-2 min-h-[420px] w-full resize-y rounded-xl border border-zinc-200 bg-white px-4 py-4 text-base leading-7 text-zinc-800 outline-none transition focus:border-zinc-400"
           placeholder="Start writing your content..."
         />
+      </div>
+
+      {/* Media */}
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-zinc-950">Media</p>
+
+            <p className="mt-1 text-xs text-zinc-500">
+              Add images or videos to this content.
+            </p>
+          </div>
+
+          {!disabled && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                onChange={handleUpload}
+                disabled={isUploading}
+                className="hidden"
+              />
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="rounded-lg bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isUploading ? "Uploading..." : "Add media"}
+              </button>
+            </>
+          )}
+        </div>
+
+        {uploadError && (
+          <p className="mt-3 text-xs text-red-600">
+            {uploadError}
+          </p>
+        )}
+
+        {media.length > 0 && (
+          <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-3">
+            {media.map((item) => (
+              <div
+                key={item.id}
+                className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+              >
+                <div className="aspect-video bg-zinc-100">
+                  {item.type === "VIDEO" ? (
+                    <video
+                      src={item.url}
+                      controls
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={item.url}
+                      alt={item.filename}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
+
+                <div className="p-3">
+                  <p className="truncate text-xs font-medium text-zinc-800">
+                    {item.filename}
+                  </p>
+
+                  <p className="mt-1 text-xs text-zinc-400">
+                    {formatFileSize(item.size)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {media.length === 0 && (
+          <div className="mt-5 rounded-xl border border-dashed border-zinc-200 px-5 py-8 text-center">
+            <p className="text-sm text-zinc-500">
+              No media attached
+            </p>
+
+            <p className="mt-1 text-xs text-zinc-400">
+              PNG, JPG, WEBP, GIF, MP4, WEBM or MOV
+            </p>
+          </div>
+        )}
       </div>
 
       {/* AI Editor */}
@@ -166,6 +339,7 @@ Return only the improved content. Do not explain what you changed.`,
             <p className="text-sm font-medium text-zinc-950">
               AI Editor
             </p>
+
             <p className="mt-1 text-xs text-zinc-500">
               Improve your draft with AI.
             </p>
@@ -183,11 +357,19 @@ Return only the improved content. Do not explain what you changed.`,
             <button
               key={action.label}
               type="button"
-              onClick={() => handleAI(action.instruction, action.label)}
-              disabled={disabled || !!aiAction || !body.trim()}
+              onClick={() =>
+                handleAI(action.instruction, action.label)
+              }
+              disabled={
+                disabled ||
+                !!aiAction ||
+                !body.trim()
+              }
               className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {aiAction === action.label ? "Working..." : action.label}
+              {aiAction === action.label
+                ? "Working..."
+                : action.label}
             </button>
           ))}
         </div>
@@ -199,6 +381,7 @@ Return only the improved content. Do not explain what you changed.`,
         )}
       </div>
 
+      {/* Platform */}
       <div>
         <label
           htmlFor="content-platform"
@@ -210,7 +393,9 @@ Return only the improved content. Do not explain what you changed.`,
         <select
           id="content-platform"
           value={platform}
-          onChange={(event) => setPlatform(event.target.value)}
+          onChange={(event) =>
+            setPlatform(event.target.value)
+          }
           disabled={disabled}
           className="mt-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400"
         >
@@ -224,6 +409,7 @@ Return only the improved content. Do not explain what you changed.`,
         </select>
       </div>
 
+      {/* Save */}
       {!disabled && (
         <div className="flex items-center justify-between border-t border-zinc-200 pt-6">
           <span className="text-sm text-zinc-400">
@@ -233,7 +419,11 @@ Return only the improved content. Do not explain what you changed.`,
           <button
             type="button"
             onClick={handleSave}
-            disabled={isPending || !!aiAction}
+            disabled={
+              isPending ||
+              !!aiAction ||
+              isUploading
+            }
             className="rounded-lg bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "Saving..." : "Save Draft"}
@@ -241,6 +431,7 @@ Return only the improved content. Do not explain what you changed.`,
         </div>
       )}
 
+      {/* Published */}
       {disabled && (
         <div className="flex items-center justify-between border-t border-zinc-200 pt-6">
           <span className="text-sm text-zinc-400">

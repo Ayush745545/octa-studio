@@ -41,3 +41,12 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Local uploaded media
+public/uploads/
+
+# Local AI/dev tool state
+.agents/
+.claude/
+.windsurf/
+skills-lock.json

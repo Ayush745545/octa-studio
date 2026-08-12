@@ -25,7 +25,12 @@ export default async function ContentPage({
     include: {
       idea: true,
       publications: true,
+    media: {
+      orderBy: {
+        createdAt: "desc",
+      },
     },
+  },
   });
 
   if (!content) {
@@ -65,6 +70,14 @@ export default async function ContentPage({
             initialTitle={content.title}
             initialBody={content.body ?? ""}
             initialPlatform={content.platform ?? ""}
+            initialMedia={content.media.map((media) => ({
+              id: media.id,
+              url: media.url,
+              filename: media.filename,
+              mimeType: media.mimeType,
+              size: media.size,
+              type: media.type,
+            }))}
           />
 
           <div className="mt-8 border-t border-zinc-200 pt-6">
