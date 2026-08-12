@@ -54,6 +54,12 @@ const aiActions = [
   },
 ];
 
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default function ContentEditor({
   id,
   initialTitle,
@@ -65,16 +71,18 @@ export default function ContentEditor({
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [platform, setPlatform] = useState(initialPlatform);
-
   const [media, setMedia] = useState<MediaItem[]>(initialMedia);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isPending, startTransition] = useTransition();
   const [aiAction, setAiAction] = useState<string | null>(null);
   const [aiError, setAiError] = useState("");
+
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleAI(instruction: string, label: string) {
     if (!body.trim()) {
@@ -125,51 +133,6 @@ Return only the improved content. Do not explain what you changed.`,
     }
   }
 
-  async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    setUploadError("");
-    setIsUploading(true);
-
-    try {
-      const formData = new FormData();
-
-      formData.append("file", file);
-      formData.append("contentId", id);
-
-      const response = await fetch("/api/media/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Upload failed.");
-      }
-
-      if (!data.media) {
-        throw new Error("Upload succeeded but media data was missing.");
-      }
-
-      setMedia((current) => [data.media, ...current]);
-    } catch (error) {
-      setUploadError(
-        error instanceof Error ? error.message : "Media upload failed.",
-      );
-    } finally {
-      setIsUploading(false);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  }
-
   function handleSave() {
     startTransition(async () => {
       await updateContent({
@@ -181,21 +144,141 @@ Return only the improved content. Do not explain what you changed.`,
     });
   }
 
-  function formatFileSize(bytes: number) {
-    if (bytes < 1024) {
-      return `${bytes} B`;
+  function openFilePicker() {
+    if (!disabled && !uploading) {
+      fileInputRef.current?.click();
+    }
+  }
+
+  async function uploadFiles(files: File[]) {
+    if (!files.length) {
+      return;
     }
 
-    if (bytes < 1024 * 1024) {
-      return `${(bytes / 1024).toFixed(1)} KB`;
+    setUploading(true);
+    setUploadError("");
+
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+
+        formData.append("file", file);
+        formData.append("contentId", id);
+
+        const response = await fetch("/api/media/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || `Failed to upload ${file.name}.`,
+          );
+        }
+
+        if (data.media) {
+          setMedia((current) => [data.media, ...current]);
+        }
+      }
+    } catch (error) {
+      setUploadError(
+        error instanceof Error
+          ? error.message
+          : "Media upload failed.",
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleUpload(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const files = Array.from(event.target.files ?? []);
+
+    await uploadFiles(files);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+
+    if (!disabled && !uploading) {
+      setIsDragging(true);
+    }
+  }
+
+  function handleDragLeave(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+
+    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  }
+
+  async function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+
+    if (disabled || uploading) {
+      return;
     }
 
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    const files = Array.from(event.dataTransfer.files);
+
+    await uploadFiles(files);
+  }
+
+  async function handleDeleteMedia(mediaId: string) {
+    const item = media.find((entry) => entry.id === mediaId);
+
+    if (!item) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete "${item.filename}"? This cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(mediaId);
+    setUploadError("");
+
+    try {
+      const response = await fetch(`/api/media/${mediaId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete media.");
+      }
+
+      setMedia((current) =>
+        current.filter((entry) => entry.id !== mediaId),
+      );
+    } catch (error) {
+      setUploadError(
+        error instanceof Error
+          ? error.message
+          : "Media deletion failed.",
+      );
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   return (
     <div className="space-y-8">
-      {/* Title */}
       <div>
         <label
           htmlFor="content-title"
@@ -214,7 +297,6 @@ Return only the improved content. Do not explain what you changed.`,
         />
       </div>
 
-      {/* Content */}
       <div>
         <div className="flex items-center justify-between">
           <label
@@ -242,11 +324,22 @@ Return only the improved content. Do not explain what you changed.`,
         />
       </div>
 
-      {/* Media */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5">
+      <div
+        className={[
+          "rounded-2xl border bg-white p-5 transition",
+          isDragging
+            ? "border-zinc-950 bg-zinc-50 ring-2 ring-zinc-950/10"
+            : "border-zinc-200",
+        ].join(" ")}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-zinc-950">Media</p>
+            <p className="text-sm font-medium text-zinc-950">
+              Media
+            </p>
 
             <p className="mt-1 text-xs text-zinc-500">
               Add images or videos to this content.
@@ -259,41 +352,36 @@ Return only the improved content. Do not explain what you changed.`,
                 ref={fileInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
-                onChange={handleUpload}
-                disabled={isUploading}
+                multiple
                 className="hidden"
+                onChange={handleUpload}
               />
 
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="rounded-lg bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={openFilePicker}
+                disabled={uploading}
+                className="rounded-lg bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isUploading ? "Uploading..." : "Add media"}
+                {uploading ? "Uploading..." : "Add media"}
               </button>
             </>
           )}
         </div>
 
-        {uploadError && (
-          <p className="mt-3 text-xs text-red-600">
-            {uploadError}
-          </p>
-        )}
-
         {media.length > 0 && (
-          <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-3">
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {media.map((item) => (
               <div
                 key={item.id}
-                className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+                className="group overflow-hidden rounded-xl border border-zinc-200 bg-white"
               >
-                <div className="aspect-video bg-zinc-100">
+                <div className="relative aspect-video overflow-hidden bg-zinc-100">
                   {item.type === "VIDEO" ? (
                     <video
                       src={item.url}
                       controls
+                      preload="metadata"
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -303,10 +391,27 @@ Return only the improved content. Do not explain what you changed.`,
                       className="h-full w-full object-cover"
                     />
                   )}
+
+                  {!disabled && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteMedia(item.id)}
+                      disabled={deletingId === item.id}
+                      aria-label={`Delete ${item.filename}`}
+                      className="absolute right-2 top-2 rounded-lg bg-black/75 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {deletingId === item.id
+                        ? "Deleting..."
+                        : "Delete"}
+                    </button>
+                  )}
                 </div>
 
-                <div className="p-3">
-                  <p className="truncate text-xs font-medium text-zinc-800">
+                <div className="px-3 py-3">
+                  <p
+                    className="truncate text-xs font-medium text-zinc-800"
+                    title={item.filename}
+                  >
                     {item.filename}
                   </p>
 
@@ -320,19 +425,57 @@ Return only the improved content. Do not explain what you changed.`,
         )}
 
         {media.length === 0 && (
-          <div className="mt-5 rounded-xl border border-dashed border-zinc-200 px-5 py-8 text-center">
-            <p className="text-sm text-zinc-500">
-              No media attached
+          <button
+            type="button"
+            onClick={openFilePicker}
+            disabled={disabled || uploading}
+            className={[
+              "mt-5 flex w-full flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center transition",
+              isDragging
+                ? "border-zinc-950 bg-zinc-50"
+                : "border-zinc-200 hover:border-zinc-400 hover:bg-zinc-50",
+            ].join(" ")}
+          >
+            <p className="text-sm font-medium text-zinc-700">
+              {uploading
+                ? "Uploading..."
+                : isDragging
+                  ? "Drop files here"
+                  : "Drop images or videos here"}
             </p>
 
             <p className="mt-1 text-xs text-zinc-400">
-              PNG, JPG, WEBP, GIF, MP4, WEBM or MOV
+              or click to browse
+            </p>
+          </button>
+        )}
+
+        {media.length > 0 && !disabled && (
+          <div
+            className={[
+              "mt-5 rounded-xl border border-dashed px-4 py-5 text-center transition",
+              isDragging
+                ? "border-zinc-950 bg-zinc-50"
+                : "border-zinc-200",
+            ].join(" ")}
+          >
+            <p className="text-xs font-medium text-zinc-600">
+              {uploading
+                ? "Uploading..."
+                : isDragging
+                  ? "Drop files to upload"
+                  : "Drag more images or videos here"}
             </p>
           </div>
         )}
+
+        {uploadError && (
+          <p className="mt-3 text-xs text-red-600">
+            {uploadError}
+          </p>
+        )}
       </div>
 
-      {/* AI Editor */}
       <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
         <div className="flex items-center justify-between">
           <div>
@@ -360,11 +503,7 @@ Return only the improved content. Do not explain what you changed.`,
               onClick={() =>
                 handleAI(action.instruction, action.label)
               }
-              disabled={
-                disabled ||
-                !!aiAction ||
-                !body.trim()
-              }
+              disabled={disabled || !!aiAction || !body.trim()}
               className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {aiAction === action.label
@@ -381,7 +520,6 @@ Return only the improved content. Do not explain what you changed.`,
         )}
       </div>
 
-      {/* Platform */}
       <div>
         <label
           htmlFor="content-platform"
@@ -393,9 +531,7 @@ Return only the improved content. Do not explain what you changed.`,
         <select
           id="content-platform"
           value={platform}
-          onChange={(event) =>
-            setPlatform(event.target.value)
-          }
+          onChange={(event) => setPlatform(event.target.value)}
           disabled={disabled}
           className="mt-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400"
         >
@@ -409,7 +545,6 @@ Return only the improved content. Do not explain what you changed.`,
         </select>
       </div>
 
-      {/* Save */}
       {!disabled && (
         <div className="flex items-center justify-between border-t border-zinc-200 pt-6">
           <span className="text-sm text-zinc-400">
@@ -419,11 +554,7 @@ Return only the improved content. Do not explain what you changed.`,
           <button
             type="button"
             onClick={handleSave}
-            disabled={
-              isPending ||
-              !!aiAction ||
-              isUploading
-            }
+            disabled={isPending || !!aiAction || uploading}
             className="rounded-lg bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "Saving..." : "Save Draft"}
@@ -431,7 +562,6 @@ Return only the improved content. Do not explain what you changed.`,
         </div>
       )}
 
-      {/* Published */}
       {disabled && (
         <div className="flex items-center justify-between border-t border-zinc-200 pt-6">
           <span className="text-sm text-zinc-400">
