@@ -8,6 +8,7 @@ interface ContentEditorProps {
   initialTitle: string;
   initialBody: string;
   initialPlatform: string;
+  disabled?: boolean;
 }
 
 const aiActions = [
@@ -42,6 +43,7 @@ export default function ContentEditor({
   initialTitle,
   initialBody,
   initialPlatform,
+  disabled = false,
 }: ContentEditorProps) {
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
@@ -124,6 +126,7 @@ Return only the improved content. Do not explain what you changed.`,
           id="content-title"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
+          disabled={disabled}
           className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-2xl font-semibold tracking-tight text-zinc-950 outline-none transition focus:border-zinc-400"
           placeholder="Give your content a title..."
         />
@@ -150,7 +153,8 @@ Return only the improved content. Do not explain what you changed.`,
             setBody(event.target.value);
             setAiError("");
           }}
-          className="mt-2 min-h-[420px] w-full resize-y rounded-xl border border-zinc-200 bg-white px-4 py-4 text-base leading-7 text-zinc-800 outline-none transition focus:border-zinc-400"
+          disabled={disabled}
+          className="mt-2 min-h-[420px w-full resize-y rounded-xl border border-zinc-200 bg-white px-4 py-4 text-base leading-7 text-zinc-800 outline-none transition focus:border-zinc-400"
           placeholder="Start writing your content..."
         />
       </div>
@@ -180,7 +184,7 @@ Return only the improved content. Do not explain what you changed.`,
               key={action.label}
               type="button"
               onClick={() => handleAI(action.instruction, action.label)}
-              disabled={!!aiAction || !body.trim()}
+              disabled={disabled || !!aiAction || !body.trim()}
               className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {aiAction === action.label ? "Working..." : action.label}
@@ -207,6 +211,7 @@ Return only the improved content. Do not explain what you changed.`,
           id="content-platform"
           value={platform}
           onChange={(event) => setPlatform(event.target.value)}
+          disabled={disabled}
           className="mt-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400"
         >
           <option value="">Select platform</option>
@@ -219,20 +224,34 @@ Return only the improved content. Do not explain what you changed.`,
         </select>
       </div>
 
-      <div className="flex items-center justify-between border-t border-zinc-200 pt-6">
-        <span className="text-sm text-zinc-400">
-          {isPending ? "Saving..." : "Draft"}
-        </span>
+      {!disabled && (
+        <div className="flex items-center justify-between border-t border-zinc-200 pt-6">
+          <span className="text-sm text-zinc-400">
+            {isPending ? "Saving..." : "Draft"}
+          </span>
 
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={isPending || !!aiAction}
-          className="rounded-lg bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isPending ? "Saving..." : "Save Draft"}
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isPending || !!aiAction}
+            className="rounded-lg bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending ? "Saving..." : "Save Draft"}
+          </button>
+        </div>
+      )}
+
+      {disabled && (
+        <div className="flex items-center justify-between border-t border-zinc-200 pt-6">
+          <span className="text-sm text-zinc-400">
+            Published content
+          </span>
+
+          <span className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-500">
+            Read only
+          </span>
+        </div>
+      )}
     </div>
   );
 }

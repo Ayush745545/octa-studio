@@ -25,6 +25,20 @@ export default function ContentStatusSelector({
 }: ContentStatusSelectorProps) {
   const [isPending, startTransition] = useTransition();
 
+  if (status === "PUBLISHED") {
+    return (
+      <div className="max-w-md rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+        <p className="text-xs font-medium text-zinc-400">
+          Status
+        </p>
+
+        <p className="mt-1 text-sm font-medium text-zinc-800">
+          Published
+        </p>
+      </div>
+    );
+  }
+
   const existingDate = scheduledAt ? new Date(scheduledAt) : null;
 
   const [scheduleDate, setScheduleDate] = useState(

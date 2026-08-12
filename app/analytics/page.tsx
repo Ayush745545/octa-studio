@@ -3,6 +3,8 @@ import Link from "next/link";
 import AppShell from "@/components/layout/app-shell";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Kolkata",

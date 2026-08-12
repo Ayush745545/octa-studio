@@ -31,4 +31,37 @@ model Content {
 
   ideaId String?
   idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+
+  publications Publication[]
+}
+
+model PublishingChannel {
+  id          String   @id @default(cuid())
+  platform    String   @unique
+  connected   Boolean  @default(false)
+  accountName String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  publications Publication[]
+}
+
+model Publication {
+  id        String @id @default(cuid())
+  contentId String
+  channelId String
+
+  status      String    @default("QUEUED")
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  externalId  String?
+  error       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  content Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  channel PublishingChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, channelId])
 }

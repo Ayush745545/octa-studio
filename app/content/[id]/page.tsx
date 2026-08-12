@@ -4,6 +4,7 @@ import AppShell from "@/components/layout/app-shell";
 import ContentEditor from "@/components/content/content-editor";
 import ContentStatusSelector from "@/components/content/content-status-selector";
 import PublishButton from "@/components/content/publish-button";
+import PublicationSelector from "@/components/content/publication-selector";
 import { prisma } from "@/lib/prisma";
 
 interface ContentPageProps {
@@ -23,12 +24,23 @@ export default async function ContentPage({
     },
     include: {
       idea: true,
+      publications: true,
     },
   });
 
   if (!content) {
     notFound();
   }
+
+  const connectedChannels = await prisma.publishingChannel.findMany({
+    where: {
+      connected: true,
+    },
+    select: {
+      id: true,
+      platform: true,
+    },
+  });
 
   return (
     <AppShell>
@@ -56,13 +68,35 @@ export default async function ContentPage({
           />
 
           <div className="mt-8 border-t border-zinc-200 pt-6">
-            <ContentStatusSelector
-              id={content.id}
-              status={content.status}
-              scheduledAt={content.scheduledAt}
-            />
+            {content.status === "PUBLISHED" ? (
+              <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                <p className="text-xs font-medium text-zinc-400">
+                  Status
+                </p>
+
+                <p className="mt-1 text-sm font-medium text-zinc-800">
+                  Published
+                </p>
+              </div>
+            ) : (
+              <ContentStatusSelector
+                id={content.id}
+                status={content.status}
+                scheduledAt={content.scheduledAt}
+              />
+            )}
 
             <div className="mt-6 border-t border-zinc-100 pt-6">
+              <PublicationSelector
+                contentId={content.id}
+                channels={connectedChannels}
+                publications={content.publications.map((publication) => ({
+                  channelId: publication.channelId,
+                  status: publication.status,
+                }))}
+                disabled={content.status === "PUBLISHED"}
+              />
+
               <PublishButton
                 id={content.id}
                 status={content.status}

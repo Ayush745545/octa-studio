@@ -17,7 +17,21 @@ export async function updateContent(input: UpdateContentInput) {
     throw new Error("Title is required.");
   }
 
-  const content = await prisma.content.update({
+  const content = await prisma.content.findUnique({
+    where: {
+      id: input.id,
+    },
+  });
+
+  if (!content) {
+    throw new Error("Content not found.");
+  }
+
+  if (content.status === "PUBLISHED") {
+    throw new Error("Published content cannot be edited.");
+  }
+
+  const updatedContent = await prisma.content.update({
     where: {
       id: input.id,
     },
@@ -28,5 +42,5 @@ export async function updateContent(input: UpdateContentInput) {
     },
   });
 
-  redirect(`/content/${content.id}`);
+  redirect(`/content/${updatedContent.id}`);
 }

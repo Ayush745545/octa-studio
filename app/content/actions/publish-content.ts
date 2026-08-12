@@ -6,6 +6,9 @@ import { prisma } from "@/lib/prisma";
 export async function publishContent(id: string) {
   const content = await prisma.content.findUnique({
     where: { id },
+    include: {
+      publications: true,
+    },
   });
 
   if (!content) {
@@ -30,13 +33,31 @@ export async function publishContent(id: string) {
     throw new Error("Content must have a body before publishing.");
   }
 
-  const updated = await prisma.content.update({
-    where: { id },
-    data: {
-      status: "PUBLISHED",
-      publishedAt: new Date(),
-      scheduledAt: null,
-    },
+  const publishedAt = new Date();
+
+  await prisma.$transaction(async (tx) => {
+    await tx.content.update({
+      where: { id },
+      data: {
+        status: "PUBLISHED",
+        publishedAt,
+        scheduledAt: null,
+      },
+    });
+
+    await tx.publication.updateMany({
+      where: {
+        contentId: id,
+        status: {
+          in: ["QUEUED", "SCHEDULED"],
+        },
+      },
+      data: {
+        status: "PUBLISHED",
+        publishedAt,
+        error: null,
+      },
+    });
   });
 
   revalidatePath("/");
@@ -44,6 +65,10 @@ export async function publishContent(id: string) {
   revalidatePath(`/content/${id}`);
   revalidatePath("/calendar");
   revalidatePath("/analytics");
+  revalidatePath("/publishing");
 
-  return updated;
+  return {
+    success: true,
+    publishedAt,
+  };
 }
