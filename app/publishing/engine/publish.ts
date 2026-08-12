@@ -39,12 +39,19 @@ export async function publishPublication(publicationId: string) {
     publication.channel.platform,
   );
 
-  const result = await provider.publish({
-    title: publication.content.title,
-    body: publication.content.body,
-    platform: publication.channel.platform,
-    accountName: publication.channel.accountName,
-  });
+  const result = await provider.publish(
+    {
+      title: publication.content.title,
+      body: publication.content.body,
+      platform: publication.channel.platform,
+      accountName: publication.channel.accountName,
+    },
+    {
+      channelId: publication.channel.id,
+      platform: publication.channel.platform,
+      accountName: publication.channel.accountName,
+    },
+  );
 
   if (!result.success) {
     await prisma.publication.update({

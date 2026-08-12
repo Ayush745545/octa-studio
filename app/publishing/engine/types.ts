@@ -5,6 +5,12 @@ export interface PublishInput {
   accountName?: string | null;
 }
 
+export interface ProviderContext {
+  channelId: string;
+  platform: string;
+  accountName?: string | null;
+}
+
 export interface PublishResult {
   success: boolean;
   externalId?: string;
@@ -13,5 +19,8 @@ export interface PublishResult {
 
 export interface PublishingProvider {
   platform: string;
-  publish(input: PublishInput): Promise<PublishResult>;
+  publish(
+    input: PublishInput,
+    context: ProviderContext,
+  ): Promise<PublishResult>;
 }
