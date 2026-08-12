@@ -2,12 +2,27 @@ import AppShell from "@/components/layout/app-shell";
 import CalendarView from "@/components/calendar/calendar-view";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function CalendarPage() {
-  const scheduledContent = await prisma.content.findMany({
+  const scheduledPublications = await prisma.publication.findMany({
     where: {
       status: "SCHEDULED",
       scheduledAt: {
         not: null,
+      },
+    },
+    include: {
+      content: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+      channel: {
+        select: {
+          platform: true,
+        },
       },
     },
     orderBy: {
@@ -15,13 +30,14 @@ export default async function CalendarPage() {
     },
   });
 
-  const contents = scheduledContent
-    .filter((content) => content.scheduledAt)
-    .map((content) => ({
-      id: content.id,
-      title: content.title,
-      platform: content.platform,
-      scheduledAt: content.scheduledAt!.toISOString(),
+  const publications = scheduledPublications
+    .filter((publication) => publication.scheduledAt)
+    .map((publication) => ({
+      id: publication.id,
+      contentId: publication.content.id,
+      title: publication.content.title,
+      platform: publication.channel.platform,
+      scheduledAt: publication.scheduledAt!.toISOString(),
     }));
 
   return (
@@ -33,13 +49,13 @@ export default async function CalendarPage() {
           </span>
 
           <span className="text-xs text-zinc-400">
-            {contents.length} scheduled
+            {publications.length} scheduled
           </span>
         </header>
 
         <main className="mx-auto max-w-7xl px-7 py-10">
           <CalendarView
-            contents={contents}
+            contents={publications}
             initialDate={new Date().toISOString()}
           />
         </main>

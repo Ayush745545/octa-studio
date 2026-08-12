@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { publishPublication } from "@/app/publishing/engine/publish";
 
 export async function publishContent(id: string) {
   const content = await prisma.content.findUnique({
@@ -33,35 +34,29 @@ export async function publishContent(id: string) {
     throw new Error("Content must have a body before publishing.");
   }
 
-  const now = new Date();
+  if (content.publications.length === 0) {
+    throw new Error(
+      "Add at least one publishing channel before publishing.",
+    );
+  }
 
-  const updated = await prisma.$transaction(async (tx) => {
-    const updatedContent = await tx.content.update({
-      where: { id },
-      data: {
-        status: "PUBLISHED",
-        publishedAt: now,
-        scheduledAt: null,
-      },
-    });
+  const activePublication = content.publications.find(
+    (publication) =>
+      publication.status === "QUEUED" ||
+      publication.status === "SCHEDULED",
+  );
 
-    await tx.publication.updateMany({
-      where: {
-        contentId: id,
-        status: {
-          in: ["QUEUED", "SCHEDULED"],
-        },
-      },
-      data: {
-        status: "PUBLISHED",
-        publishedAt: now,
-        scheduledAt: null,
-        error: null,
-      },
-    });
+  if (!activePublication) {
+    throw new Error(
+      "No queued publication is available for this content.",
+    );
+  }
 
-    return updatedContent;
-  });
+  const result = await publishPublication(activePublication.id);
+
+  if (!result.success) {
+    throw new Error(result.error ?? "Publishing failed.");
+  }
 
   revalidatePath("/");
   revalidatePath("/content");
@@ -70,5 +65,5 @@ export async function publishContent(id: string) {
   revalidatePath("/analytics");
   revalidatePath("/publishing");
 
-  return updated;
+  return result;
 }

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { rescheduleContent } from "@/app/content/actions/reschedule-content";
-import { cancelSchedule } from "@/app/content/actions/cancel-schedule";
+import { reschedulePublication } from "@/app/publishing/actions/reschedule-publication";
+import { cancelPublication } from "@/app/publishing/actions/cancel-publication";
 
 interface CalendarContent {
   id: string;
+  contentId: string;
   title: string;
-  platform: string | null;
+  platform: string;
   scheduledAt: string;
 }
 
@@ -114,7 +115,7 @@ export default function CalendarView({
 
     startTransition(async () => {
       try {
-        await rescheduleContent(draggedContent.id, scheduledAt);
+        await reschedulePublication(draggedContent.id, scheduledAt);
       } finally {
         setDraggedContent(null);
         setDragOverDate(null);
@@ -186,7 +187,7 @@ export default function CalendarView({
 
     startTransition(async () => {
       try {
-        await cancelSchedule(selectedContent.id);
+        await cancelPublication(selectedContent.id);
         setSelectedContent(null);
       } catch (error) {
         console.error("Failed to cancel schedule:", error);
@@ -477,7 +478,7 @@ export default function CalendarView({
 
                     startTransition(async () => {
                       try {
-                        await rescheduleContent(
+                        await reschedulePublication(
                           selectedContent.id,
                           scheduledAt,
                         );

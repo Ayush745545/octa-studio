@@ -13,17 +13,47 @@ export async function rescheduleContent(
     throw new Error("Invalid schedule date.");
   }
 
-  const content = await prisma.content.update({
+  if (date <= new Date()) {
+    throw new Error("Content must be rescheduled in the future.");
+  }
+
+  const content = await prisma.content.findUnique({
     where: { id },
-    data: {
-      scheduledAt: date,
-      status: "SCHEDULED",
-    },
   });
 
-  revalidatePath("/calendar");
-  revalidatePath(`/content/${id}`);
-  revalidatePath("/content");
+  if (!content) {
+    throw new Error("Content not found.");
+  }
 
-  return content;
+  if (content.status === "PUBLISHED") {
+    throw new Error("Published content cannot be rescheduled.");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.content.update({
+      where: { id },
+      data: {
+        status: "SCHEDULED",
+        scheduledAt: date,
+      },
+    });
+
+    await tx.publication.updateMany({
+      where: {
+        contentId: id,
+        status: "SCHEDULED",
+      },
+      data: {
+        scheduledAt: date,
+        error: null,
+      },
+    });
+  });
+
+  revalidatePath("/");
+  revalidatePath("/content");
+  revalidatePath(`/content/${id}`);
+  revalidatePath("/calendar");
+  revalidatePath("/analytics");
+  revalidatePath("/publishing");
 }
