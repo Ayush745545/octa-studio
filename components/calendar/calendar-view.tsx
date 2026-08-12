@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { rescheduleContent } from "@/app/content/actions/reschedule-content";
+import { cancelSchedule } from "@/app/content/actions/cancel-schedule";
 
 interface CalendarContent {
   id: string;
@@ -178,6 +179,19 @@ export default function CalendarView({
         1,
       ),
     );
+  }
+
+  function handleCancelSchedule() {
+    if (!selectedContent) return;
+
+    startTransition(async () => {
+      try {
+        await cancelSchedule(selectedContent.id);
+        setSelectedContent(null);
+      } catch (error) {
+        console.error("Failed to cancel schedule:", error);
+      }
+    });
   }
 
   return (
@@ -433,37 +447,52 @@ export default function CalendarView({
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-2">
+            <div className="mt-6 flex items-center justify-between gap-2">
               <button
                 type="button"
-                onClick={() => setSelectedContent(null)}
+                onClick={handleCancelSchedule}
                 disabled={isPending}
-                className="rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700"
+                className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Cancel
+                {isPending ? "Saving..." : "Cancel Schedule"}
               </button>
 
-              <button
-                type="button"
-                disabled={!newDate || !newTime || isPending}
-                onClick={() => {
-                  if (!selectedContent) return;
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedContent(null)}
+                  disabled={isPending}
+                  className="rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300"
+                >
+                  Close
+                </button>
 
-                  const scheduledAt = `${newDate}T${newTime}`;
+                <button
+                  type="button"
+                  disabled={!newDate || !newTime || isPending}
+                  onClick={() => {
+                    if (!selectedContent) return;
 
-                  startTransition(async () => {
-                    await rescheduleContent(
-                      selectedContent.id,
-                      scheduledAt,
-                    );
+                    const scheduledAt = `${newDate}T${newTime}`;
 
-                    setSelectedContent(null);
-                  });
-                }}
-                className="rounded-xl bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isPending ? "Saving..." : "Save Schedule"}
-              </button>
+                    startTransition(async () => {
+                      try {
+                        await rescheduleContent(
+                          selectedContent.id,
+                          scheduledAt,
+                        );
+
+                        setSelectedContent(null);
+                      } catch (error) {
+                        console.error("Failed to reschedule:", error);
+                      }
+                    });
+                  }}
+                  className="rounded-xl bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isPending ? "Saving..." : "Save Schedule"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
