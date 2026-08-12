@@ -51,7 +51,7 @@ export default function PublishButton({
         disabled={isPending}
         className="rounded-xl bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-wait disabled:opacity-50"
       >
-        {isPending ? "Publishing..." : "Publish"}
+        {isPending ? "Queueing..." : "Publish"}
       </button>
 
       {error && (
