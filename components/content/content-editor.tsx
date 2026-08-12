@@ -21,6 +21,18 @@ interface ContentEditorProps {
   disabled?: boolean;
 }
 
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+const ALLOWED_MEDIA_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+]);
+
 const aiActions = [
   {
     label: "Improve",
@@ -155,11 +167,35 @@ Return only the improved content. Do not explain what you changed.`,
       return;
     }
 
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      if (!ALLOWED_MEDIA_TYPES.has(file.type)) {
+        setUploadError(
+          `"${file.name}" is not a supported image or video.`,
+        );
+        continue;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        setUploadError(
+          `"${file.name}" is larger than 50 MB.`,
+        );
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (!validFiles.length) {
+      return;
+    }
+
     setUploading(true);
     setUploadError("");
 
     try {
-      for (const file of files) {
+      for (const file of validFiles) {
         const formData = new FormData();
 
         formData.append("file", file);
