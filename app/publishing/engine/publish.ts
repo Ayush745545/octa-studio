@@ -29,6 +29,12 @@ export async function publishPublication(publicationId: string) {
     throw new Error("Content must have a body.");
   }
 
+  if (!publication.channel.connected) {
+    throw new Error(
+      `Publishing channel "${publication.channel.platform}" is not connected.`,
+    );
+  }
+
   const provider = getPublishingProvider(
     publication.channel.platform,
   );
