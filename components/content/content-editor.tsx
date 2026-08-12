@@ -405,7 +405,19 @@ Return only the improved content. Do not explain what you changed.`,
           )}
         </div>
 
-        {media.length > 0 && (
+        {uploadError && (
+          <p className="mt-3 text-sm text-red-600">
+            {uploadError}
+          </p>
+        )}
+
+        {isDragging && (
+          <p className="mt-4 rounded-lg bg-zinc-950 px-3 py-2 text-center text-xs font-medium text-white">
+            Drop your files here
+          </p>
+        )}
+
+        {media.length > 0 ? (
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {media.map((item) => (
               <div
@@ -433,82 +445,55 @@ Return only the improved content. Do not explain what you changed.`,
                       type="button"
                       onClick={() => handleDeleteMedia(item.id)}
                       disabled={deletingId === item.id}
-                      aria-label={`Delete ${item.filename}`}
-                      className="absolute right-2 top-2 rounded-lg bg-black/75 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="absolute right-3 top-3 rounded-lg bg-black/75 px-3 py-2 text-xs font-medium text-white opacity-0 backdrop-blur transition group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {deletingId === item.id
-                        ? "Deleting..."
-                        : "Delete"}
+                      {deletingId === item.id ? "Deleting..." : "Delete"}
                     </button>
                   )}
                 </div>
 
-                <div className="px-3 py-3">
-                  <p
-                    className="truncate text-xs font-medium text-zinc-800"
-                    title={item.filename}
-                  >
-                    {item.filename}
-                  </p>
+                <div className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <p
+                      className="truncate text-sm font-medium text-zinc-900"
+                      title={item.filename}
+                    >
+                      {item.filename}
+                    </p>
 
-                  <p className="mt-1 text-xs text-zinc-400">
-                    {formatFileSize(item.size)}
-                  </p>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      {item.type === "VIDEO" ? "Video" : "Image"} ·{" "}
+                      {formatFileSize(item.size)}
+                    </p>
+                  </div>
+
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="shrink-0 text-xs font-medium text-zinc-500 hover:text-zinc-950"
+                  >
+                    Open
+                  </a>
                 </div>
               </div>
             ))}
           </div>
-        )}
-
-        {media.length === 0 && (
+        ) : (
           <button
             type="button"
             onClick={openFilePicker}
             disabled={disabled || uploading}
-            className={[
-              "mt-5 flex w-full flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center transition",
-              isDragging
-                ? "border-zinc-950 bg-zinc-50"
-                : "border-zinc-200 hover:border-zinc-400 hover:bg-zinc-50",
-            ].join(" ")}
+            className="mt-5 flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-6 py-10 text-center transition hover:border-zinc-500 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <p className="text-sm font-medium text-zinc-700">
-              {uploading
-                ? "Uploading..."
-                : isDragging
-                  ? "Drop files here"
-                  : "Drop images or videos here"}
-            </p>
+            <span className="text-sm font-medium text-zinc-800">
+              {uploading ? "Uploading..." : "Drop images or videos here"}
+            </span>
 
-            <p className="mt-1 text-xs text-zinc-400">
-              or click to browse
-            </p>
+            <span className="mt-1 text-xs text-zinc-400">
+              or click to browse · max 50 MB per file
+            </span>
           </button>
-        )}
-
-        {media.length > 0 && !disabled && (
-          <div
-            className={[
-              "mt-5 rounded-xl border border-dashed px-4 py-5 text-center transition",
-              isDragging
-                ? "border-zinc-950 bg-zinc-50"
-                : "border-zinc-200",
-            ].join(" ")}
-          >
-            <p className="text-xs font-medium text-zinc-600">
-              {uploading
-                ? "Uploading..."
-                : isDragging
-                  ? "Drop files to upload"
-                  : "Drag more images or videos here"}
-            </p>
-          </div>
-        )}
-
-        {uploadError && (
-          <p className="mt-3 text-xs text-red-600">
-            {uploadError}
-          </p>
         )}
       </div>
 
@@ -536,15 +521,11 @@ Return only the improved content. Do not explain what you changed.`,
             <button
               key={action.label}
               type="button"
-              onClick={() =>
-                handleAI(action.instruction, action.label)
-              }
+              onClick={() => handleAI(action.instruction, action.label)}
               disabled={disabled || !!aiAction || !body.trim()}
               className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {aiAction === action.label
-                ? "Working..."
-                : action.label}
+              {aiAction === action.label ? "Working..." : action.label}
             </button>
           ))}
         </div>
