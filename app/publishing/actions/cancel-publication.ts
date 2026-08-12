@@ -18,15 +18,29 @@ export async function cancelPublication(publicationId: string) {
     throw new Error("Publication is not scheduled.");
   }
 
-  const updated = await prisma.publication.update({
-    where: {
-      id: publicationId,
-    },
-    data: {
-      status: "QUEUED",
-      scheduledAt: null,
-      error: null,
-    },
+  const updated = await prisma.$transaction(async (tx) => {
+    const publicationUpdate = await tx.publication.update({
+      where: {
+        id: publicationId,
+      },
+      data: {
+        status: "QUEUED",
+        scheduledAt: null,
+        error: null,
+      },
+    });
+
+    await tx.content.update({
+      where: {
+        id: publication.contentId,
+      },
+      data: {
+        status: "READY",
+        scheduledAt: null,
+      },
+    });
+
+    return publicationUpdate;
   });
 
   revalidatePath("/publishing");
