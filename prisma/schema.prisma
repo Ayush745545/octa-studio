@@ -33,6 +33,25 @@ model Content {
   idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
 
   publications Publication[]
+  media        Media[]
+}
+
+model Media {
+  id        String @id @default(cuid())
+  contentId String
+
+  url      String
+  filename String
+  mimeType String
+  size     Int
+  type     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@index([contentId])
 }
 
 model PublishingChannel {
