@@ -17,6 +17,11 @@ export const simulatedProvider: PublishingProvider = {
       title: input.title,
       channelId: context.channelId,
       accountName: context.accountName,
+      media: input.media.map((media) => ({
+        filename: media.filename,
+        type: media.type,
+        url: media.url,
+      })),
     });
 
     return {

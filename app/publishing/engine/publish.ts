@@ -7,7 +7,15 @@ export async function publishPublication(publicationId: string) {
       id: publicationId,
     },
     include: {
-      content: true,
+      content: {
+        include: {
+          media: {
+            orderBy: {
+              createdAt: "asc",
+            },
+          },
+        },
+      },
       channel: true,
     },
   });
@@ -45,6 +53,14 @@ export async function publishPublication(publicationId: string) {
       body: publication.content.body,
       platform: publication.channel.platform,
       accountName: publication.channel.accountName,
+      media: publication.content.media.map((media) => ({
+        id: media.id,
+        url: media.url,
+        filename: media.filename,
+        mimeType: media.mimeType,
+        size: media.size,
+        type: media.type,
+      })),
     },
     {
       channelId: publication.channel.id,
