@@ -25,6 +25,7 @@ model Content {
   status      String    @default("DRAFT")
   platform    String?
   scheduledAt DateTime?
+  publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
