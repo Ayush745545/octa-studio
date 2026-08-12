@@ -59,8 +59,14 @@ model PublishingChannel {
   platform    String   @unique
   connected   Boolean  @default(false)
   accountName String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  externalId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   publications Publication[]
 }
