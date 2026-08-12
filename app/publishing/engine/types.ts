@@ -2,6 +2,7 @@ export interface PublishInput {
   title: string;
   body: string;
   platform: string;
+  accountName?: string | null;
 }
 
 export interface PublishResult {

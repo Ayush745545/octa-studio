@@ -37,6 +37,7 @@ export async function publishPublication(publicationId: string) {
     title: publication.content.title,
     body: publication.content.body,
     platform: publication.channel.platform,
+    accountName: publication.channel.accountName,
   });
 
   if (!result.success) {
