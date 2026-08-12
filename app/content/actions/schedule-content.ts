@@ -21,8 +21,11 @@ export async function scheduleContent(
     },
   });
 
+  revalidatePath("/");
   revalidatePath("/content");
   revalidatePath(`/content/${id}`);
+  revalidatePath("/calendar");
+  revalidatePath("/analytics");
 
   return content;
 }

@@ -46,10 +46,16 @@ export default function ContentStatusSelector({
       return;
     }
 
-    const scheduled = `${scheduleDate}T${scheduleTime}`;
+    // The calendar UI uses Asia/Kolkata, so persist the selected
+    // date/time explicitly as IST instead of relying on server timezone.
+    const scheduled = `${scheduleDate}T${scheduleTime}:00+05:30`;
 
     startTransition(async () => {
-      await scheduleContent(id, scheduled);
+      try {
+        await scheduleContent(id, scheduled);
+      } catch (error) {
+        console.error("Failed to schedule content:", error);
+      }
     });
   }
 
