@@ -19,13 +19,39 @@ export async function updateContentStatus(
     throw new Error("Invalid content status");
   }
 
-  const content = await prisma.content.update({
+  const content = await prisma.content.findUnique({
     where: { id },
-    data: { status },
   });
 
+  if (!content) {
+    throw new Error("Content not found");
+  }
+
+  if (content.status === "PUBLISHED") {
+    throw new Error("Published content cannot change status");
+  }
+
+  if (status === "SCHEDULED" && !content.scheduledAt) {
+    throw new Error(
+      "Scheduled content must have a scheduled date and time.",
+    );
+  }
+
+  const updated = await prisma.content.update({
+    where: { id },
+    data: {
+      status,
+      ...(status !== "SCHEDULED"
+        ? { scheduledAt: null }
+        : {}),
+    },
+  });
+
+  revalidatePath("/");
   revalidatePath("/content");
   revalidatePath(`/content/${id}`);
+  revalidatePath("/calendar");
+  revalidatePath("/analytics");
 
-  return content;
+  return updated;
 }
