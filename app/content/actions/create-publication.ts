@@ -27,7 +27,20 @@ export async function createPublication(
     throw new Error("Publishing channel is not connected.");
   }
 
-  await prisma.publication.upsert({
+  const existing = await prisma.publication.findUnique({
+    where: {
+      contentId_channelId: {
+        contentId,
+        channelId,
+      },
+    },
+  });
+
+  if (existing?.status === "PUBLISHED") {
+    throw new Error("This publication is already published.");
+  }
+
+  const publication = await prisma.publication.upsert({
     where: {
       contentId_channelId: {
         contentId,
@@ -36,6 +49,7 @@ export async function createPublication(
     },
     update: {
       status: "QUEUED",
+      scheduledAt: null,
       error: null,
     },
     create: {
@@ -47,4 +61,8 @@ export async function createPublication(
 
   revalidatePath(`/content/${contentId}`);
   revalidatePath("/publishing");
+  revalidatePath("/calendar");
+  revalidatePath("/analytics");
+
+  return publication;
 }

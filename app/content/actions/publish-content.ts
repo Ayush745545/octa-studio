@@ -33,14 +33,14 @@ export async function publishContent(id: string) {
     throw new Error("Content must have a body before publishing.");
   }
 
-  const publishedAt = new Date();
+  const now = new Date();
 
-  await prisma.$transaction(async (tx) => {
-    await tx.content.update({
+  const updated = await prisma.$transaction(async (tx) => {
+    const updatedContent = await tx.content.update({
       where: { id },
       data: {
         status: "PUBLISHED",
-        publishedAt,
+        publishedAt: now,
         scheduledAt: null,
       },
     });
@@ -54,10 +54,13 @@ export async function publishContent(id: string) {
       },
       data: {
         status: "PUBLISHED",
-        publishedAt,
+        publishedAt: now,
+        scheduledAt: null,
         error: null,
       },
     });
+
+    return updatedContent;
   });
 
   revalidatePath("/");
@@ -67,8 +70,5 @@ export async function publishContent(id: string) {
   revalidatePath("/analytics");
   revalidatePath("/publishing");
 
-  return {
-    success: true,
-    publishedAt,
-  };
+  return updated;
 }

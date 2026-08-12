@@ -13,6 +13,9 @@ if (!connectionString) {
 
 const adapter = new PrismaPg({
   connectionString,
+  max: 5,
+  connectionTimeoutMillis: 5000,
+  idleTimeoutMillis: 300000,
 });
 
 export const prisma =
