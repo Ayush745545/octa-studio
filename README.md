@@ -9,6 +9,10 @@
 
 </div>
 
+<div align="center">
+  <img src="/public/images/logo.png" alt="ContentOS Logo" width="120" />
+</div>
+
 <h1 align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/ContentOS-Your_Content_Operating_System-ff66ff?style=for-the-badge">
@@ -67,9 +71,9 @@
 
   **Step 1:** Capture ideas &nbsp;→&nbsp; **Step 2:** Write &amp; enhance content &nbsp;→&nbsp; **Step 3:** Schedule &amp; publish
 
-  ![Step 1: Ideas](/public/images/step1-ideas.jpg)
-  ![Step 2: Write](/public/images/step2-write.jpg)
-  ![Step 3: Schedule](/public/images/step3-schedule.jpg)
+  <img src="/public/images/step1-ideas.jpg" alt="Step 1: Ideas" width="180" />
+  <img src="/public/images/step2-write.jpg" alt="Step 2: Write" width="180" />
+  <img src="/public/images/step3-schedule.jpg" alt="Step 3: Schedule" width="180" />
 
   *From raw idea to published post in three steps.*
 
