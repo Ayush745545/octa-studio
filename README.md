@@ -65,19 +65,116 @@
 
 <div align="center">
 
-  <p>
-    <strong>Step 1:</strong> Capture ideas &nbsp;→&nbsp; <strong>Step 2:</strong> Write &amp; enhance content &nbsp;→&nbsp; <strong>Step 3:</strong> Schedule &amp; publish
-  </p>
+  **Step 1:** Capture ideas &nbsp;→&nbsp; **Step 2:** Write &amp; enhance content &nbsp;→&nbsp; **Step 3:** Schedule &amp; publish
 
-  <img src="/images/step1-ideas.jpg" alt="Step 1: Ideas" width="280" />
-  <img src="/images/step2-write.jpg" alt="Step 2: Write" width="280" />
-  <img src="/images/step3-schedule.jpg" alt="Step 3: Schedule" width="280" />
+  ![Step 1: Ideas](/images/step1-ideas.jpg)
+  ![Step 2: Write](/images/step2-write.jpg)
+  ![Step 3: Schedule](/images/step3-schedule.jpg)
 
-  <p>
-    <em>From raw idea to published post in three steps.</em>
-  </p>
+  *From raw idea to published post in three steps.*
 
 </div>
+
+> **Note:** Screenshots are stored in `public/images/`. On GitHub they render automatically from the repo root. For local preview, open the images directly from `public/images/`.
+
+---
+
+## 📦 Dependencies & Setup Commands
+
+### System Prerequisites
+
+```bash
+# Verify Node.js (v18+ required)
+node --version
+
+# Verify npm
+npm --version
+
+# Verify PostgreSQL is running
+pg_isready -h localhost
+```
+
+---
+
+### Install Project Dependencies
+
+```bash
+npm install
+```
+
+---
+
+### Install Global / CLI Dependencies (if needed)
+
+```bash
+# Prisma CLI (if not installed globally)
+npm install -g prisma
+
+# Ollama (for local AI features)
+# macOS:
+brew install ollama
+ollama serve
+ollama pull qwen2.5-coder:7b
+
+# Linux:
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve
+ollama pull qwen2.5-coder:7b
+```
+
+---
+
+### Environment Setup
+
+```bash
+# Copy example env file (if .env.example exists)
+cp .env.example .env
+
+# Or create .env manually with:
+cat > .env << 'EOF'
+DATABASE_URL="postgres://postgres:postgres@localhost:5432/contentos"
+SHADOW_DATABASE_URL="postgres://postgres:postgres@localhost:5432/contentos"
+AI_PROVIDER=ollama
+AI_BASE_URL=http://localhost:11434/v1
+AI_MODEL=qwen2.5-coder:7b
+CRON_SECRET=$(openssl rand -hex 32)
+LINKEDIN_CLIENT_ID="your_client_id"
+LINKEDIN_CLIENT_SECRET="your_client_secret"
+APP_URL="http://localhost:3000"
+EOF
+```
+
+---
+
+### Database Setup
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Create initial migration
+npx prisma migrate dev --name init
+
+# Apply migrations
+npx prisma migrate deploy
+
+# Open Prisma Studio (optional, to inspect data)
+npx prisma studio
+```
+
+---
+
+### Start Development
+
+```bash
+# Run dev server
+npm run dev
+
+# In another terminal, run Ollama (if using AI features)
+ollama serve
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ---
 
@@ -110,16 +207,7 @@ graph TD
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- PostgreSQL database (local or remote)
-- Ollama (optional, for AI features)
-- LinkedIn Developer App (optional, for publishing)
-
----
+## 🚀 Quick Start
 
 ### 1. Clone the Repository
 
@@ -132,15 +220,17 @@ cd contentos
 
 ### 2. Install Dependencies
 
+See the **[Dependencies & Setup Commands](#-dependencies--setup-commands)** section above for full details.
+
 ```bash
 npm install
 ```
 
 ---
 
-### 3. Configure Environment Variables
+### 3. Configure Environment
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root. See the **[Dependencies & Setup Commands](#-dependencies--setup-commands)** section for the full template.
 
 ```bash
 # Database
