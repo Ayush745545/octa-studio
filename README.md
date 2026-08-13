@@ -61,6 +61,26 @@
 
 ---
 
+## 🔄 Workflow
+
+<div align="center">
+
+  <p>
+    <strong>Step 1:</strong> Capture ideas &nbsp;→&nbsp; <strong>Step 2:</strong> Write &amp; enhance content &nbsp;→&nbsp; <strong>Step 3:</strong> Schedule &amp; publish
+  </p>
+
+  <img src="/images/step1-ideas.jpg" alt="Step 1: Ideas" width="280" />
+  <img src="/images/step2-write.jpg" alt="Step 2: Write" width="280" />
+  <img src="/images/step3-schedule.jpg" alt="Step 3: Schedule" width="280" />
+
+  <p>
+    <em>From raw idea to published post in three steps.</em>
+  </p>
+
+</div>
+
+---
+
 ## 🛠 Tech Stack
 
 <div align="center">
