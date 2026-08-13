@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  allowedDevOrigins: [
+    "support-happiness-backlash.ngrok-free.dev",
+  ],
 };
 
 export default nextConfig;

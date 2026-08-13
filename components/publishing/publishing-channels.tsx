@@ -115,18 +115,27 @@ export default function PublishingChannels({
                   {isConnected ? "Connected" : "Not connected"}
                 </span>
 
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => toggleChannel(channel.name)}
-                  className={`rounded-lg px-3 py-2 text-xs font-medium transition disabled:cursor-wait disabled:opacity-50 ${
-                    isConnected
-                      ? "border border-zinc-200 bg-white text-zinc-600 hover:border-red-200 hover:text-red-600"
-                      : "bg-zinc-950 text-white hover:bg-zinc-800"
-                  }`}
-                >
-                  {isConnected ? "Disconnect" : "Connect"}
-                </button>
+                {channel.name === "LinkedIn" && !isConnected ? (
+                  <a
+                    href="/api/publishing/linkedin/connect"
+                    className="rounded-lg bg-zinc-950 px-3 py-2 text-xs font-medium text-white transition hover:bg-zinc-800"
+                  >
+                    Connect
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => toggleChannel(channel.name)}
+                    className={`rounded-lg px-3 py-2 text-xs font-medium transition disabled:cursor-wait disabled:opacity-50 ${
+                      isConnected
+                        ? "border border-zinc-200 bg-white text-zinc-600 hover:border-red-200 hover:text-red-600"
+                        : "bg-zinc-950 text-white hover:bg-zinc-800"
+                    }`}
+                  >
+                    {isConnected ? "Disconnect" : "Connect"}
+                  </button>
+                )}
               </div>
             </div>
           );

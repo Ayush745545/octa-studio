@@ -4,6 +4,10 @@ import { publishPublication } from "./publish";
 export async function processScheduledPublications() {
   const now = new Date();
 
+  console.log(
+    `[Scheduler] Checking scheduled publications at ${now.toISOString()}`,
+  );
+
   const publications = await prisma.publication.findMany({
     where: {
       status: "SCHEDULED",
@@ -14,6 +18,7 @@ export async function processScheduledPublications() {
     },
     select: {
       id: true,
+      scheduledAt: true,
     },
     orderBy: {
       scheduledAt: "asc",
@@ -21,10 +26,18 @@ export async function processScheduledPublications() {
     take: 10,
   });
 
+  console.log(
+    `[Scheduler] Found ${publications.length} publication(s) ready to publish.`,
+  );
+
   const results = [];
 
   for (const publication of publications) {
     try {
+      console.log(
+        `[Scheduler] Publishing ${publication.id} scheduled for ${publication.scheduledAt?.toISOString()}`,
+      );
+
       const result = await publishPublication(publication.id);
 
       results.push({
@@ -34,6 +47,11 @@ export async function processScheduledPublications() {
         error: result.error ?? null,
       });
     } catch (error) {
+      console.error(
+        `[Scheduler] Failed publication ${publication.id}:`,
+        error,
+      );
+
       results.push({
         publicationId: publication.id,
         success: false,

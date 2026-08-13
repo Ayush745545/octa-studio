@@ -64,6 +64,7 @@ model PublishingChannel {
   refreshToken String?
   expiresAt    DateTime?
   externalId   String?
+  authorUrn     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

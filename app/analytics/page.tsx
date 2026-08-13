@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import AppShell from "@/components/layout/app-shell";
+import WorkspaceLayout from "@/components/layout/workspace-layout";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -241,31 +241,23 @@ export default async function AnalyticsPage() {
   ];
 
   return (
-    <AppShell>
-      <div className="min-h-screen bg-zinc-50">
-        <header className="flex h-16 items-center justify-between border-b border-zinc-200 bg-white px-8">
+    <WorkspaceLayout activeItem="analytics">
+      <div className="min-h-screen bg-[#0a0a0c]">
+        <header className="flex h-16 items-center justify-between border-b border-zinc-800 bg-[#0a0a0c] px-4 sm:px-6 lg:px-8">
           <div>
-            <p className="text-sm font-medium text-zinc-500">
-              Content Analytics
-            </p>
+            <p className="text-sm font-medium text-zinc-500">Content Analytics</p>
           </div>
 
-          <span className="text-xs text-zinc-400">
-            {totalContent} content items
-          </span>
+          <span className="text-xs text-zinc-500">{totalContent} content items</span>
         </header>
 
-        <main className="px-6 py-10 sm:px-8">
+        <main className="px-4 py-10 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
             <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
               <div>
-                <p className="text-sm font-medium text-zinc-400">
-                  Workspace intelligence
-                </p>
+                <p className="text-sm font-medium text-zinc-500">Workspace intelligence</p>
 
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-                  Analytics
-                </h1>
+                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Analytics</h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
                   See what is being created, what is ready,
@@ -275,7 +267,7 @@ export default async function AnalyticsPage() {
 
               <Link
                 href="/ai-studio"
-                className="inline-flex w-fit items-center rounded-xl bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+                className="inline-flex w-fit items-center rounded-xl bg-fuchsia-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-fuchsia-500"
               >
                 Create content
                 <span className="ml-2">→</span>
@@ -286,59 +278,45 @@ export default async function AnalyticsPage() {
               {stats.map((stat, index) => (
                 <div
                   key={stat.label}
-                  className={`rounded-2xl border bg-white p-5 ${
+                  className={`rounded-2xl border bg-zinc-950 p-5 ${
                     index === 4
-                      ? "border-zinc-950"
-                      : "border-zinc-200"
+                      ? "border-fuchsia-500/50"
+                      : "border-zinc-800"
                   }`}
                 >
                   <div className="flex items-start justify-between">
-                    <p className="text-xs font-medium text-zinc-500">
-                      {stat.label}
-                    </p>
+                    <p className="text-xs font-medium text-zinc-500">{stat.label}</p>
 
-                    <span className="text-[10px] text-zinc-300">
-                      0{index + 1}
-                    </span>
+                    <span className="text-[10px] text-zinc-600">0{index + 1}</span>
                   </div>
 
-                  <p className="mt-4 text-3xl font-semibold tracking-tight text-zinc-950">
-                    {stat.value}
-                  </p>
+                  <p className="mt-4 text-3xl font-semibold tracking-tight text-white">{stat.value}</p>
 
-                  <p className="mt-2 text-xs leading-5 text-zinc-400">
-                    {stat.description}
-                  </p>
+                  <p className="mt-2 text-xs leading-5 text-zinc-500">{stat.description}</p>
                 </div>
               ))}
             </section>
 
             <section className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-950">
-                      Content activity
-                    </h2>
+                    <h2 className="text-sm font-semibold text-white">Content activity</h2>
 
-                    <p className="mt-1 text-xs text-zinc-400">
-                      Created and published over the last 7 days.
-                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">Created and published over the last 7 days.</p>
                   </div>
 
-                  <span className="rounded-full bg-zinc-50 px-3 py-1 text-[11px] font-medium text-zinc-500">
-                    Last 7 days
-                  </span>
+                  <span className="rounded-full border border-zinc-800 bg-zinc-950 px-3 py-1 text-[11px] font-medium text-zinc-500">Last 7 days</span>
                 </div>
 
                 <div className="mt-6 flex items-center gap-5 text-xs text-zinc-500">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-sm bg-zinc-950" />
+                    <span className="h-2.5 w-2.5 rounded-sm bg-fuchsia-500" />
                     Created
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-sm bg-zinc-300" />
+                    <span className="h-2.5 w-2.5 rounded-sm bg-zinc-600" />
                     Published
                   </div>
                 </div>
@@ -351,7 +329,7 @@ export default async function AnalyticsPage() {
                     >
                       <div className="flex h-44 w-full items-end justify-center gap-1">
                         <div
-                          className="w-full max-w-6 rounded-t-md bg-zinc-950 transition-all"
+                          className="w-full max-w-6 rounded-t-md bg-fuchsia-600 transition-all"
                           style={{
                             height: `${
                               day.created > 0
@@ -368,7 +346,7 @@ export default async function AnalyticsPage() {
                         />
 
                         <div
-                          className="w-full max-w-6 rounded-t-md bg-zinc-300 transition-all"
+                          className="w-full max-w-6 rounded-t-md bg-zinc-600 transition-all"
                           style={{
                             height: `${
                               day.published > 0
@@ -385,41 +363,29 @@ export default async function AnalyticsPage() {
                         />
                       </div>
 
-                      <span className="mt-3 text-[10px] font-medium text-zinc-400">
-                        {day.label}
-                      </span>
+                      <span className="mt-3 text-[10px] font-medium text-zinc-500">{day.label}</span>
 
-                      <span className="mt-1 text-[10px] text-zinc-300">
-                        {day.created}/{day.published}
-                      </span>
+                      <span className="mt-1 text-[10px] text-zinc-600">{day.created}/{day.published}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-950">
-                      Platform mix
-                    </h2>
+                    <h2 className="text-sm font-semibold text-white">Platform mix</h2>
 
-                    <p className="mt-1 text-xs text-zinc-400">
-                      Where your content is being created.
-                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">Where your content is being created.</p>
                   </div>
 
-                  <span className="text-xs text-zinc-400">
-                    {platforms.length} platforms
-                  </span>
+                  <span className="text-xs text-zinc-500">{platforms.length} platforms</span>
                 </div>
 
                 <div className="mt-7 space-y-5">
                   {platforms.length === 0 ? (
-                    <div className="rounded-xl bg-zinc-50 px-4 py-8 text-center">
-                      <p className="text-sm text-zinc-400">
-                        No platform data yet.
-                      </p>
+                    <div className="rounded-xl bg-zinc-950 px-4 py-8 text-center">
+                      <p className="text-sm text-zinc-500">No platform data yet.</p>
                     </div>
                   ) : (
                     platforms.map(([platform, count]) => {
@@ -433,23 +399,19 @@ export default async function AnalyticsPage() {
                       return (
                         <div key={platform}>
                           <div className="mb-2 flex items-center justify-between">
-                            <span className="text-sm font-medium text-zinc-700">
-                              {platform}
-                            </span>
+                            <span className="text-sm font-medium text-zinc-300">{platform}</span>
 
-                            <span className="text-xs text-zinc-400">
-                              {count} · {percentage}%
-                            </span>
+                            <span className="text-xs text-zinc-500">{count} · {percentage}%</span>
                           </div>
 
                           <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
                             <div
-                              className="h-full rounded-full bg-zinc-950 transition-all"
+                              className="h-full rounded-full bg-fuchsia-600 transition-all"
                               style={{
                                 width: `${
                                   (count /
                                     maxPlatformCount) *
-                                  100
+                                    100
                                 }%`,
                               }}
                             />
@@ -463,21 +425,15 @@ export default async function AnalyticsPage() {
             </section>
 
             <section className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-950">
-                      Publishing pipeline
-                    </h2>
+                    <h2 className="text-sm font-semibold text-white">Publishing pipeline</h2>
 
-                    <p className="mt-1 text-xs text-zinc-400">
-                      Current state of your content.
-                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">Current state of your content.</p>
                   </div>
 
-                  <span className="text-xs text-zinc-400">
-                    {totalContent} total
-                  </span>
+                  <span className="text-xs text-zinc-500">{totalContent} total</span>
                 </div>
 
                 <div className="mt-8 grid grid-cols-4 gap-2">
@@ -486,107 +442,77 @@ export default async function AnalyticsPage() {
                       <div
                         className={`flex h-20 flex-col justify-between rounded-xl p-3 ${
                           index === 3
-                            ? "bg-zinc-950 text-white"
-                            : "bg-zinc-50"
+                            ? "bg-fuchsia-600 text-white"
+                            : "bg-zinc-950"
                         }`}
                       >
-                        <span
-                          className={`text-[10px] font-medium ${
-                            index === 3
-                              ? "text-zinc-400"
-                              : "text-zinc-400"
-                          }`}
-                        >
-                          {stage.label}
-                        </span>
+                        <span className="text-[10px] font-medium text-zinc-500">{stage.label}</span>
 
-                        <span className="text-xl font-semibold">
-                          {stage.count}
-                        </span>
+                        <span className="text-xl font-semibold text-white">{stage.count}</span>
                       </div>
-
-                      {index < pipeline.length - 1 && (
-                        <div className="hidden" />
-                      )}
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-950">
-                      Publishing rate
-                    </h2>
+                    <h2 className="text-sm font-semibold text-white">Publishing rate</h2>
 
-                    <p className="mt-1 text-xs text-zinc-400">
-                      Published content versus total content.
-                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">Published content versus total content.</p>
                   </div>
 
-                  <span className="text-2xl font-semibold tracking-tight text-zinc-950">
-                    {publishingRate}%
-                  </span>
+                  <span className="text-2xl font-semibold tracking-tight text-white">{publishingRate}%</span>
                 </div>
 
                 <div className="mt-8 h-3 overflow-hidden rounded-full bg-zinc-100">
                   <div
-                    className="h-full rounded-full bg-zinc-950 transition-all"
+                    className="h-full rounded-full bg-fuchsia-600 transition-all"
                     style={{
                       width: `${publishingRate}%`,
                     }}
                   />
                 </div>
 
-                <div className="mt-4 flex items-center justify-between text-xs text-zinc-400">
+                <div className="mt-4 flex items-center justify-between text-xs text-zinc-500">
                   <span>{publishedCount} published</span>
                   <span>{totalContent} total</span>
                 </div>
 
-                <div className="mt-6 rounded-xl bg-zinc-50 p-4">
-                  <p className="text-xs text-zinc-400">
-                    Published this week
-                  </p>
+                <div className="mt-6 rounded-xl bg-zinc-950 p-4">
+                  <p className="text-xs text-zinc-500">Published this week</p>
 
-                  <p className="mt-1 text-2xl font-semibold text-zinc-950">
-                    {publishedLast7Days}
-                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-white">{publishedLast7Days}</p>
                 </div>
               </div>
             </section>
 
             <section className="mt-6 grid gap-6 lg:grid-cols-2">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-950">
-                      Upcoming content
-                    </h2>
+                    <h2 className="text-sm font-semibold text-white">Upcoming content</h2>
 
-                    <p className="mt-1 text-xs text-zinc-400">
-                      Your next scheduled posts.
-                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">Your next scheduled posts.</p>
                   </div>
 
                   <Link
                     href="/calendar"
-                    className="text-xs font-medium text-zinc-500 transition hover:text-zinc-950"
+                    className="text-xs font-medium text-zinc-500 transition hover:text-white"
                   >
                     Calendar →
                   </Link>
                 </div>
 
-                <div className="mt-5 divide-y divide-zinc-100">
+                <div className="mt-5 divide-y divide-zinc-800">
                   {upcomingContent.length === 0 ? (
-                    <div className="rounded-xl bg-zinc-50 py-10 text-center">
-                      <p className="text-sm text-zinc-400">
-                        Nothing scheduled yet.
-                      </p>
+                    <div className="rounded-xl bg-zinc-950 py-10 text-center">
+                      <p className="text-sm text-zinc-500">Nothing scheduled yet.</p>
 
                       <Link
                         href="/content"
-                        className="mt-3 inline-block text-xs font-medium text-zinc-700 hover:text-zinc-950"
+                        className="mt-3 inline-block text-xs font-medium text-zinc-500 hover:text-white"
                       >
                         Create content →
                       </Link>
@@ -596,34 +522,28 @@ export default async function AnalyticsPage() {
                       <Link
                         key={content.id}
                         href={`/content/${content.id}`}
-                        className="flex items-center justify-between gap-4 rounded-lg py-4 transition hover:bg-zinc-50"
+                        className="flex items-center justify-between gap-4 rounded-lg py-4 transition hover:bg-zinc-100/40"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-zinc-900">
-                            {content.title}
-                          </p>
+                          <p className="truncate text-sm font-medium text-white">{content.title}</p>
 
                           <div className="mt-1 flex items-center gap-2">
-                            <span className="text-xs text-zinc-400">
-                              {content.platform || "General"}
-                            </span>
+                            <span className="text-xs text-zinc-500">{content.platform || "General"}</span>
 
-                            <span className="h-1 w-1 rounded-full bg-zinc-300" />
+                            <span className="h-1 w-1 rounded-full bg-zinc-700" />
 
-                            <span className="text-xs text-zinc-400">
-                              Scheduled
-                            </span>
+                            <span className="text-xs text-zinc-500">Scheduled</span>
                           </div>
                         </div>
 
                         <div className="shrink-0 text-right">
-                          <p className="text-xs font-medium text-zinc-700">
+                          <p className="text-xs font-medium text-zinc-300">
                             {content.scheduledAt
                               ? formatTime(content.scheduledAt)
                               : ""}
                           </p>
 
-                          <p className="mt-1 text-[11px] text-zinc-400">
+                          <p className="mt-1 text-[11px] text-zinc-600">
                             {content.scheduledAt
                               ? formatDate(content.scheduledAt)
                               : ""}
@@ -635,53 +555,43 @@ export default async function AnalyticsPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-950">
-                      Recent content
-                    </h2>
+                    <h2 className="text-sm font-semibold text-white">Recent content</h2>
 
-                    <p className="mt-1 text-xs text-zinc-400">
-                      Recently created or updated.
-                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">Recently created or updated.</p>
                   </div>
 
                   <Link
                     href="/content"
-                    className="text-xs font-medium text-zinc-500 transition hover:text-zinc-950"
+                    className="text-xs font-medium text-zinc-500 transition hover:text-white"
                   >
                     View all →
                   </Link>
                 </div>
 
-                <div className="mt-5 divide-y divide-zinc-100">
+                <div className="mt-5 divide-y divide-zinc-800">
                   {recentContent.length === 0 ? (
-                    <div className="rounded-xl bg-zinc-50 py-10 text-center">
-                      <p className="text-sm text-zinc-400">
-                        No content yet.
-                      </p>
+                    <div className="rounded-xl bg-zinc-950 py-10 text-center">
+                      <p className="text-sm text-zinc-500">No content yet.</p>
                     </div>
                   ) : (
                     recentContent.map((content) => (
                       <Link
                         key={content.id}
                         href={`/content/${content.id}`}
-                        className="flex items-center justify-between gap-4 rounded-lg py-4 transition hover:bg-zinc-50"
+                        className="flex items-center justify-between gap-4 rounded-lg py-4 transition hover:bg-zinc-100/40"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-zinc-900">
-                            {content.title}
-                          </p>
+                          <p className="truncate text-sm font-medium text-white">{content.title}</p>
 
                           <div className="mt-1 flex items-center gap-2">
-                            <span className="text-xs text-zinc-400">
-                              {content.platform || "General"}
-                            </span>
+                            <span className="text-xs text-zinc-500">{content.platform || "General"}</span>
 
-                            <span className="h-1 w-1 rounded-full bg-zinc-300" />
+                            <span className="h-1 w-1 rounded-full bg-zinc-700" />
 
-                            <span className="text-[11px] text-zinc-300">
+                            <span className="text-[11px] text-zinc-600">
                               {formatDateTime(content.updatedAt)}
                             </span>
                           </div>
@@ -690,7 +600,7 @@ export default async function AnalyticsPage() {
                         <span
                           className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${
                             content.status === "PUBLISHED"
-                              ? "bg-zinc-950 text-white"
+                              ? "bg-fuchsia-600/20 text-fuchsia-300"
                               : "bg-zinc-100 text-zinc-500"
                           }`}
                         >
@@ -704,37 +614,25 @@ export default async function AnalyticsPage() {
             </section>
 
             <section className="mt-6 grid gap-6 sm:grid-cols-2">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-                <p className="text-xs font-medium text-zinc-400">
-                  Ideas captured
-                </p>
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
+                <p className="text-xs font-medium text-zinc-500">Ideas captured</p>
 
-                <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
-                  {ideaCount}
-                </p>
+                <p className="mt-3 text-3xl font-semibold tracking-tight text-white">{ideaCount}</p>
 
-                <p className="mt-2 text-xs text-zinc-400">
-                  Ideas available for future content.
-                </p>
+                <p className="mt-2 text-xs text-zinc-500">Ideas available for future content.</p>
               </div>
 
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-                <p className="text-xs font-medium text-zinc-400">
-                  Ready + scheduled
-                </p>
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
+                <p className="text-xs font-medium text-zinc-500">Ready + scheduled</p>
 
-                <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
-                  {readyCount + scheduledCount}
-                </p>
+                <p className="mt-3 text-3xl font-semibold tracking-tight text-white">{readyCount + scheduledCount}</p>
 
-                <p className="mt-2 text-xs text-zinc-400">
-                  Content moving toward publication.
-                </p>
+                <p className="mt-2 text-xs text-zinc-500">Content moving toward publication.</p>
               </div>
             </section>
           </div>
         </main>
       </div>
-    </AppShell>
+    </WorkspaceLayout>
   );
 }

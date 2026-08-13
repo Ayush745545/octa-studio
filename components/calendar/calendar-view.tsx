@@ -1,503 +1,307 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
-import { reschedulePublication } from "@/app/publishing/actions/reschedule-publication";
-import { cancelPublication } from "@/app/publishing/actions/cancel-publication";
+import { useMemo, useEffect, useState, useRef } from "react";
 
-interface CalendarContent {
+export interface ScheduledPost {
   id: string;
   contentId: string;
   title: string;
+  body?: string | null;
   platform: string;
+  accountName?: string | null;
   scheduledAt: string;
+  media?: Array<{ id: string; url: string; filename: string; mimeType: string; type: string }>;
 }
 
-interface CalendarViewProps {
-  contents: CalendarContent[];
-  initialDate: string;
+export interface CalendarViewProps {
+  posts: ScheduledPost[];
+  weekStart: Date;
+  onCellClick: (date: string, time: string) => void;
+  onPostClick: (post: ScheduledPost) => void;
+  onReschedule: (postId: string, newScheduledAt: string) => void;
+  onMediaDrop: (date: string, time: string, mediaData: any) => void;
 }
 
-const WEEKDAYS = [
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat",
-  "Sun",
-];
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-function getCalendarDays(year: number, month: number) {
-  const firstDay = new Date(year, month, 1);
-  const firstWeekday = (firstDay.getDay() + 6) % 7;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const totalCells =
-    Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
-
-  return Array.from({ length: totalCells }, (_, index) => {
-    const day = index - firstWeekday + 1;
-
-    return day >= 1 && day <= daysInMonth ? day : null;
-  });
+function formatHour(hour: number): string {
+  if (hour === 0) return "12AM";
+  if (hour < 12) return `${hour}AM`;
+  if (hour === 12) return "12PM";
+  return `${hour - 12}PM`;
 }
 
-function dateKey(year: number, month: number, day: number) {
-  return `${year}-${String(month + 1).padStart(2, "0")}-${String(
-    day,
-  ).padStart(2, "0")}`;
+function dateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
+
+function isSameDay(d1: Date, d2: Date): boolean {
+  return dateKey(d1) === dateKey(d2);
+}
+
+const PLATFORM_COLORS: Record<string, string> = {
+  twitter: "bg-blue-500",
+  instagram: "bg-pink-500",
+  linkedin: "bg-blue-700",
+  tiktok: "bg-black",
+  youtube: "bg-red-600",
+  facebook: "bg-blue-600",
+};
 
 export default function CalendarView({
-  contents,
-  initialDate,
+  posts,
+  weekStart,
+  onCellClick,
+  onPostClick,
+  onReschedule,
+  onMediaDrop,
 }: CalendarViewProps) {
-  const [currentDate, setCurrentDate] = useState(
-    new Date(initialDate),
-  );
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [draggedPost, setDraggedPost] = useState<ScheduledPost | null>(null);
+  const [dragOverCell, setDragOverCell] = useState<string | null>(null);
+  
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [selectedContent, setSelectedContent] =
-    useState<CalendarContent | null>(null);
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const [draggedContent, setDraggedContent] =
-    useState<CalendarContent | null>(null);
+  useEffect(() => {
+    if (scrollRef.current) {
+      const currentHour = new Date().getHours();
+      const scrollPosition = Math.max(0, currentHour * 52 - 100);
+      scrollRef.current.scrollTop = scrollPosition;
+    }
+  }, [weekStart]);
 
-  const [dragOverDate, setDragOverDate] =
-    useState<string | null>(null);
-
-  const [newDate, setNewDate] = useState("");
-  const [newTime, setNewTime] = useState("");
-
-  const [isPending, startTransition] = useTransition();
-
-  function handleDragStart(content: CalendarContent) {
-    setDraggedContent(content);
-  }
-
-  function handleDragEnd() {
-    setDraggedContent(null);
-    setDragOverDate(null);
-  }
-
-  function handleDragOver(
-    event: React.DragEvent<HTMLDivElement>,
-    dateKey: string,
-  ) {
-    event.preventDefault();
-    setDragOverDate(dateKey);
-  }
-
-  function handleDrop(
-    event: React.DragEvent<HTMLDivElement>,
-    dateKey: string,
-  ) {
-    event.preventDefault();
-
-    if (!draggedContent) return;
-
-    const originalDate = new Date(draggedContent.scheduledAt);
-    const [year, month, day] = dateKey.split("-").map(Number);
-
-    const newDate = new Date(
-      year,
-      month - 1,
-      day,
-      originalDate.getHours(),
-      originalDate.getMinutes(),
-      originalDate.getSeconds(),
-    );
-
-    const scheduledAt =
-      `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, "0")}` +
-      `-${String(newDate.getDate()).padStart(2, "0")}` +
-      `T${String(newDate.getHours()).padStart(2, "0")}:${String(newDate.getMinutes()).padStart(2, "0")}`;
-
-    startTransition(async () => {
-      try {
-        await reschedulePublication(draggedContent.id, scheduledAt);
-      } finally {
-        setDraggedContent(null);
-        setDragOverDate(null);
-      }
+  const weekDays = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      d.setHours(0, 0, 0, 0);
+      return d;
     });
-  }
+  }, [weekStart]);
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [currentTime.getDate()]); // Update if day changes
 
-  const today = new Date();
+  const postsByCell = useMemo(() => {
+    const map = new Map<string, ScheduledPost[]>();
+    const start = new Date(weekStart);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
 
-  const todayKey = dateKey(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
-
-  const calendarDays = useMemo(
-    () => getCalendarDays(year, month),
-    [year, month],
-  );
-
-  const contentByDate = useMemo(() => {
-    const map = new Map<string, CalendarContent[]>();
-
-    for (const content of contents) {
-      const date = new Date(content.scheduledAt);
-
-      const key = dateKey(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-      );
-
-      const existing = map.get(key) ?? [];
-      existing.push(content);
-      map.set(key, existing);
+    for (const post of posts) {
+      const scheduled = new Date(post.scheduledAt);
+      if (scheduled >= start && scheduled < end) {
+        const key = `${dateKey(scheduled)}-${scheduled.getHours()}`;
+        const existing = map.get(key) ?? [];
+        existing.push(post);
+        map.set(key, existing);
+      }
     }
 
     return map;
-  }, [contents]);
+  }, [posts, weekStart]);
 
-  const monthName = new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    year: "numeric",
-  }).format(currentDate);
+  const timeIndicator = useMemo(() => {
+    const currentDay = currentTime.getDay();
+    const currentHour = currentTime.getHours();
+    const currentMinute = currentTime.getMinutes();
+    
+    const startDay = weekStart.getDay();
+    const dayOffset = (currentDay - startDay + 7) % 7;
+    
+    const todayDate = new Date();
+    todayDate.setHours(0,0,0,0);
+    const isCurrentWeek = weekDays.some(d => isSameDay(d, todayDate));
+    
+    if (!isCurrentWeek) return null;
 
-  function previousMonth() {
-    setCurrentDate(new Date(year, month - 1, 1));
+    return {
+      top: (currentHour * 52) + (currentMinute / 60) * 52,
+    };
+  }, [currentTime, weekStart, weekDays]);
+
+  function handleDragStart(e: React.DragEvent, post: ScheduledPost) {
+    e.stopPropagation();
+    setDraggedPost(post);
+    // Needed for Firefox
+    e.dataTransfer.setData("text/plain", post.id);
+    e.dataTransfer.effectAllowed = "move";
   }
 
-  function nextMonth() {
-    setCurrentDate(new Date(year, month + 1, 1));
+  function handleDragOver(e: React.DragEvent, cellKey: string) {
+    e.preventDefault();
+    if (!dragOverCell || dragOverCell !== cellKey) {
+      setDragOverCell(cellKey);
+    }
   }
 
-  function goToday() {
-    setCurrentDate(
-      new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        1,
-      ),
-    );
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    setDragOverCell(null);
   }
 
-  function handleCancelSchedule() {
-    if (!selectedContent) return;
+  function handleDrop(e: React.DragEvent, day: Date, hour: number) {
+    e.preventDefault();
+    setDragOverCell(null);
 
-    startTransition(async () => {
-      try {
-        await cancelPublication(selectedContent.id);
-        setSelectedContent(null);
-      } catch (error) {
-        console.error("Failed to cancel schedule:", error);
+    const cellDateKey = dateKey(day);
+    const timeString = `${String(hour).padStart(2, "0")}:00`;
+
+    // Handle internal post dragging
+    if (draggedPost) {
+      const newScheduledAt = `${cellDateKey}T${timeString}:00`;
+      onReschedule(draggedPost.id, newScheduledAt);
+      setDraggedPost(null);
+      return;
+    }
+
+    // Handle external media dropping
+    try {
+      const rawData = e.dataTransfer.getData("application/json");
+      if (rawData) {
+        const parsed = JSON.parse(rawData);
+        onMediaDrop(cellDateKey, timeString, parsed);
       }
-    });
+    } catch (err) {
+      // Ignore if not valid JSON
+    }
+  }
+
+  function handleCellClick(day: Date, hour: number) {
+    const dateStr = dateKey(day);
+    const timeStr = `${String(hour).padStart(2, "0")}:00`;
+    onCellClick(dateStr, timeStr);
   }
 
   return (
-    <div>
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-sm text-zinc-400">
-            Publishing schedule
-          </p>
-
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-            {monthName}
-          </h1>
-
-          <p className="mt-2 text-sm text-zinc-500">
-            See when your content is scheduled to go live.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={previousMonth}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-zinc-400 hover:text-zinc-950"
-            aria-label="Previous month"
-          >
-            ←
-          </button>
-
-          <button
-            type="button"
-            onClick={goToday}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-950"
-          >
-            Today
-          </button>
-
-          <button
-            type="button"
-            onClick={nextMonth}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-zinc-400 hover:text-zinc-950"
-            aria-label="Next month"
-          >
-            →
-          </button>
-
-          <Link
-            href="/content"
-            className="ml-2 rounded-lg bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
-          >
-            View Content
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-        <div className="grid grid-cols-7 border-b border-zinc-200 bg-zinc-50">
-          {WEEKDAYS.map((day) => (
-            <div
-              key={day}
-              className="border-r border-zinc-200 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-400 last:border-r-0"
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-7">
-          {calendarDays.map((day, index) => {
-            if (day === null) {
-              return (
-                <div
-                  key={`empty-${index}`}
-                  className="min-h-36 border-b border-r border-zinc-100 bg-zinc-50/40"
-                />
-              );
-            }
-
-            const key = dateKey(year, month, day);
-            const items = contentByDate.get(key) ?? [];
-            const isToday = key === todayKey;
-
+    <div className="flex h-full flex-col min-w-0 bg-[#0a0a0c]">
+      <div 
+        ref={scrollRef}
+        className="relative flex-1 overflow-y-auto"
+      >
+        <div 
+          className="grid min-w-[800px]"
+          style={{ gridTemplateColumns: "50px repeat(7, minmax(0, 1fr))" }}
+        >
+          {/* Header row */}
+          <div className="sticky top-0 left-0 z-30 h-14 bg-[#0a0a0c] border-b border-r border-zinc-800" />
+          {weekDays.map((day) => {
+            const isToday = isSameDay(day, today);
             return (
               <div
-                key={key}
-                onDragEnter={(event) => {
-                  event.preventDefault();
-                  setDragOverDate(key);
-                }}
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  event.dataTransfer.dropEffect = "move";
-                  handleDragOver(event, key);
-                }}
-                onDragLeave={() => setDragOverDate(null)}
-                onDrop={(event) => handleDrop(event, key)}
-                className={`min-h-36 border-b border-r border-zinc-100 p-3 transition ${
-                  dragOverDate === key
-                    ? "bg-zinc-100 ring-2 ring-inset ring-zinc-300"
-                    : "hover:bg-zinc-50"
+                key={day.toISOString()}
+                className={`sticky top-0 z-20 h-14 border-b border-r border-zinc-800 px-2 py-2 flex flex-col items-center justify-center ${
+                  isToday ? "bg-zinc-900/40/60" : "bg-[#0a0a0c]"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={
-                      isToday
-                        ? "flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950 text-xs font-semibold text-white"
-                        : "text-xs font-medium text-zinc-500"
-                    }
-                  >
-                    {day}
-                  </span>
-
-                  {items.length > 0 && (
-                    <span className="text-[10px] font-medium text-zinc-400">
-                      {items.length}
-                    </span>
-                  )}
+                <div className={`text-xl font-medium ${isToday ? "text-[#7C3AED]" : "text-white"}`}>
+                  {day.getDate()}
                 </div>
-
-                <div className="mt-3 space-y-2">
-                  {items.map((content) => {
-                const scheduledDate = new Date(content.scheduledAt);
-
-                return (
-                  <div
-                    key={content.id}
-                    role="button"
-                    tabIndex={0}
-                    draggable={true}
-                    onDragStart={(event) => {
-                      event.dataTransfer.effectAllowed = "move";
-                      event.dataTransfer.setData("text/plain", content.id);
-                      handleDragStart(content);
-                    }}
-                    onDragEnd={handleDragEnd}
-                    onClick={() => {
-                      setSelectedContent(content);
-                      setNewDate(
-                        `${scheduledDate.getFullYear()}-${String(
-                          scheduledDate.getMonth() + 1,
-                        ).padStart(2, "0")}-${String(
-                          scheduledDate.getDate(),
-                        ).padStart(2, "0")}`,
-                      );
-                      setNewTime(
-                        `${String(scheduledDate.getHours()).padStart(
-                          2,
-                          "0",
-                        )}:${String(scheduledDate.getMinutes()).padStart(
-                          2,
-                          "0",
-                        )}`,
-                      );
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        setSelectedContent(content);
-                      }
-                    }}
-                    className="group block w-full cursor-grab rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-left transition hover:border-zinc-400 hover:bg-white active:cursor-grabbing"
-                  >
-                    <p className="line-clamp-2 text-xs font-medium leading-4 text-zinc-900">
-                      {content.title}
-                    </p>
-
-                    <div className="mt-2 flex items-center justify-between gap-2">
-                      <span className="text-[10px] text-zinc-400">
-                        {content.platform || "General"}
-                      </span>
-
-                      <span className="text-[10px] font-medium text-zinc-500">
-                        {(() => {
-                          const hours = scheduledDate.getHours();
-                          const minutes = String(
-                            scheduledDate.getMinutes(),
-                          ).padStart(2, "0");
-                          const hour12 = hours % 12 || 12;
-                          const period = hours >= 12 ? "PM" : "AM";
-
-                          return `${hour12}:${minutes} ${period}`;
-                        })()}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                <div className="text-[10px] font-semibold text-zinc-500 tracking-wider">
+                  {WEEKDAYS[day.getDay()]}
                 </div>
               </div>
             );
           })}
-        </div>
-      </div>
 
-      {selectedContent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-6">
-          <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-zinc-400">
-                  Reschedule
-                </p>
+          {/* Grid Area */}
+          <div className="col-span-full relative" style={{ display: "contents" }}>
+            {HOURS.map((hour) => (
+              <div key={`row-${hour}`} style={{ display: "contents" }}>
+                {/* Time Column */}
+                <div className="sticky left-0 z-10 h-[52px] border-b border-r border-zinc-800 bg-[#0a0a0c] px-1.5 py-1">
+                  <span className="text-[10px] font-medium text-zinc-500 block -mt-2">
+                    {hour === 0 ? "" : formatHour(hour)}
+                  </span>
+                </div>
+                
+                {/* Day Cells */}
+                {weekDays.map((day) => {
+                  const cellKey = `${dateKey(day)}-${hour}`;
+                  const cellPosts = postsByCell.get(cellKey) ?? [];
+                  const isDragOver = dragOverCell === cellKey;
+                  const isToday = isSameDay(day, today);
 
-                <h2 className="mt-1 text-lg font-semibold text-zinc-950">
-                  {selectedContent.title}
-                </h2>
+                  return (
+                    <div
+                      key={cellKey}
+                      onClick={() => handleCellClick(day, hour)}
+                      onDragOver={(e) => handleDragOver(e, cellKey)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, day, hour)}
+                      className={`h-[52px] border-b border-r border-zinc-800 p-1 relative transition-colors ${
+                        isDragOver
+                          ? "bg-[#F3E8FF]/60 ring-1 ring-inset ring-[#7C3AED]/40"
+                          : isToday 
+                            ? "bg-zinc-900/40/60 hover:bg-zinc-800/60" 
+                            : "hover:bg-zinc-900/40"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-1 h-full overflow-y-auto no-scrollbar">
+                        {cellPosts.map((post) => {
+                          const platformColor = PLATFORM_COLORS[post.platform?.toLowerCase()] || "bg-zinc-900/400";
+                          const scheduled = new Date(post.scheduledAt);
+                          const postTime = `${scheduled.getHours() % 12 || 12}:${String(scheduled.getMinutes()).padStart(2, "0")}${scheduled.getHours() >= 12 ? "p" : "a"}`;
+
+                          return (
+                            <div
+                              key={post.id}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, post)}
+                              onDragEnd={() => setDraggedPost(null)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onPostClick(post);
+                              }}
+                              className="group flex flex-col rounded-md border border-zinc-800 bg-[#0a0a0c] p-1.5 shadow-sm transition hover:border-[#7C3AED] hover:shadow-md cursor-grab active:cursor-grabbing"
+                            >
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <div className={`w-1.5 h-1.5 rounded-full ${platformColor}`} />
+                                <span className="text-[9px] font-medium text-zinc-500 uppercase tracking-wider truncate">
+                                  {post.platform}
+                                </span>
+                              </div>
+                              <div className="text-xs font-medium text-white truncate">
+                                {post.title || "Untitled Post"}
+                              </div>
+                              <div className="text-[9px] text-zinc-400 text-right mt-0.5">
+                                {postTime}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+            ))}
 
-              <button
-                type="button"
-                onClick={() => setSelectedContent(null)}
-                className="text-zinc-400 hover:text-zinc-950"
+            {/* Current Time Indicator */}
+            {timeIndicator && (
+              <div
+                className="pointer-events-none absolute left-0 right-0 z-30 flex items-center"
+                style={{ top: `${timeIndicator.top + 56}px` }} // +56 for header offset
               >
-                ✕
-              </button>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              <div>
-                <label
-                  htmlFor="calendar-date"
-                  className="text-sm font-medium text-zinc-700"
-                >
-                  Date
-                </label>
-
-                <input
-                  id="calendar-date"
-                  type="date"
-                  value={newDate}
-                  onChange={(event) => setNewDate(event.target.value)}
-                  disabled={isPending}
-                  className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none focus:border-zinc-400"
-                />
+                <div className="w-[50px] relative">
+                  <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#7C3AED]" />
+                </div>
+                <div className="flex-1 h-[1px] bg-[#7C3AED]" />
               </div>
-
-              <div>
-                <label
-                  htmlFor="calendar-time"
-                  className="text-sm font-medium text-zinc-700"
-                >
-                  Time
-                </label>
-
-                <input
-                  id="calendar-time"
-                  type="time"
-                  value={newTime}
-                  onChange={(event) => setNewTime(event.target.value)}
-                  disabled={isPending}
-                  className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none focus:border-zinc-400"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={handleCancelSchedule}
-                disabled={isPending}
-                className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isPending ? "Saving..." : "Cancel Schedule"}
-              </button>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedContent(null)}
-                  disabled={isPending}
-                  className="rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300"
-                >
-                  Close
-                </button>
-
-                <button
-                  type="button"
-                  disabled={!newDate || !newTime || isPending}
-                  onClick={() => {
-                    if (!selectedContent) return;
-
-                    const scheduledAt = `${newDate}T${newTime}`;
-
-                    startTransition(async () => {
-                      try {
-                        await reschedulePublication(
-                          selectedContent.id,
-                          scheduledAt,
-                        );
-
-                        setSelectedContent(null);
-                      } catch (error) {
-                        console.error("Failed to reschedule:", error);
-                      }
-                    });
-                  }}
-                  className="rounded-xl bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isPending ? "Saving..." : "Save Schedule"}
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

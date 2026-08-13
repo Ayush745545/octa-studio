@@ -94,6 +94,7 @@ export async function POST(request: Request) {
     const contentType = String(body.contentType || "Post");
     const tone = String(body.tone || "Engaging");
     const length = String(body.length || "Medium");
+    const context = String(body.context || "");
 
     if (!prompt) {
       return NextResponse.json(
@@ -126,7 +127,7 @@ ${length}
 
 USER REQUEST:
 ${prompt}
-
+${context ? `\nPREVIOUS CONTEXT:\n${context}\n` : ""}
 ${workflow}
 
 GLOBAL RULES:

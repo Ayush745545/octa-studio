@@ -9,9 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "@studio-freight/lenis": "^1.0.42",
     "dotenv": "^17.4.2",
+    "gsap": "^3.15.0",
     "next": "16.3.0",
     "pg": "^8.23.0",
     "react": "19.2.8",

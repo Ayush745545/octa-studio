@@ -1,65 +1,81 @@
-import AppShell from "@/components/layout/app-shell";
-import CalendarView from "@/components/calendar/calendar-view";
+import CalendarWorkspace from "@/components/calendar/calendar-workspace";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function CalendarPage() {
-  const scheduledPublications = await prisma.publication.findMany({
-    where: {
-      status: "SCHEDULED",
-      scheduledAt: {
-        not: null,
-      },
-    },
-    include: {
-      content: {
-        select: {
-          id: true,
-          title: true,
+  const [scheduledPublications, connectedChannels, mediaCount] = await Promise.all([
+    prisma.publication.findMany({
+      where: {
+        status: "SCHEDULED",
+        scheduledAt: {
+          not: null,
         },
       },
-      channel: {
-        select: {
-          platform: true,
+      include: {
+        content: {
+          select: {
+            id: true,
+            title: true,
+            body: true,
+            platform: true,
+            media: {
+              select: {
+                id: true,
+                url: true,
+                filename: true,
+                mimeType: true,
+                size: true,
+                type: true,
+              },
+            },
+          },
+        },
+        channel: {
+          select: {
+            platform: true,
+            accountName: true,
+            connected: true,
+            externalId: true,
+          },
         },
       },
-    },
-    orderBy: {
-      scheduledAt: "asc",
-    },
-  });
+      orderBy: {
+        scheduledAt: "asc",
+      },
+    }),
+    prisma.publishingChannel.findMany({
+      where: { connected: true },
+      select: {
+        platform: true,
+        accountName: true,
+        externalId: true,
+      },
+    }),
+    prisma.media.count(),
+  ]);
 
-  const publications = scheduledPublications
-    .filter((publication) => publication.scheduledAt)
-    .map((publication) => ({
-      id: publication.id,
-      contentId: publication.content.id,
-      title: publication.content.title,
-      platform: publication.channel.platform,
-      scheduledAt: publication.scheduledAt!.toISOString(),
+  const posts = scheduledPublications
+    .filter((pub) => pub.scheduledAt)
+    .map((pub) => ({
+      id: pub.id,
+      contentId: pub.content.id,
+      title: pub.content.title,
+      body: pub.content.body,
+      platform: pub.channel.platform,
+      accountName: pub.channel.accountName,
+      scheduledAt: pub.scheduledAt!.toISOString(),
+      media: pub.content.media,
     }));
 
+  const connectedPlatforms = connectedChannels.map((ch) => ch.platform);
+
   return (
-    <AppShell>
-      <div className="min-h-screen bg-white">
-        <header className="flex h-14 items-center justify-between border-b border-zinc-200 px-7">
-          <span className="text-sm font-medium text-zinc-500">
-            Content Calendar
-          </span>
-
-          <span className="text-xs text-zinc-400">
-            {publications.length} scheduled
-          </span>
-        </header>
-
-        <main className="mx-auto max-w-7xl px-7 py-10">
-          <CalendarView
-            contents={publications}
-            initialDate={new Date().toISOString()}
-          />
-        </main>
-      </div>
-    </AppShell>
+    <CalendarWorkspace
+      posts={posts}
+      connectedPlatforms={connectedPlatforms}
+      connectedChannels={connectedChannels}
+      mediaCount={mediaCount}
+    />
   );
 }

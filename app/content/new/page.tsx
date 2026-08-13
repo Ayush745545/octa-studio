@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import AppShell from "@/components/layout/app-shell";
+import WorkspaceLayout from "@/components/layout/workspace-layout";
 import { createContent } from "@/app/content/actions/create-content";
 
 function NewContentForm() {
@@ -35,20 +35,16 @@ function NewContentForm() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="flex h-14 items-center border-b border-zinc-200 px-7">
-        <span className="text-sm font-medium text-zinc-500">
-          Content Workspace
-        </span>
+    <div className="min-h-screen bg-[#0a0a0c]">
+      <header className="flex h-16 items-center border-b border-zinc-800 bg-[#0a0a0c] px-4 sm:px-6 lg:px-8">
+        <span className="text-sm font-medium text-zinc-500">Content Workspace</span>
       </header>
 
-      <main className="mx-auto max-w-5xl px-7 py-12">
+      <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-7">
         <div className="max-w-3xl">
-          <p className="text-sm text-zinc-400">AI Studio</p>
+          <p className="text-sm text-zinc-600">AI Studio</p>
 
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-zinc-950">
-            Create your content
-          </h1>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">Create your content</h1>
 
           <p className="mt-4 text-base leading-7 text-zinc-500">
             Review the AI result and save it as a ContentOS draft.
@@ -57,38 +53,32 @@ function NewContentForm() {
 
         <section className="mt-10 space-y-7">
           <div>
-            <label className="text-sm font-medium text-zinc-700">
-              Title
-            </label>
+            <label className="text-sm font-medium text-zinc-700">Title</label>
 
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-4 text-base font-medium text-zinc-950 outline-none focus:border-zinc-400"
+              className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0a0a0c] px-4 py-4 text-base font-medium text-white outline-none transition focus:border-zinc-300 focus:ring-1 focus:ring-zinc-300"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-zinc-700">
-              Content
-            </label>
+            <label className="text-sm font-medium text-zinc-700">Content</label>
 
             <textarea
               value={body}
               onChange={(event) => setBody(event.target.value)}
-              className="mt-2 min-h-96 w-full resize-y rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm leading-7 text-zinc-800 outline-none focus:border-zinc-400"
+              className="mt-2 min-h-96 w-full resize-y rounded-xl border border-zinc-800 bg-[#0a0a0c] px-4 py-4 text-sm leading-7 text-white outline-none transition focus:border-zinc-300 focus:ring-1 focus:ring-zinc-300 placeholder:text-zinc-400"
             />
           </div>
 
           <div className="flex items-center gap-4">
-            <label className="text-sm font-medium text-zinc-700">
-              Platform
-            </label>
+            <label className="text-sm font-medium text-zinc-700">Platform</label>
 
             <select
               value={platform}
               onChange={(event) => setPlatform(event.target.value)}
-              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400"
+              className="rounded-xl border border-zinc-800 bg-[#0a0a0c] px-4 py-3 text-sm text-white outline-none transition focus:border-zinc-300 focus:ring-1 focus:ring-zinc-300"
             >
               <option value="">Select platform</option>
               <option value="YouTube">YouTube</option>
@@ -100,16 +90,14 @@ function NewContentForm() {
             </select>
           </div>
 
-          <div className="flex items-center justify-between border-t border-zinc-200 pt-6">
-            <span className="text-sm text-zinc-400">
-              Status: DRAFT
-            </span>
+          <div className="flex items-center justify-between border-t border-zinc-800 pt-6">
+            <span className="text-sm text-zinc-600">Status: DRAFT</span>
 
             <button
               type="button"
               onClick={handleSave}
               disabled={isSaving || !title.trim()}
-              className="rounded-xl bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSaving ? "Saving..." : "Save Draft"}
             </button>
@@ -122,16 +110,16 @@ function NewContentForm() {
 
 export default function NewContentPage() {
   return (
-    <AppShell>
+    <WorkspaceLayout activeItem="content">
       <Suspense
         fallback={
-          <div className="min-h-screen bg-white p-12 text-sm text-zinc-500">
+          <div className="min-h-screen bg-[#0a0a0c] p-12 text-sm text-zinc-600">
             Loading content editor...
           </div>
         }
       >
         <NewContentForm />
       </Suspense>
-    </AppShell>
+    </WorkspaceLayout>
   );
 }

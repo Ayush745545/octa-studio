@@ -20,7 +20,9 @@ export default function PublicationScheduleControls({
   const [error, setError] = useState("");
 
   const initialValue = scheduledAt
-    ? new Date(scheduledAt).toISOString().slice(0, 16)
+    ? new Date(scheduledAt).toLocaleString("sv-SE", {
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      }).replace(" ", "T").slice(0, 16)
     : "";
 
   const [value, setValue] = useState(initialValue);
@@ -33,21 +35,32 @@ export default function PublicationScheduleControls({
       return;
     }
 
-    const date = new Date(value);
+    const [datePart, timePart] = value.split("T");
 
-    if (Number.isNaN(date.getTime())) {
+    if (!datePart || !timePart) {
       setError("Invalid date.");
       return;
     }
 
-    if (date <= new Date()) {
+    // datetime-local represents the user's local time.
+    // Convert that local time to an absolute UTC timestamp.
+    const localDate = new Date(`${datePart}T${timePart}:00`);
+
+    if (Number.isNaN(localDate.getTime())) {
+      setError("Invalid date.");
+      return;
+    }
+
+    if (localDate <= new Date()) {
       setError("Choose a future date and time.");
       return;
     }
 
+    const utcISOString = localDate.toISOString();
+
     startTransition(async () => {
       try {
-        await schedulePublication(publicationId, date.toISOString());
+        await schedulePublication(publicationId, utcISOString);
         setOpen(false);
       } catch (error) {
         setError(
