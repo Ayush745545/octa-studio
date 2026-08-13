@@ -67,15 +67,15 @@
 
   **Step 1:** Capture ideas &nbsp;→&nbsp; **Step 2:** Write &amp; enhance content &nbsp;→&nbsp; **Step 3:** Schedule &amp; publish
 
-  ![Step 1: Ideas](/images/step1-ideas.jpg)
-  ![Step 2: Write](/images/step2-write.jpg)
-  ![Step 3: Schedule](/images/step3-schedule.jpg)
+  ![Step 1: Ideas](/public/images/step1-ideas.jpg)
+  ![Step 2: Write](/public/images/step2-write.jpg)
+  ![Step 3: Schedule](/public/images/step3-schedule.jpg)
 
   *From raw idea to published post in three steps.*
 
 </div>
 
-> **Note:** Screenshots are stored in `public/images/`. On GitHub they render automatically from the repo root. For local preview, open the images directly from `public/images/`.
+> **Note:** Screenshots are stored in `public/images/`. On GitHub, they are referenced via `/public/images/...`. For local app preview, they are served from `/images/...`.
 
 ---
 
