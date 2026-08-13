@@ -10,7 +10,7 @@
 </div>
 
 <div align="center">
-  <img src="/public/images/logo.png" alt="ContentOS Logo" width="120" />
+  <img src="public/images/logo.png" alt="ContentOS Logo" width="100" />
 </div>
 
 <h1 align="center">
