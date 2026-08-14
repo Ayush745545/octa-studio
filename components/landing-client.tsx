@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { TextPlugin } from "gsap/TextPlugin";
 import { useSmoothScroll } from "@/lib/animations/smooth-scroll";
 import { prefersReducedMotion } from "@/lib/animations/scroll";
 
@@ -254,10 +255,12 @@ function GsapCalendarShowcase() {
     <div ref={sectionRef} className="py-16 min-h-[85vh] flex flex-col justify-center">
       {/* Section Header */}
       <div className="text-center mb-10 max-w-5xl mx-auto">
-        <ScrollTextReveal 
-          text="Your scheduling command center" 
-          className="text-[clamp(2.5rem,5vw,4.5rem)]"
-        />
+        <h2 data-reveal className="headline uppercase text-white text-center text-[clamp(2.75rem,7vw,6.5rem)] leading-[0.95]">
+          Your scheduling<br />command center
+        </h2>
+        <p data-reveal className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.7] text-zinc-400">
+          Most tools show you a list of posts. octa-studio gives you a living week view — drag, drop, and ship your entire content pipeline from one screen.
+        </p>
       </div>
 
       {/* Progress Steps */}
@@ -596,11 +599,14 @@ function AiPipelineAnimation() {
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
     const ctx = gsap.context(() => {
       const nodes = gsap.utils.toArray<HTMLElement>("[data-pipe-node]", rootRef.current);
       const lines = gsap.utils.toArray<HTMLElement>("[data-pipe-line]", rootRef.current);
+      const dots = gsap.utils.toArray<HTMLElement>("[data-pipe-dot]", rootRef.current);
+      const prompt = rootRef.current?.querySelector("[data-pipe-prompt]");
+      const caret = rootRef.current?.querySelector("[data-pipe-caret]");
       const result = rootRef.current?.querySelector("[data-pipe-result]");
 
       const badge = rootRef.current?.querySelector("[data-pipe-badge]");
@@ -608,34 +614,52 @@ function AiPipelineAnimation() {
       const phone = document.querySelector<HTMLElement>("[data-pipe-phone]");
 
       const tl = gsap.timeline({
-        repeat: -1,
-        repeatDelay: 2.4,
+        // Plays a single time when scrolled into view — no looping
         scrollTrigger: { trigger: rootRef.current, start: "top 80%", once: true },
       });
 
       tl.set(nodes, { autoAlpha: 0.35, scale: 1 })
-        .set(lines, { scaleX: 0, transformOrigin: "left center" });
+        .set(lines, { scaleX: 0, transformOrigin: "left center" })
+        .set(dots, { left: "0%", autoAlpha: 0 });
+      if (prompt) tl.set(prompt, { text: "" });
       if (result) tl.set(result, { autoAlpha: 0, y: 28, scale: 0.88, transformOrigin: "center center" });
-      if (phone) tl.set(phone, { autoAlpha: 0, y: 32, scale: 0.85, transformOrigin: "center center" });
+      if (phone) tl.set(phone, { autoAlpha: 0, y: -40, scale: 0.9, transformOrigin: "center center" });
 
-      // Slower, more deliberate stage-by-stage build
+      // Blinking caret while the user's prompt types itself in
+      let caretTween: gsap.core.Tween | null = null;
+      if (caret) caretTween = gsap.to(caret, { opacity: 0.15, duration: 0.5, repeat: -1, yoyo: true, ease: "power1.inOut" });
+      if (prompt) tl.to(prompt, { text: "5 AI tools every developer should try in 2026…", duration: 1.4, ease: "none" }, "+=0.3");
+
+      // Stage-by-stage build with a light pulse travelling each connector
       nodes.forEach((node, i) => {
         if (i > 0) {
-          tl.to(lines[i - 1], { scaleX: 1, duration: 0.9, ease: "power2.inOut" }, "+=0.35");
+          tl.to(lines[i - 1], { scaleX: 1, duration: 0.9, ease: "power2.inOut" }, "+=0.35")
+            .fromTo(dots[i - 1], { left: "0%", autoAlpha: 1 }, { left: "100%", duration: 0.9, ease: "power2.inOut" }, "<")
+            .to(dots[i - 1], { autoAlpha: 0, duration: 0.2 }, ">-0.15");
         }
         tl.to(node, { autoAlpha: 1, scale: 1.08, duration: 0.45, ease: "power2.out", yoyo: true, repeat: 1 }, "<");
+        const chip = node.querySelector("span");
+        if (chip) {
+          tl.fromTo(chip, { boxShadow: "0 0 0 rgba(217,70,239,0)" }, { boxShadow: "0 0 22px rgba(217,70,239,0.45)", duration: 0.45, yoyo: true, repeat: 1 }, "<");
+        }
       });
 
       // Finished post pops up like a notification when the pipeline completes
       if (result) {
         tl.to(result, { autoAlpha: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" }, "+=0.5");
       }
-      // …and the phone mockup pops in alongside it
+      // …and the phone mockup slides down into place alongside it
       if (phone) {
-        tl.to(phone, { autoAlpha: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.6)" }, "<");
+        tl.to(phone, { autoAlpha: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" }, "<");
       }
       if (badge) {
         tl.to(badge, { scale: 1.2, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 }, "-=0.2");
+      }
+      // Settle: stop the caret blink once the one-shot run finishes
+      if (caretTween && caret) {
+        const tw = caretTween;
+        tl.call(() => tw.kill());
+        tl.to(caret, { opacity: 0, duration: 0.4 }, "<0.1");
       }
     }, rootRef);
 
@@ -657,6 +681,13 @@ function AiPipelineAnimation() {
         <p className="text-[11px] text-zinc-600">One prompt in — a ready post out</p>
       </div>
 
+      {/* Prompt input — types itself in before the pipeline runs */}
+      <div className="mt-6 flex items-center gap-2.5 rounded-xl border border-zinc-800 bg-[#111113] px-4 py-3">
+        <svg className="h-4 w-4 shrink-0 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+        <p data-pipe-prompt className="truncate text-[12px] text-zinc-300" />
+        <span data-pipe-caret className="h-3.5 w-px shrink-0 bg-fuchsia-400" />
+      </div>
+
       <div className="mt-8 flex items-start">
         {stages.map((stage, i) => (
           <React.Fragment key={stage.label}>
@@ -669,8 +700,9 @@ function AiPipelineAnimation() {
               <span className="text-[10px] font-medium text-zinc-500">{stage.label}</span>
             </div>
             {i < stages.length - 1 && (
-              <div className="relative mt-[22px] h-px flex-1 overflow-hidden rounded bg-zinc-800">
+              <div className="relative mt-[22px] h-px flex-1 rounded bg-zinc-800">
                 <div data-pipe-line className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-violet-500" />
+                <span data-pipe-dot className="absolute -top-[2.5px] left-0 h-1.5 w-1.5 rounded-full bg-fuchsia-300 shadow-[0_0_8px_2px_rgba(217,70,239,0.55)]" />
               </div>
             )}
           </React.Fragment>
@@ -687,11 +719,8 @@ function AiPipelineAnimation() {
           </div>
           <span className="rounded-full border border-zinc-800 px-2.5 py-1 text-[10px] font-medium text-zinc-500">LinkedIn · Engaging · Medium</span>
         </div>
-        <div className="mt-3 space-y-1.5">
-          <div className="h-2 w-3/4 rounded bg-zinc-800" />
-          <div className="h-2 w-full rounded bg-zinc-800/80" />
-          <div className="h-2 w-5/6 rounded bg-zinc-800/60" />
-        </div>
+        <p className="mt-3 text-[12px] leading-relaxed text-zinc-300">🚀 AI is reshaping how devs build products. Here are 5 tools every developer should try…</p>
+        <p className="mt-1 text-[11px] text-fuchsia-400">#AI #DevTools #SaaS</p>
       </div>
     </div>
   );
@@ -730,6 +759,20 @@ export function LandingClient({
             scrollTrigger: { trigger: el, start: "top 88%", once: true },
           },
         );
+      });
+
+      // Fade the fixed nav in on load
+      const nav = document.querySelector("nav");
+      if (nav) gsap.from(nav, { y: -16, autoAlpha: 0, duration: 0.8, ease: "power3.out", delay: 0.15 });
+
+      // Play analytics chart bars when scrolled into view
+      gsap.utils.toArray<HTMLElement>("[data-chart]").forEach((el) => {
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top 82%",
+          once: true,
+          onEnter: () => el.classList.add("chart-play"),
+        });
       });
     });
 
@@ -785,6 +828,8 @@ export function LandingClient({
           from { transform: scaleY(0); }
           to { transform: scaleY(1); }
         }
+        .chart-bar { animation-play-state: paused; }
+        .chart-play .chart-bar { animation-play-state: running; }
       `}} />
 
       {/* ━━━ Navigation ━━━ */}
@@ -803,7 +848,7 @@ export function LandingClient({
           </div>
           <div className="flex items-center gap-3">
             <Link href="/calendar" className="rounded-full border border-zinc-800 px-5 py-2 text-[13px] font-medium text-zinc-300 transition hover:border-zinc-600 hover:text-white">Open App</Link>
-            <Link href="/ai-studio" className="rounded-full bg-white px-5 py-2 text-[13px] font-medium text-black transition hover:bg-zinc-200">Get Started</Link>
+            <Link href="/login" className="rounded-full bg-white px-5 py-2 text-[13px] font-medium text-black transition hover:bg-zinc-200">Get Started</Link>
           </div>
         </div>
       </nav>
@@ -895,7 +940,7 @@ export function LandingClient({
                 <div data-pipe-phone className="relative mx-auto w-[280px] rounded-[32px] border-2 border-zinc-700 bg-black p-2 shadow-2xl shadow-black/80">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 rounded-b-xl bg-black border-b border-x border-zinc-700 z-10" />
                   <div className="rounded-[24px] bg-[#111113] overflow-hidden">
-                    <div className="aspect-[9/16] w-full">
+                    <div className="aspect-[798/1648] w-full">
                       <Image src="/my.png" alt="Live Preview Mockup" width={798} height={1648} className="w-full h-full object-cover" />
                     </div>
                   </div>
@@ -942,7 +987,7 @@ export function LandingClient({
               </p>
             </div>
             
-            <div data-reveal className="relative aspect-square max-w-md mx-auto w-full overflow-hidden rounded-2xl border border-zinc-800 bg-[#111113] p-6 shadow-2xl">
+            <div data-reveal data-chart className="relative aspect-square max-w-md mx-auto w-full overflow-hidden rounded-2xl border border-zinc-800 bg-[#111113] p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <p className="text-[11px] text-zinc-500 font-medium">Total Impressions</p>
@@ -959,10 +1004,11 @@ export function LandingClient({
                 {[40, 25, 60, 30, 85, 45, 95].map((h, i) => (
                   <div key={i} className="group relative flex-1 h-full flex items-end">
                     <div 
-                      className="w-full rounded-t-sm bg-gradient-to-t from-blue-600/30 to-blue-500 transition-all hover:opacity-80 origin-bottom"
+                      className="chart-bar w-full rounded-t-sm bg-gradient-to-t from-blue-600/30 to-blue-500 transition-all hover:opacity-80 origin-bottom"
                       style={{ 
                         height: `${h}%`, 
                         animation: `scaleUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards ${i * 0.08}s`,
+                        animationPlayState: 'paused',
                         transform: 'scaleY(0)'
                       }}
                     />
@@ -1003,7 +1049,7 @@ export function LandingClient({
 
       {/* Footer */}
       <footer className="border-t border-zinc-900 bg-zinc-950">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 sm:flex-row lg:px-8">
+        <div data-reveal className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 sm:flex-row lg:px-8">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-md overflow-hidden">
               <Image src="/images/logo.png" alt="octa-studio" width={28} height={28} className="object-cover" />

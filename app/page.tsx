@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { LandingClient } from "@/components/landing-client";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "ContentOS — Your Content Operating System",
   description:
