@@ -285,6 +285,7 @@ export function MediaPanelClosed({
             <button
               onClick={onClearAll}
               disabled={media.length === 0}
+              suppressHydrationWarning
               className="text-xs text-zinc-500 hover:text-white font-medium transition-colors disabled:opacity-40 disabled:hover:text-zinc-500"
             >
               Clear All

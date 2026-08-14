@@ -10,13 +10,23 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const [ideaCount, contentCount, publishedCount, channelCount] =
-    await Promise.all([
-      prisma.idea.count(),
-      prisma.content.count(),
-      prisma.content.count({ where: { status: "PUBLISHED" } }),
-      prisma.publishingChannel.count({ where: { connected: true } }),
-    ]);
+  let ideaCount = 0;
+  let contentCount = 0;
+  let publishedCount = 0;
+  let channelCount = 0;
+
+  try {
+    [ideaCount, contentCount, publishedCount, channelCount] =
+      await Promise.all([
+        prisma.idea.count(),
+        prisma.content.count(),
+        prisma.content.count({ where: { status: "PUBLISHED" } }),
+        prisma.publishingChannel.count({ where: { connected: true } }),
+      ]);
+  } catch {
+    // Database not configured/reachable (e.g. preview deploy without
+    // DATABASE_URL) — render the landing page with zero counts instead of 500.
+  }
 
   return (
     <LandingClient 
