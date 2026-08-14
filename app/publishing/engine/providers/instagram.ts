@@ -105,6 +105,47 @@ export const instagramProvider: PublishingProvider = {
         };
       }
 
+      /*
+       * Instagram processes media asynchronously (it downloads and encodes
+       * the image/video itself). Publishing before the container reaches
+       * FINISHED fails with "Media ID is not available", so poll the
+       * container status first.
+       */
+      let statusData: { status_code?: string; status?: string } = {};
+      // Reels take much longer to process than images on Meta's side.
+      const maxAttempts = videoMedia ? 90 : 30;
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const statusResponse = await fetch(
+          `${GRAPH}/${containerData.id}?fields=status_code,status`,
+          {
+            headers: { Authorization: `Bearer ${channel.accessToken}` },
+          },
+        );
+
+        statusData = await statusResponse.json();
+        const statusCode = statusData.status_code ?? "FINISHED";
+
+        if (statusCode === "FINISHED") break;
+        if (statusCode === "ERROR" || statusCode === "EXPIRED") {
+          console.error("[Instagram] Media processing failed:", statusData);
+
+          return {
+            success: false,
+            error: `Instagram media processing ${statusCode}: ${statusData.status ?? JSON.stringify(statusData)}`,
+          };
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+
+      if (statusData.status_code && statusData.status_code !== "FINISHED") {
+        return {
+          success: false,
+          error: `Instagram media still ${statusData.status_code} after ${maxAttempts * 2}s - try again or use a smaller/public media file.`,
+        };
+      }
+
       const publishResponse = await fetch(
         `${GRAPH}/${channel.externalId}/media_publish`,
         {

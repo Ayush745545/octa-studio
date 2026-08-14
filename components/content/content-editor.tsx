@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { updateContent } from "@/app/content/actions/update-content";
+import { PostPreviewPanel } from "@/components/ai-studio/post-preview-panel";
 
 interface MediaItem {
   id: string;
@@ -32,6 +33,29 @@ const ALLOWED_MEDIA_TYPES = new Set([
   "video/webm",
   "video/quicktime",
 ]);
+
+const studioTools = [
+  {
+    title: "Generate Ideas",
+    instruction: "Give 3 short, specific content ideas for the topic below.",
+  },
+  {
+    title: "Write Content",
+    instruction: "Write a full post for the topic below.",
+  },
+  {
+    title: "Generate Hook",
+    instruction: "Create 3 strong opening hooks for the topic below.",
+  },
+  {
+    title: "Generate Title",
+    instruction: "Turn the topic below into 3 clickable titles.",
+  },
+  {
+    title: "Repurpose",
+    instruction: "Transform the content below for another platform.",
+  },
+];
 
 const aiActions = [
   {
@@ -94,6 +118,11 @@ export default function ContentEditor({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  const [studioTool, setStudioTool] = useState("Write Content");
+  const [studioPrompt, setStudioPrompt] = useState("");
+  const [studioGenerating, setStudioGenerating] = useState(false);
+  const [studioError, setStudioError] = useState("");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleAI(instruction: string, label: string) {
@@ -142,6 +171,93 @@ Return only the improved content. Do not explain what you changed.`,
       );
     } finally {
       setAiAction(null);
+    }
+  }
+
+  async function handleStudioGenerate() {
+    if (studioGenerating) {
+      return;
+    }
+
+    const tool =
+      studioTools.find((entry) => entry.title === studioTool) ??
+      studioTools[1];
+
+    const promptText = studioPrompt.trim();
+
+    if (!promptText && tool.title !== "Repurpose") {
+      setStudioError("Tell AI what you want to create.");
+      return;
+    }
+
+    if (tool.title === "Repurpose" && !promptText && !body.trim()) {
+      setStudioError("Write some content first, or describe what to repurpose.");
+      return;
+    }
+
+    setStudioGenerating(true);
+    setStudioError("");
+
+    try {
+      const response = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: `${tool.instruction}
+
+Platform: ${platform || "General"}
+
+${promptText || body}`,
+          tool: tool.title,
+          platform: platform || "Instagram",
+          contentType: media.some((item) => item.type === "VIDEO")
+            ? "Reel"
+            : "Post",
+          tone: "Engaging",
+          length: "Medium",
+          context: tool.title === "Repurpose" ? body : "",
+        }),
+      });
+
+      const text = await response.text();
+      let data: Record<string, any> = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          `The server returned an unexpected response (${response.status}). Please try again.`,
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || "Generation failed.");
+      }
+
+      const result = (data.result || "").trim();
+
+      if (!result) {
+        throw new Error("AI returned an empty result.");
+      }
+
+      if (tool.title === "Generate Title") {
+        const firstLine = result
+          .split("\n")
+          .map((line: string) => line.replace(/^\d+[.)\s-]+/, "").trim())
+          .find(Boolean);
+        setTitle(firstLine || result.slice(0, 80));
+      } else {
+        setBody(result);
+      }
+    } catch (error) {
+      setStudioError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong with the AI.",
+      );
+    } finally {
+      setStudioGenerating(false);
     }
   }
 
@@ -535,6 +651,90 @@ Return only the improved content. Do not explain what you changed.`,
             {aiError}
           </p>
         )}
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_400px]">
+          <div className="p-6">
+            <p className="text-xs font-semibold uppercase tracking-widest text-fuchsia-400">
+              AI Studio
+            </p>
+
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">
+              Draft once. Preview everywhere.
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-zinc-400">
+              Write posts, chain pipelines, and generate images or videos —
+              with a live preview on phone, tablet, and MacBook.
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {studioTools.map((tool) => (
+                <button
+                  key={tool.title}
+                  type="button"
+                  onClick={() => setStudioTool(tool.title)}
+                  disabled={disabled}
+                  className={`rounded-full border px-3.5 py-2 text-xs font-medium transition ${
+                    studioTool === tool.title
+                      ? "border-fuchsia-500/60 bg-fuchsia-500/10 text-fuchsia-300"
+                      : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+                  } disabled:cursor-not-allowed disabled:opacity-40`}
+                >
+                  {tool.title}
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              value={studioPrompt}
+              onChange={(event) => {
+                setStudioPrompt(event.target.value);
+                setStudioError("");
+              }}
+              disabled={disabled}
+              placeholder="Tell AI what you want to create."
+              className="mt-4 min-h-[96px] w-full resize-y rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-600 focus:border-fuchsia-500/50"
+            />
+
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleStudioGenerate}
+                disabled={disabled || studioGenerating}
+                className="rounded-lg bg-fuchsia-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {studioGenerating ? "Generating..." : "Generate draft"}
+              </button>
+
+              <span className="text-xs text-zinc-500">
+                {studioGenerating
+                  ? "AI is writing..."
+                  : "The result lands straight into the editor and preview."}
+              </span>
+            </div>
+
+            {studioError && (
+              <p className="mt-3 text-xs text-red-400">{studioError}</p>
+            )}
+          </div>
+
+          <div className="border-t border-zinc-800/80 bg-[#0c0c0e] lg:border-l lg:border-t-0">
+            <PostPreviewPanel
+              content={body}
+              platform={platform || "Instagram"}
+              contentType={
+                media.some((item) => item.type === "VIDEO") ? "Reel" : "Post"
+              }
+              isGenerating={studioGenerating}
+              prompt={studioPrompt}
+              imageUrl={
+                media.find((item) => item.type !== "VIDEO")?.url ?? null
+              }
+            />
+          </div>
+        </div>
       </div>
 
       <div>
