@@ -1,0 +1,1 @@
+Next.js App Router server components with Prisma client for database reads; UI built with Tailwind CSS classes and the shared `WorkspaceLayout` component.

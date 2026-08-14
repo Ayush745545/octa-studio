@@ -1,0 +1,1 @@
+`npm run dev` boots the Next.js dev server; `npm run build` / `npm run start` produce and serve the production bundle; `npx prisma migrate deploy` applies migrations defined in `database/prisma/migrations` against the `DATABASE_URL` configured in `prisma.config.ts`.

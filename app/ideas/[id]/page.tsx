@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import WorkspaceLayout from "@/components/layout/workspace-layout";
 import { prisma } from "@/lib/prisma";
 import TurnIntoContentButton from "@/components/ideas/turn-into-content-button";
+import CategoryBadge from "@/components/ideas/category-badge";
+
+export const dynamic = "force-dynamic";
 
 interface IdeaDetailPageProps {
   params: Promise<{
@@ -40,11 +43,7 @@ export default async function IdeaDetailPage({
         <main className="px-4 py-10 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
             <div className="flex items-center gap-2">
-              {idea.category && (
-                <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500">
-                  {idea.category}
-                </span>
-              )}
+              {idea.category && <CategoryBadge category={idea.category} />}
 
               <span className="text-xs text-zinc-500">{idea.status}</span>
             </div>
@@ -76,7 +75,7 @@ export default async function IdeaDetailPage({
 
               <p className="mt-2 text-sm leading-6 text-zinc-500">
                 Turn this idea into a piece of content and move it into the
-                ContentOS pipeline.
+                octa-studio pipeline.
               </p>
 
               <TurnIntoContentButton ideaId={idea.id} />

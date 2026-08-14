@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: app_pages/analytics_and_help
+title: Analytics, Help & What's New Pages
+scope:
+    - app/analytics/
+    - app/custom-analytics/
+    - app/help/
+    - app/whats-new/
+source_files: []
+depends_on: []
+related_to: []

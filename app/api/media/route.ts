@@ -17,6 +17,7 @@ export async function GET() {
       mimeType: item.mimeType,
       size: item.size,
       type: item.type,
+      contentId: item.contentId,
       createdAt: item.createdAt.toISOString(),
     })),
   });

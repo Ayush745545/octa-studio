@@ -1,0 +1,1 @@
+Next.js App Router with React Server Components for `/ideas` routes and a client component for `/ai-studio`; Prisma ORM for persistence; Tailwind CSS for styling; server actions with `next/cache` revalidation for mutations.

@@ -38,7 +38,7 @@ model Content {
 
 model Media {
   id        String @id @default(cuid())
-  contentId String
+  contentId String?
 
   url      String
   filename String
@@ -49,7 +49,7 @@ model Media {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  content Content? @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
   @@index([contentId])
 }
@@ -77,11 +77,12 @@ model Publication {
   contentId String
   channelId String
 
-  status      String    @default("QUEUED")
-  scheduledAt DateTime?
-  publishedAt DateTime?
-  externalId  String?
-  error       String?
+  status          String    @default("QUEUED")
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  externalId      String?
+  error           String?
+  executionTimeMs Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

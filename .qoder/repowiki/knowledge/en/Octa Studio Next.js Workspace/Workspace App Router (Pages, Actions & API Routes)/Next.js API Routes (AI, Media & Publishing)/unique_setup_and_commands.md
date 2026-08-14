@@ -1,0 +1,1 @@
+Requires environment variables `AI_BASE_URL`/`AI_MODEL` (or defaults to Ollama), `COMFYUI_URL` for the image/video engine, `CRON_SECRET` to authorize the `/api/publishing/process` cron POST, and `LINKEDIN_CLIENT_ID`/`CLIENT_SECRET`/`APP_URL` for the LinkedIn OAuth flow. The cron endpoint must be called with `Authorization: Bearer <CRON_SECRET>`.

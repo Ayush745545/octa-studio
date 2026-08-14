@@ -12,7 +12,7 @@ export const simulatedProvider: PublishingProvider = {
     input: PublishInput,
     context: ProviderContext,
   ): Promise<PublishResult> {
-    console.log("[ContentOS] Simulated publish:", {
+    console.log("[octa-studio] Simulated publish:", {
       platform: input.platform,
       title: input.title,
       channelId: context.channelId,

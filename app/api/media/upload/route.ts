@@ -43,11 +43,21 @@ export async function POST(request: Request) {
       );
     }
 
-    if (typeof contentId !== "string" || !contentId) {
-      return NextResponse.json(
-        { error: "contentId is required." },
-        { status: 400 },
-      );
+    // contentId is optional — uploads without one go into the media library
+    let resolvedContentId: string | null = null;
+    if (typeof contentId === "string" && contentId) {
+      const content = await prisma.content.findUnique({
+        where: { id: contentId },
+        select: { id: true },
+      });
+
+      if (!content) {
+        return NextResponse.json(
+          { error: "Content not found." },
+          { status: 404 },
+        );
+      }
+      resolvedContentId = content.id;
     }
 
     if (!ALLOWED_TYPES.has(file.type)) {
@@ -61,18 +71,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "File must be smaller than 50 MB." },
         { status: 400 },
-      );
-    }
-
-    const content = await prisma.content.findUnique({
-      where: { id: contentId },
-      select: { id: true },
-    });
-
-    if (!content) {
-      return NextResponse.json(
-        { error: "Content not found." },
-        { status: 404 },
       );
     }
 
@@ -96,7 +94,7 @@ export async function POST(request: Request) {
 
     const media = await prisma.media.create({
       data: {
-        contentId,
+        contentId: resolvedContentId,
         url: `/uploads/${filename}`,
         filename: file.name,
         mimeType: file.type,

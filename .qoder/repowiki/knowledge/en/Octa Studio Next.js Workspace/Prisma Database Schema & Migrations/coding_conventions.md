@@ -1,0 +1,4 @@
+- Every model uses a `cuid()`-generated `id` field as the primary key.
+- Audit timestamps are added via `createdAt @default(now())` and `updatedAt @updatedAt` on most models.
+- Optional relationships use `onDelete: SetNull` (e.g., `Content.idea`), while child records like `Media` and `Publication` use `onDelete: Cascade`.
+- Migration folders follow a `<timestamp>_<snake_case_description>/migration.sql` naming convention.

@@ -9,13 +9,25 @@ interface WorkspaceTopBarProps {
     externalId: string | null;
   }>;
   onUploadMedia: () => void;
+  onToggleSidebar?: () => void;
 }
 
-export function WorkspaceTopBar({ connectedChannels, onUploadMedia }: WorkspaceTopBarProps) {
+export function WorkspaceTopBar({ connectedChannels, onUploadMedia, onToggleSidebar }: WorkspaceTopBarProps) {
   return (
     <div className="h-12 border-b border-zinc-800 bg-[#0a0a0c] px-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <button 
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="border border-zinc-800 rounded-full p-2 text-white hover:bg-zinc-950 flex items-center justify-center transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
+
+        <button
           onClick={onUploadMedia}
           className="border border-zinc-800 rounded-full px-4 py-1.5 text-sm font-medium text-white hover:bg-zinc-950 flex items-center gap-2 transition-colors"
         >
@@ -44,11 +56,11 @@ export function WorkspaceTopBar({ connectedChannels, onUploadMedia }: WorkspaceT
 
         <div className="flex items-center gap-1">
           {connectedChannels.map((channel, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
               style={{
-                backgroundColor: 
+                backgroundColor:
                   channel.platform === 'LinkedIn' ? '#0A66C2' :
                   channel.platform === 'Instagram' ? '#E4405F' :
                   channel.platform === 'Facebook' ? '#1877F2' :

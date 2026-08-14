@@ -1,0 +1,1 @@
+No top-level command — the workspace boots as a single Next.js app via `next dev` / `next build`; feature boundaries are enforced purely by the App Router file-system routing rather than separate binaries.

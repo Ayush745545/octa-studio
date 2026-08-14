@@ -1,0 +1,158 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: en-US
+branch: main
+nodes_managed: true
+exported_at: "2026-08-14T04:35:50Z"
+modules:
+    "":
+        dir_name: Octa Studio Next.js Workspace
+        title: Octa Studio Next.js Workspace
+        scope:
+            - README.md
+            - package.json
+            - next.config.ts
+            - tsconfig.json
+            - prisma.config.ts
+            - vercel.json
+            - .gitignore
+            - eslint.config.mjs
+            - postcss.config.mjs
+            - AGENTS.md
+            - CLAUDE.md
+            - package-lock.json
+            - vercel.json.backup
+        source_files: []
+        children:
+            - app_pages
+            - components
+            - database
+            - lib_shared
+        depends_on: []
+        related_to: []
+    app_pages:
+        dir_name: Workspace App Router (Pages, Actions & API Routes)
+        title: Workspace App Router (Pages, Actions & API Routes)
+        scope:
+            - app/
+        source_files: []
+        children:
+            - app_pages/analytics_and_help
+            - app_pages/api_routes
+            - app_pages/content
+            - app_pages/ideas
+            - app_pages/publishing
+            - app_pages/settings_and_marketing
+            - app_pages/shared_layout
+        depends_on: []
+        related_to: []
+    app_pages/analytics_and_help:
+        dir_name: Analytics, Help & What's New Pages
+        title: Analytics, Help & What's New Pages
+        scope:
+            - app/analytics/
+            - app/custom-analytics/
+            - app/help/
+            - app/whats-new/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    app_pages/api_routes:
+        dir_name: Next.js API Routes (AI, Media & Publishing)
+        title: Next.js API Routes (AI, Media & Publishing)
+        scope:
+            - app/api/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app_pages/ideas
+            - path: app_pages/publishing
+            - path: components
+    app_pages/content:
+        dir_name: Content Workspace (Create, Edit & Publish Content)
+        title: Content Workspace (Create, Edit & Publish Content)
+        scope:
+            - app/content/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app_pages/publishing
+    app_pages/ideas:
+        dir_name: Ideas Inbox & AI Studio
+        title: Ideas Inbox & AI Studio
+        scope:
+            - app/ideas/
+            - app/ai-studio/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app_pages/api_routes
+    app_pages/publishing:
+        dir_name: Publishing Center & Distribution Engine
+        title: Publishing Center & Distribution Engine
+        scope:
+            - app/publishing/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app_pages/api_routes
+            - path: app_pages/content
+    app_pages/settings_and_marketing:
+        dir_name: Settings, Link-in-Bio & Creator Home Placeholder Pages
+        title: Settings, Link-in-Bio & Creator Home Placeholder Pages
+        scope:
+            - app/settings/
+            - app/link-in-bio/
+            - app/creator-home/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    app_pages/shared_layout:
+        dir_name: Root Layout & Landing Page
+        title: Root Layout & Landing Page
+        scope:
+            - app/layout.tsx
+            - app/page.tsx
+            - app/globals.css
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: components
+            - path: database
+    components:
+        dir_name: Octa Studio UI Components
+        title: Octa Studio UI Components
+        scope:
+            - components/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app_pages/api_routes
+            - path: app_pages/shared_layout
+    database:
+        dir_name: Prisma Database Schema & Migrations
+        title: Prisma Database Schema & Migrations
+        scope:
+            - prisma/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app_pages/shared_layout
+    lib_shared:
+        dir_name: Shared AI & Animation Utilities
+        title: Shared AI & Animation Utilities
+        scope:
+            - lib/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []

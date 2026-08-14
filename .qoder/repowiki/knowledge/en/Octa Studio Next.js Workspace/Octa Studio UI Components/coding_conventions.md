@@ -1,0 +1,5 @@
+- Feature roots are client components marked with the `"use client"` directive at the top of the file.
+- Workspace views are composed by a parent component that owns all cross-cutting state (week navigation, modals, toasts, media drawer) and passes callbacks down to child view components.
+- UI state such as modals, drawers, and toasts is managed locally with `useState` booleans and message/type pairs, then rendered as sibling overlays at the bottom of the workspace tree.
+- Server mutations are triggered through Next.js server actions or direct `fetch` calls to API routes, wrapped in `useTransition` and surfaced to the user via a local toast.
+- Reusable layout pieces (sidebar, top bar) are imported from `../layout/...` and reused across multiple workspace entry points instead of being duplicated per feature.

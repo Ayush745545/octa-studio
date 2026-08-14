@@ -1,3 +1,5 @@
+@import url('https://fonts.cdnfonts.com/css/aileron');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -25,6 +27,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-inter);
 }
 
 body {
@@ -148,4 +151,41 @@ body {
 
 .toast-exit {
   animation: toast-out 200ms ease-in forwards;
+}
+
+/* ── Display headlines — Inter Black, tight tracking ── */
+.headline {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+/* ── Satoshi display headlines ── */
+.headline-satoshi {
+  font-family: 'Satoshi', Inter, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* ── Aileron display headlines ── */
+.headline-aileron {
+  font-family: 'Aileron', Inter, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* ── Apple-style hero headline — SF Pro feel, faded white→grey text ── */
+.headline-apple {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Inter, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  background: linear-gradient(180deg, #ffffff 0%, #d4d4d8 45%, #71717a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }

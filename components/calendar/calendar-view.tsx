@@ -184,7 +184,7 @@ export default function CalendarView({
   }
 
   return (
-    <div className="flex h-full flex-col min-w-0 bg-[#0a0a0c]">
+    <div className="flex h-full flex-1 flex-col min-w-0 bg-[#0a0a0c]">
       <div 
         ref={scrollRef}
         className="relative flex-1 overflow-y-auto"

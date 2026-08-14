@@ -19,6 +19,29 @@ interface AIAssistantPanelProps {
   platform: string;
 }
 
+const ENHANCE_OPTIONS = [
+  {
+    label: "Make it shorter",
+    instruction:
+      "Shorten this to under 100 words while keeping the strongest points.",
+  },
+  {
+    label: "Humanize it",
+    instruction:
+      "Rewrite this to sound like a real person wrote it. Remove generic phrases, keep the meaning.",
+  },
+  {
+    label: "Stronger hook",
+    instruction:
+      "Rewrite only the first line to be a stronger attention-grabbing hook. Keep everything else.",
+  },
+  {
+    label: "Add a question",
+    instruction:
+      "Keep this content exactly as it is, but end with one short engaging question that invites comments.",
+  },
+];
+
 export default function AIAssistantPanel({
   onClose,
   onUseResult,
@@ -60,6 +83,38 @@ export default function AIAssistantPanel({
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Generation failed.");
+      if (!data.result?.trim()) throw new Error("AI returned an empty result.");
+
+      setResult(data.result.trim());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function handleEnhance(instruction: string) {
+    if (!result.trim() || isGenerating) return;
+    setIsGenerating(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: instruction,
+          tool: "Write Content",
+          platform: platform || "General",
+          contentType: "Post",
+          tone: "Engaging",
+          length: "Medium",
+          context: result,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Enhance failed.");
       if (!data.result?.trim()) throw new Error("AI returned an empty result.");
 
       setResult(data.result.trim());
@@ -163,7 +218,7 @@ export default function AIAssistantPanel({
 
   return (
     <div
-      className="absolute inset-0 z-10 flex justify-end rounded-2xl bg-black/60 p-4 backdrop-blur-sm"
+      className="absolute inset-0 z-10 flex items-start justify-end rounded-2xl bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -173,7 +228,7 @@ export default function AIAssistantPanel({
       }}
     >
       <div
-        className="h-full w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 shadow-xl slide-in-right"
+        className="max-h-full w-full max-w-md overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-900 shadow-xl slide-in-right"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
@@ -353,7 +408,7 @@ export default function AIAssistantPanel({
             <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
               <p className="text-xs font-medium text-zinc-400">Generated Video</p>
               <div className="mt-2 overflow-hidden rounded-lg border border-zinc-800 bg-[#0a0a0c]">
-                <img src={generatedVideo} alt="Video preview" className="w-full object-cover" />
+                <video src={generatedVideo} controls autoPlay loop playsInline muted className="w-full" />
               </div>
               <div className="mt-3 flex justify-end gap-2">
                 <button
@@ -376,10 +431,23 @@ export default function AIAssistantPanel({
 
           {mode === "text" && result && !isGenerating && (
             <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-              <div className="min-h-24 rounded-xl border border-zinc-800 bg-zinc-800/40 p-4">
+              <div className="max-h-64 overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-800/40 p-4">
                 <p className="whitespace-pre-wrap text-sm leading-7 text-zinc-300">
                   {result}
                 </p>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {ENHANCE_OPTIONS.map((option) => (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => handleEnhance(option.instruction)}
+                    className="rounded-full border border-fuchsia-500/30 bg-black/40 px-3 py-1.5 text-xs font-medium text-fuchsia-300 transition hover:border-fuchsia-400 hover:bg-fuchsia-500/10"
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
 
               <div className="mt-3 flex justify-end gap-2">

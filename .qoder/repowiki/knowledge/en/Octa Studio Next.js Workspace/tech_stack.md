@@ -1,0 +1,1 @@
+Next.js 16 with App Router, React 19, TypeScript 5, Tailwind CSS v4, Prisma ORM with PostgreSQL adapter, GSAP + Lenis for scroll animations, and Vercel deployment with scheduled cron jobs.

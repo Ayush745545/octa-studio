@@ -1,0 +1,1 @@
+Next.js App Router pages providing a content analytics dashboard and placeholder routes for custom analytics, help, and what's-new sections within the workspace layout.

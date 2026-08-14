@@ -1,0 +1,1 @@
+LinkedIn publishing requires `APP_URL` env var so the provider can resolve local `/uploads/*` URLs before uploading to LinkedIn; missing it throws during image upload. The scheduler scans are driven externally (e.g. cron) calling `processScheduledPublications`; there is no built-in background worker in this module.

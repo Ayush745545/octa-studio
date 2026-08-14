@@ -1,282 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import React, { useRef, useLayoutEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useSmoothScroll } from "@/lib/animations/smooth-scroll";
+import { prefersReducedMotion } from "@/lib/animations/scroll";
 
 /* ─── Animated Components ─── */
-
-function CreatePostWithAIAssistant() {
-  const [aiTab, setAiTab] = useState<'Write' | 'Image' | 'Video' | 'Pipeline'>('Write');
-  const [generating, setGenerating] = useState(false);
-  const [generated, setGenerated] = useState(false);
-  const [prompt, setPrompt] = useState('');
-  const [selectedPlatform, setSelectedPlatform] = useState('Instagram');
-
-  const handleGenerate = () => {
-    setGenerating(true);
-    setGenerated(false);
-    setTimeout(() => {
-      setGenerating(false);
-      setGenerated(true);
-    }, 2200);
-  };
-
-  const sidebarItems = [
-    { icon: '📊', label: 'Overview', active: false },
-    { icon: '💡', label: 'Ideas', active: false },
-    { icon: '📝', label: 'Content', active: false },
-    { icon: '✨', label: 'AI Studio', active: true },
-    { icon: '📅', label: 'Calendar', active: false },
-    { icon: '📤', label: 'Publishing', active: false },
-    { icon: '📈', label: 'Analytics', active: false },
-  ];
-
-  const platforms = [
-    { name: 'LinkedIn', color: '#0A66C2' },
-    { name: 'Instagram', color: '#E4405F' },
-    { name: 'X', color: '#ffffff' },
-    { name: 'TikTok', color: '#00f2ea' },
-  ];
-
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-[#0a0a0c] shadow-2xl shadow-black/60" style={{ minHeight: 520 }}>
-      <div className="flex h-full" style={{ minHeight: 520 }}>
-        
-        {/* ── Sidebar ── */}
-        <div className="w-[56px] shrink-0 border-r border-zinc-800 bg-[#0a0a0c] flex flex-col items-center py-4 gap-1">
-          {/* Logo */}
-          <div className="h-7 w-7 mb-4">
-            <Image src="/images/logo.png" alt="ContentOS" width={28} height={28} className="rounded-md" />
-          </div>
-          {sidebarItems.map(item => (
-            <div
-              key={item.label}
-              className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all ${
-                item.active
-                  ? 'bg-fuchsia-500/15 text-fuchsia-400'
-                  : 'text-zinc-600 hover:bg-zinc-900 hover:text-zinc-400'
-              }`}
-            >
-              <span className="text-[12px]">{item.icon}</span>
-              <span className="text-[6px] font-medium leading-none">{item.label}</span>
-            </div>
-          ))}
-          {/* Bottom */}
-          <div className="mt-auto flex flex-col items-center gap-2">
-            <div className="h-6 w-6 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-zinc-400">MG</div>
-          </div>
-        </div>
-
-        {/* ── Main AI Workspace ── */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Top Bar */}
-          <div className="flex items-center gap-3 border-b border-zinc-800 px-5 py-2.5">
-            <span className="text-[12px] font-semibold text-white">← Back to Workspace</span>
-            <span className="text-[12px] font-semibold text-fuchsia-400 ml-4">AI Studio</span>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] text-zinc-500">AI Ready</span>
-            </div>
-          </div>
-
-          <div className="flex flex-1 min-h-0">
-            {/* ── Left: AI Controls ── */}
-            <div className="flex-1 p-5 overflow-y-auto border-r border-zinc-800">
-              {/* Mode Tabs */}
-              <div className="flex gap-1.5 mb-5">
-                {(['Write', 'Image', 'Video', 'Pipeline'] as const).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setAiTab(tab)}
-                    className={`rounded-lg px-3.5 py-1.5 text-[11px] font-semibold transition-all ${
-                      aiTab === tab
-                        ? 'bg-fuchsia-500 text-white shadow-[0_0_12px_-3px_rgba(211,4,235,0.5)]'
-                        : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300'
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              {/* Platform Selector */}
-              <div className="mb-4">
-                <p className="text-[9px] font-medium text-zinc-500 uppercase tracking-wider mb-2">Select Platform</p>
-                <div className="flex gap-2">
-                  {platforms.map(p => (
-                    <button
-                      key={p.name}
-                      onClick={() => setSelectedPlatform(p.name)}
-                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-bold transition-all border ${
-                        selectedPlatform === p.name
-                          ? 'border-fuchsia-500 bg-fuchsia-500/10 text-white'
-                          : 'border-zinc-800 text-zinc-500 hover:border-zinc-700'
-                      }`}
-                    >
-                      <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-                      {p.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Config Grid */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {[
-                  { label: 'Content', value: 'Post' },
-                  { label: 'Tone', value: 'Engaging' },
-                  { label: 'Length', value: 'Medium' },
-                ].map(opt => (
-                  <div key={opt.label} className="rounded-lg border border-zinc-800 bg-zinc-950 p-2 cursor-pointer hover:border-zinc-700">
-                    <div className="text-[8px] font-medium text-zinc-600 uppercase tracking-wider">{opt.label}</div>
-                    <div className="text-[11px] font-medium text-zinc-300 mt-0.5">{opt.value}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Prompt Area */}
-              <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[9px] font-bold text-fuchsia-400 uppercase tracking-wider">Generate Ideas ▾</span>
-                  <span className="text-[9px] text-zinc-600 font-medium px-2 py-0.5 rounded bg-zinc-900">Write Mode</span>
-                </div>
-                <textarea
-                  rows={2}
-                  value={prompt}
-                  onChange={e => setPrompt(e.target.value)}
-                  placeholder="Example: AI tools for developers"
-                  className="w-full resize-none bg-transparent text-[12px] text-zinc-300 placeholder-zinc-700 outline-none"
-                />
-              </div>
-
-              {/* Generate Button */}
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="rounded-xl bg-[#D304EB] px-5 py-2 text-[12px] font-bold text-white shadow-[0_0_20px_-5px_rgba(211,4,235,0.5)] transition hover:shadow-[0_0_25px_-5px_rgba(211,4,235,0.7)] disabled:opacity-50"
-                >
-                  {generating ? (
-                    <span className="flex items-center gap-2">
-                      <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                      Generating…
-                    </span>
-                  ) : 'Generate'}
-                </button>
-              </div>
-
-              {/* Generated Result */}
-              {generated && (
-                <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 transition-all" style={{ animation: 'toast-in 300ms ease-out' }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">AI Generated</span>
-                  </div>
-                  <p className="text-[11px] text-zinc-300 leading-relaxed">🚀 AI is reshaping how devs build products. Here are 5 tools every developer should try in 2026...</p>
-                  <p className="text-[10px] text-fuchsia-400 mt-1.5">#AI #DevTools #SaaS #Productivity</p>
-                  <div className="flex gap-2 mt-3">
-                    <button className="rounded-lg bg-zinc-800 px-3 py-1 text-[9px] font-semibold text-zinc-300 hover:bg-zinc-700">Save Draft</button>
-                    <button className="rounded-lg bg-fuchsia-600 px-3 py-1 text-[9px] font-semibold text-white hover:bg-fuchsia-500">Schedule Post</button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* ── Right: Phone Mockup Preview ── */}
-            <div className="w-[200px] shrink-0 bg-black/30 flex items-center justify-center p-4">
-              <div className="w-full">
-                <p className="text-[9px] text-zinc-500 font-medium text-center mb-3 uppercase tracking-wider">Live Preview</p>
-                {/* Phone Frame */}
-                <div className="relative mx-auto w-[160px] rounded-[20px] border-2 border-zinc-700 bg-black p-1.5 shadow-xl shadow-black/80">
-                  {/* Notch */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-3 rounded-b-xl bg-black border-b border-x border-zinc-700 z-10" />
-                  
-                  {/* Screen */}
-                  <div className="rounded-[14px] bg-[#111113] overflow-hidden">
-                    {/* Status Bar */}
-                    <div className="flex items-center justify-between px-3 pt-4 pb-1">
-                      <span className="text-[6px] text-zinc-500 font-semibold">9:41</span>
-                      <div className="flex gap-1">
-                        <div className="w-2.5 h-1.5 rounded-sm bg-zinc-600" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                      </div>
-                    </div>
-                    
-                    {/* App Header */}
-                    <div className="px-2.5 py-1.5 flex items-center gap-1.5">
-                      <div className="h-4 w-4">
-                        <Image src="/images/logo.png" alt="ContentOS" width={16} height={16} className="rounded-full" />
-                      </div>
-                      <div>
-                        <p className="text-[7px] font-bold text-white leading-none">ContentOS</p>
-                        <p className="text-[5px] text-zinc-500 leading-none mt-0.5">{selectedPlatform}</p>
-                      </div>
-                    </div>
-
-                    {/* Post Content */}
-                    <div className="px-2.5 py-1.5">
-                      {generated ? (
-                        <>
-                          <div className="aspect-[4/3] w-full rounded-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 mb-1.5 flex items-center justify-center">
-                            <span className="text-[16px]">🚀</span>
-                          </div>
-                          <p className="text-[6px] text-zinc-300 leading-[1.5]">
-                            <span className="font-bold text-white">Main Group </span>
-                            🚀 AI is reshaping how devs build products. Here are 5 tools every developer should try...
-                          </p>
-                          <p className="text-[5px] text-fuchsia-400 mt-0.5">#AI #DevTools #SaaS</p>
-                        </>
-                      ) : (
-                        <>
-                          <div className="aspect-[4/3] w-full rounded-lg bg-zinc-900 mb-1.5 flex items-center justify-center border border-zinc-800">
-                            <svg className="h-4 w-4 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                          </div>
-                          <p className="text-[6px] text-zinc-600 leading-[1.5]">
-                            <span className="font-bold text-zinc-500">Main Group </span>
-                            Your post preview will appear here...
-                          </p>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Post Actions */}
-                    <div className="px-2.5 py-1.5 flex gap-2 text-zinc-500 border-t border-zinc-900">
-                      <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                      <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                      <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-                    </div>
-
-                    {/* Bottom Nav */}
-                    <div className="flex justify-around border-t border-zinc-800 px-2 py-2">
-                      <div className="h-1.5 w-4 rounded-full bg-zinc-700" />
-                      <div className="h-1.5 w-4 rounded-full bg-zinc-700" />
-                      <div className="h-1.5 w-4 rounded-full bg-fuchsia-500" />
-                      <div className="h-1.5 w-4 rounded-full bg-zinc-700" />
-                    </div>
-                  </div>
-                  
-                  {/* Home Indicator */}
-                  <div className="mx-auto mt-1 h-1 w-10 rounded-full bg-zinc-700" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* Post Status Cards — shows how posts look in different pipeline states */
 function PostStatusCards() {
   const statuses = [
-    { label: 'DRAFT', color: 'bg-zinc-800', icon: '📝', title: '5 Tools Every Dev Needs', platform: 'LinkedIn', time: 'Edited 2m ago' },
-    { label: 'READY', color: 'bg-[#1D54F9]', icon: '✅', title: 'Why Dark Mode Wins', platform: 'X (Twitter)', time: 'Approved today' },
-    { label: 'SCHEDULED', color: 'bg-[#D304EB]', icon: '📅', title: 'AI in Content Creation', platform: 'Instagram', time: 'Aug 15, 10:00 AM' },
-    { label: 'PUBLISHED', color: 'bg-[#009E60]', icon: '🚀', title: 'The Future of SaaS', platform: 'YouTube', time: 'Published Aug 12' },
+    { label: 'DRAFT', color: 'bg-zinc-800', icon: '/ai/content.png', title: '5 Tools Every Dev Needs', platform: 'LinkedIn', time: 'Edited 2m ago' },
+    { label: 'READY', color: 'bg-[#1D54F9]', icon: '/ai/scanner.png', title: 'Why Dark Mode Wins', platform: 'X (Twitter)', time: 'Approved today' },
+    { label: 'SCHEDULED', color: 'bg-[#D304EB]', icon: '/ai/calendar.png', title: 'AI in Content Creation', platform: 'Instagram', time: 'Aug 15, 10:00 AM' },
+    { label: 'PUBLISHED', color: 'bg-[#009E60]', icon: '/ai/new-release.png', title: 'The Future of SaaS', platform: 'YouTube', time: 'Published Aug 12' },
   ];
 
   return (
@@ -285,7 +25,7 @@ function PostStatusCards() {
         <div key={s.label} className="group relative overflow-hidden rounded-xl border border-zinc-700 bg-[#0a0a0c] p-5 transition hover:border-zinc-500">
           <div className="flex items-center justify-between mb-4">
             <span className={`${s.color} rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white`}>{s.label}</span>
-            <span className="text-lg">{s.icon}</span>
+            <Image src={s.icon} alt={s.label} width={20} height={20} />
           </div>
           <h4 className="text-[14px] font-semibold text-white leading-tight">{s.title}</h4>
           <div className="mt-3 flex items-center gap-1.5 text-[11px] text-zinc-500 font-medium">
@@ -345,11 +85,11 @@ function PostPreviewCard() {
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4">
         <div className="h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
-          <Image src="/images/logo.png" alt="ContentOS" width={40} height={40} className="object-cover" />
+          <Image src="/images/logo.png" alt="octa-studio" width={40} height={40} className="object-cover" />
         </div>
         <div>
-          <p className="text-[13px] font-semibold text-white">ContentOS</p>
-          <p className="text-[11px] text-zinc-500">@contentos · 2h ago</p>
+          <p className="text-[13px] font-semibold text-white">octa-studio</p>
+          <p className="text-[11px] text-zinc-500">@octa-studio · 2h ago</p>
         </div>
         <div className="ml-auto flex items-center gap-1 rounded-full bg-blue-600/20 px-2.5 py-0.5">
           <span className="text-[10px] font-bold text-blue-400">LinkedIn</span>
@@ -417,7 +157,7 @@ function ScrollTextReveal({ text, className }: { text: string; className?: strin
         <span 
           key={i} 
           ref={el => { if (el) wordsRef.current[i] = el; }}
-          className="text-zinc-800 transition-colors duration-150 inline-block mr-[1.5vw] lg:mr-[1vw] mb-2 lg:mb-4"
+          className="text-zinc-500 transition-colors duration-150 inline-block mr-[0.3em]"
         >
           {word}
         </span>
@@ -461,6 +201,7 @@ function GsapCalendarShowcase() {
     const ctx = gsap.context(() => {
       // Initial hidden states
       gsap.set([text2Ref.current, text3Ref.current, text4Ref.current], { opacity: 0, y: 30 });
+      gsap.set(calendarRef.current, { opacity: 0, y: 40 });
       gsap.set(postRef.current, { opacity: 0, scale: 0.8, y: -40 });
       gsap.set(phoneRef.current, { opacity: 0, x: 80, scale: 0.9 });
       gsap.set(macbookRef.current, { opacity: 0, y: 60, scale: 0.95 });
@@ -478,7 +219,8 @@ function GsapCalendarShowcase() {
       });
 
       // ── Phase 1: Calendar appears, post schedules ──
-      tl.to(step1Ref.current, { opacity: 1, duration: 0.5 })
+      tl.to(calendarRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power3.out' })
+        .to(step1Ref.current, { opacity: 1, duration: 0.5 }, '<0.2')
         .to(progressRef.current, { width: '33%', duration: 2 }, '<')
         .to(text1Ref.current, { opacity: 0, y: -20, duration: 1 }, '+=0.5')
         .to(text2Ref.current, { opacity: 1, y: 0, duration: 1 }, '<0.3')
@@ -512,7 +254,6 @@ function GsapCalendarShowcase() {
     <div ref={sectionRef} className="py-16 min-h-[85vh] flex flex-col justify-center">
       {/* Section Header */}
       <div className="text-center mb-10 max-w-5xl mx-auto">
-        <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400 mb-6">Visual Calendar</p>
         <ScrollTextReveal 
           text="Your scheduling command center" 
           className="text-[clamp(2.5rem,5vw,4.5rem)]"
@@ -549,7 +290,7 @@ function GsapCalendarShowcase() {
           <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-fuchsia-400">Scheduled.</strong> Your LinkedIn post is locked into Thursday at 10 AM. It's queued and ready to publish automatically.</p>
         </div>
         <div ref={text3Ref} className="absolute inset-0 w-full flex items-center justify-center">
-          <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-emerald-400">Rescheduled.</strong> Dragged to Saturday. ContentOS updates the queue instantly — no extra clicks needed.</p>
+          <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-emerald-400">Rescheduled.</strong> Dragged to Saturday. octa-studio updates the queue instantly — no extra clicks needed.</p>
         </div>
         <div ref={text4Ref} className="absolute inset-0 w-full flex items-center justify-center">
           <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-blue-400">Everywhere.</strong> Generate content in AI Studio on mobile, schedule on desktop. Your workspace syncs across all devices.</p>
@@ -557,10 +298,10 @@ function GsapCalendarShowcase() {
       </div>
 
       {/* Visual Area */}
-      <div className="relative mx-auto w-full max-w-5xl" style={{ height: '420px' }}>
+      <div className="relative mx-auto w-full max-w-6xl" style={{ height: '480px' }}>
         
         {/* ── Realistic Calendar Dashboard ── */}
-        <div ref={calendarRef} className="absolute inset-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111113] shadow-2xl shadow-black/60">
+        <div ref={calendarRef} className="absolute inset-0 overflow-hidden rounded-2xl border border-zinc-800 bg-[#111113] shadow-2xl shadow-black/60" style={{ opacity: 0 }}>
           {/* Calendar Top Bar */}
           <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2.5">
             <div className="flex items-center gap-3">
@@ -585,7 +326,7 @@ function GsapCalendarShowcase() {
             {/* Time Column */}
             <div className="w-14 flex-shrink-0 border-r border-zinc-900 pt-8">
               {hours.map(h => (
-                <div key={h} className="h-[56px] pr-2 text-right text-[9px] text-zinc-600">{h}</div>
+                <div key={h} className="h-[68px] pr-2 text-right text-[9px] text-zinc-600">{h}</div>
               ))}
             </div>
             {/* Day Columns */}
@@ -599,7 +340,7 @@ function GsapCalendarShowcase() {
                   {/* Time slots */}
                   <div className="relative">
                     {hours.map(h => (
-                      <div key={h} className="h-[56px] border-b border-zinc-900/30" />
+                      <div key={h} className="h-[68px] border-b border-zinc-900/30" />
                     ))}
                   </div>
                   {/* Static events */}
@@ -610,13 +351,13 @@ function GsapCalendarShowcase() {
                     </div>
                   )}
                   {i === 4 && (
-                    <div className="absolute top-[180px] left-1 right-1 rounded-md bg-pink-600/20 border border-pink-600/30 p-1.5">
+                    <div className="absolute top-[204px] left-1 right-1 rounded-md bg-pink-600/20 border border-pink-600/30 p-1.5">
                       <p className="text-[8px] font-bold text-pink-400">IG Reel</p>
                       <p className="text-[7px] text-pink-400/60">SaaS Showcase</p>
                     </div>
                   )}
                   {i === 6 && (
-                    <div className="absolute top-[124px] left-1 right-1 rounded-md bg-red-600/20 border border-red-600/30 p-1.5">
+                    <div className="absolute top-[136px] left-1 right-1 rounded-md bg-red-600/20 border border-red-600/30 p-1.5">
                       <p className="text-[8px] font-bold text-red-400">YT Video</p>
                       <p className="text-[7px] text-red-400/60">AI Deep Dive</p>
                     </div>
@@ -647,7 +388,7 @@ function GsapCalendarShowcase() {
               {/* AI Studio Header */}
               <div className="bg-zinc-900 px-3 py-2 flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded overflow-hidden bg-gradient-to-br from-fuchsia-500 to-purple-600">
-                  <Image src="/images/logo.png" alt="ContentOS" width={20} height={20} className="object-cover" />
+                  <Image src="/images/logo.png" alt="octa-studio" width={20} height={20} className="object-cover" />
                 </span>
                 <span className="text-[10px] font-semibold text-white">AI Studio</span>
               </div>
@@ -686,7 +427,7 @@ function GsapCalendarShowcase() {
               <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
               <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
               <div className="flex-1 mx-2 rounded bg-zinc-800 px-2 py-0.5">
-                <span className="text-[7px] text-zinc-500">contentos.app/calendar</span>
+                <span className="text-[7px] text-zinc-500">octa-studio.app/calendar</span>
               </div>
             </div>
             {/* Screen Content — mini calendar */}
@@ -723,8 +464,12 @@ function PricingSection() {
   return (
     <section className="border-t border-zinc-900 bg-zinc-950/20 py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] font-semibold tracking-tight text-white">Simple, transparent pricing</h2>
+        <div data-reveal className="text-center">
+          <h2 className="text-[clamp(3rem,6vw,5.5rem)] font-medium tracking-tight" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
+            <span className="text-zinc-100">Simple,</span>{" "}
+            <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-green-400 bg-clip-text text-transparent">transparent</span>{" "}
+            <span className="text-zinc-100">pricing</span>
+          </h2>
           <p className="mt-4 text-[15px] text-zinc-400">Start for free, upgrade when you need more power.</p>
           
           <div className="mt-8 flex justify-center">
@@ -735,7 +480,7 @@ function PricingSection() {
           </div>
         </div>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-3">
+        <div data-reveal className="mt-16 grid gap-8 md:grid-cols-3">
           {[
             { name: "Starter", price: "$0", desc: "Perfect for individuals just getting started.", btn: "Get Started", features: ["1 Social Profile per platform", "10 AI Generations / mo", "Basic Analytics"] },
             { name: "Pro", price: "$29", desc: "For professional creators and solopreneurs.", btn: "Start 14-Day Trial", features: ["Unlimited Social Profiles", "Unlimited AI Generations", "Advanced AI Video Mesh", "Custom Analytics"], popular: true },
@@ -771,9 +516,9 @@ function FAQSection() {
   return (
     <section className="border-t border-zinc-900 py-24 lg:py-32">
       <div className="mx-auto max-w-4xl px-6 lg:px-8">
-        <h2 className="text-center text-[clamp(2rem,4vw,3rem)] font-semibold tracking-tight text-white">Frequently Asked Questions</h2>
+        <h2 data-reveal className="text-center text-[clamp(2rem,4vw,3rem)] font-semibold tracking-tight text-white">Frequently Asked Questions</h2>
         
-        <div className="mt-16 space-y-6">
+        <div data-reveal className="mt-16 space-y-6">
           {[
             { q: "Which social platforms are supported?", a: "We currently support LinkedIn, X (Twitter), Instagram, Facebook, TikTok, and YouTube. We're constantly adding more." },
             { q: "How does the AI Video Mesh work?", a: "Our AI processes your video in the browser to map facial expressions to 3D meshes, allowing you to swap styles and avatars seamlessly without rendering delays." },
@@ -802,12 +547,12 @@ function CreativeAdBanner() {
         <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-8 lg:p-16">
           <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-fuchsia-600/20 blur-[120px]" />
           
-          <div className="relative z-10 max-w-2xl">
+          <div data-reveal className="relative z-10 max-w-2xl">
             <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-tight font-semibold tracking-[-0.02em] text-white">
               Stop switching tabs. <br/> Start shipping content.
             </h2>
             <p className="mt-4 text-[16px] text-zinc-400 max-w-xl">
-              Join thousands of modern creators using ContentOS to ideate, write, edit, and publish from a single beautiful workspace.
+              Join thousands of modern creators using octa-studio to ideate, write, edit, and publish from a single beautiful workspace.
             </p>
             <div className="mt-10 flex gap-4">
               <Link href="/calendar" className="inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-[14px] font-semibold text-black transition hover:bg-zinc-200">
@@ -845,6 +590,97 @@ function CreativeAdBanner() {
 }
 
 
+/* AI Pipeline Animation — shows how the AI builds a post, stage by stage */
+function AiPipelineAnimation() {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const nodes = gsap.utils.toArray<HTMLElement>("[data-pipe-node]", rootRef.current);
+      const lines = gsap.utils.toArray<HTMLElement>("[data-pipe-line]", rootRef.current);
+      const result = rootRef.current?.querySelector("[data-pipe-result]");
+
+      const tl = gsap.timeline({
+        repeat: -1,
+        repeatDelay: 1.2,
+        scrollTrigger: { trigger: rootRef.current, start: "top 80%", once: true },
+      });
+
+      tl.set(nodes, { autoAlpha: 0.35, scale: 1 })
+        .set(lines, { scaleX: 0, transformOrigin: "left center" });
+      if (result) tl.set(result, { autoAlpha: 0, y: 16 });
+
+      nodes.forEach((node, i) => {
+        if (i > 0) {
+          tl.to(lines[i - 1], { scaleX: 1, duration: 0.45, ease: "power2.inOut" }, "+=0.15");
+        }
+        tl.to(node, { autoAlpha: 1, scale: 1.08, duration: 0.22, ease: "power2.out", yoyo: true, repeat: 1 }, "<");
+      });
+
+      if (result) tl.to(result, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, "+=0.2");
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const stages = [
+    { label: "Prompt", icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" },
+    { label: "Plan", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
+    { label: "Write", icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" },
+    { label: "Polish", icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" },
+    { label: "Publish", icon: "M12 19l9 2-9-18-9 18 9-2zm0 0v-8" },
+  ];
+
+  return (
+    <div ref={rootRef} data-reveal className="mt-16 rounded-2xl border border-zinc-900 bg-zinc-950/60 p-6 sm:p-10">
+      <div className="flex items-center justify-between">
+        <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">How the AI works</p>
+        <p className="text-[11px] text-zinc-600">One prompt in — a ready post out</p>
+      </div>
+
+      <div className="mt-8 flex items-start">
+        {stages.map((stage, i) => (
+          <React.Fragment key={stage.label}>
+            <div data-pipe-node className="flex w-14 sm:w-16 shrink-0 flex-col items-center gap-2">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-800 bg-[#111113] text-fuchsia-400">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={stage.icon} />
+                </svg>
+              </span>
+              <span className="text-[10px] font-medium text-zinc-500">{stage.label}</span>
+            </div>
+            {i < stages.length - 1 && (
+              <div className="relative mt-[22px] h-px flex-1 overflow-hidden rounded bg-zinc-800">
+                <div data-pipe-line className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-violet-500" />
+              </div>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+
+      <div data-pipe-result className="mt-8 rounded-xl border border-zinc-800 bg-[#111113] p-4 sm:p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            </span>
+            <p className="text-[12px] font-semibold text-white">Post ready to publish</p>
+          </div>
+          <span className="rounded-full border border-zinc-800 px-2.5 py-1 text-[10px] font-medium text-zinc-500">LinkedIn · Engaging · Medium</span>
+        </div>
+        <div className="mt-3 space-y-1.5">
+          <div className="h-2 w-3/4 rounded bg-zinc-800" />
+          <div className="h-2 w-full rounded bg-zinc-800/80" />
+          <div className="h-2 w-5/6 rounded bg-zinc-800/60" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Client Component ─── */
 export function LandingClient({
   ideaCount,
@@ -857,6 +693,33 @@ export function LandingClient({
   publishedCount: number;
   channelCount: number;
 }) {
+  // Lenis smooth scrolling synced with GSAP ScrollTrigger
+  useSmoothScroll();
+
+  // Scroll-reveal every [data-reveal] block across all sections
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 44 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          },
+        );
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
+
   const steps = [
     {
       step: "STEP 1",
@@ -913,9 +776,9 @@ export function LandingClient({
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-lg shadow-fuchsia-500/10">
-              <Image src="/images/logo.png" alt="ContentOS" width={32} height={32} className="object-cover" />
+              <Image src="/images/logo.png" alt="octa-studio" width={32} height={32} className="object-cover" />
             </span>
-            <span className="text-[15px] font-semibold tracking-tight">ContentOS</span>
+            <span className="text-[15px] font-semibold tracking-tight">octa-studio</span>
           </Link>
           <div className="hidden items-center gap-8 md:flex">
             <a href="#calendar" className="text-[13px] text-zinc-500 transition hover:text-white">Calendar</a>
@@ -931,25 +794,20 @@ export function LandingClient({
 
       {/* 1. HERO ("plan create publish page 1") */}
       <section className="relative overflow-hidden pt-16">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.08),transparent_60%)]" />
-        {/* Side Image with Fade */}
-        <div className="absolute inset-y-0 right-0 w-1/2 pointer-events-none hidden lg:block">
-          <img
-            src="/images/hompage.png"
-            alt="ContentOS workspace"
-            className="h-full w-full object-cover opacity-70 rounded-l-3xl"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0c] via-transparent to-transparent z-10" />
+        {/* Background image — full, no fade */}
+        <div className="absolute inset-0">
+          <Image src="/images/bg.png" alt="" fill className="object-cover" priority />
+          <div className="absolute inset-0 bg-black/55" />
         </div>
         <div className="relative z-10 mx-auto max-w-5xl px-6 pt-32 pb-16 text-center lg:px-8 lg:pt-40 lg:pb-24">
 
-          <h1 className="mx-auto mt-8 max-w-4xl text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.1] tracking-[-0.02em] font-bold text-white">
+          <h1 data-reveal className="headline-apple mx-auto mt-8 max-w-3xl text-[clamp(2.25rem,4.5vw,4rem)]">
             Plan, create, and publish from one workspace
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-[1.7] text-zinc-400">
-            ContentOS brings your idea inbox, AI composer, visual calendar, publishing queue, and analytics into a single workspace built for modern content creators.
+          <p data-reveal className="mx-auto mt-6 max-w-2xl text-[16px] leading-[1.7] text-zinc-400">
+            octa-studio brings your idea inbox, AI composer, visual calendar, publishing queue, and analytics into a single workspace built for modern content creators.
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div data-reveal className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/calendar" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-[14px] font-semibold text-black transition hover:bg-zinc-200">
               Open Calendar <span>→</span>
             </Link>
@@ -966,31 +824,35 @@ export function LandingClient({
 
       {/* 3. ALL STEP AI — redesigned with Create Post + AI Assistant */}
       <section id="ai-steps" className="border-t border-zinc-900">
-        <div className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8">
           
-          <h2 className="text-center text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.1] tracking-[-0.02em] font-bold text-white">AI-Powered Workflows</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-[15px] text-zinc-500">From idea to published post — see every stage of your content pipeline.</p>
+          <h2 data-reveal className="headline-apple text-center text-[clamp(3rem,6vw,5.5rem)]">
+            AI-Powered Workflows
+          </h2>
+          <p data-reveal className="mx-auto mt-6 max-w-3xl text-center text-[17px] leading-[1.6] text-zinc-500">From idea to published post — see every stage of your content pipeline.</p>
           
           {/* The 3 Step Cards */}
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
+          <div data-reveal className="mt-20 grid gap-10 md:grid-cols-3">
             {steps.map((item) => (
               <Link key={item.step} href={item.href} className="group flex flex-col">
                 <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950 transition-transform duration-300 group-hover:scale-[1.02] group-hover:border-zinc-700">
                   <Image src={item.image} alt={item.title} fill className="object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-100" sizes="(max-width: 768px) 100vw, 33vw" />
                 </div>
-                <div className="mt-5 flex justify-center">
-                  <span className="rounded-full border border-zinc-800 bg-zinc-950 px-3 py-1 text-[11px] font-semibold tracking-widest text-zinc-400">{item.step}</span>
+                <div className="mt-6 flex justify-center">
+                  <span className="rounded-full border border-zinc-800 bg-zinc-950 px-3.5 py-1.5 text-[12px] font-semibold tracking-widest text-zinc-400">{item.step}</span>
                 </div>
-                <h3 className="mt-4 text-center text-xl font-semibold tracking-[-0.01em]">{item.title}</h3>
-                <p className="mt-2.5 text-center text-[13px] leading-[1.6] text-zinc-500">{item.description}</p>
+                <h3 className="mt-4 text-center text-2xl font-semibold tracking-[-0.01em]">{item.title}</h3>
+                <p className="mt-3 text-center text-[15px] leading-[1.7] text-zinc-500">{item.description}</p>
               </Link>
             ))}
           </div>
 
           {/* ── Post Status Cards ── */}
-          <div className="mt-32">
+          <div data-reveal className="mt-32">
             <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400 text-center mb-6">Content Pipeline</p>
-            <h3 className="mt-3 text-center text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.1] tracking-[-0.02em] font-bold text-white">See how your posts look at every stage</h3>
+            <h3 className="headline-apple mt-3 text-center text-[clamp(2.25rem,4.5vw,4rem)]">
+              See how your posts look at every stage
+            </h3>
             <p className="mx-auto mt-4 max-w-xl text-center text-[14px] text-zinc-500">Every post moves through Draft → Ready → Scheduled → Published. Track status at a glance.</p>
             <div className="mt-12">
               <PostStatusCards />
@@ -998,7 +860,7 @@ export function LandingClient({
           </div>
 
           {/* ── Create Post + AI Assistant Showcase ── */}
-          <div className="mt-32">
+          <div data-reveal className="mt-32">
             <div className="grid items-start gap-12 lg:grid-cols-[0.8fr_1.2fr]">
               <div className="lg:sticky lg:top-32">
                 <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Create with AI</p>
@@ -1013,12 +875,25 @@ export function LandingClient({
                   ))}
                 </ul>
               </div>
-              <CreatePostWithAIAssistant />
+              <div className="flex flex-col items-center gap-6">
+                <div className="relative mx-auto w-[280px] rounded-[32px] border-2 border-zinc-700 bg-black p-2 shadow-2xl shadow-black/80">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 rounded-b-xl bg-black border-b border-x border-zinc-700 z-10" />
+                  <div className="rounded-[24px] bg-[#111113] overflow-hidden">
+                    <div className="aspect-[9/16] w-full">
+                      <Image src="/images/img.png" alt="Live Preview Mockup" width={280} height={500} className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                  <div className="mx-auto mt-2 h-1 w-12 rounded-full bg-zinc-700" />
+                </div>
+                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Live Preview</p>
+              </div>
             </div>
+
+            <AiPipelineAnimation />
           </div>
 
           {/* ── Bulk Scheduling + Post Preview ── */}
-          <div className="mt-32 grid items-start gap-12 lg:grid-cols-2">
+          <div data-reveal className="mt-32 grid items-start gap-12 lg:grid-cols-2">
             <div>
               <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Bulk Operations</p>
               <h3 className="mt-3 text-[clamp(1.3rem,2vw,1.75rem)] font-semibold tracking-[-0.02em]">Reschedule & publish in bulk</h3>
@@ -1027,7 +902,7 @@ export function LandingClient({
             </div>
             <div>
               <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Post Preview</p>
-              <h3 className="mt-3 text-[clamp(1.3rem,2vw,1.75rem)] font-semibold tracking-[-0.02em]">See exactly how your post will look</h3>
+              <h3 className="mt-3 text-[clamp(1.3rem,2vw,1.75rem)] font-medium tracking-[-0.02em]" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>See how your posts look at every stage</h3>
               <p className="mt-4 text-[14px] leading-[1.7] text-zinc-500 mb-8">Preview your content as it will appear on each platform before you publish. No surprises.</p>
               <PostPreviewCard />
             </div>
@@ -1041,15 +916,17 @@ export function LandingClient({
       <section className="border-t border-zinc-900 bg-black py-24 lg:py-32">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <div className="grid items-center gap-16 lg:grid-cols-2">
-            <div>
+            <div data-reveal>
               <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-blue-400">Simple Analytics</p>
-              <h3 className="mt-3 text-[clamp(2rem,4vw,3rem)] font-semibold tracking-tight text-white">Understand your audience</h3>
+              <h3 className="headline-apple mt-3 text-[clamp(2.25rem,4.5vw,4rem)]">
+                Understand your audience
+              </h3>
               <p className="mt-4 text-[15px] leading-relaxed text-zinc-400">
-                Stop guessing what works. ContentOS automatically aggregates your performance data across all platforms into one unified dashboard. Track engagement, audience growth, and top-performing content.
+                Stop guessing what works. octa-studio automatically aggregates your performance data across all platforms into one unified dashboard. Track engagement, audience growth, and top-performing content.
               </p>
             </div>
             
-            <div className="relative aspect-square max-w-md mx-auto w-full overflow-hidden rounded-2xl border border-zinc-800 bg-[#111113] p-6 shadow-2xl">
+            <div data-reveal className="relative aspect-square max-w-md mx-auto w-full overflow-hidden rounded-2xl border border-zinc-800 bg-[#111113] p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <p className="text-[11px] text-zinc-500 font-medium">Total Impressions</p>
@@ -1113,14 +990,14 @@ export function LandingClient({
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 sm:flex-row lg:px-8">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-md overflow-hidden">
-              <Image src="/images/logo.png" alt="ContentOS" width={28} height={28} className="object-cover" />
+              <Image src="/images/logo.png" alt="octa-studio" width={28} height={28} className="object-cover" />
             </span>
-            <span className="text-sm font-semibold">ContentOS</span>
+            <span className="text-sm font-semibold">octa-studio</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/calendar" className="text-xs text-zinc-500 hover:text-white transition">Open Calendar</Link>
             <p className="text-xs text-zinc-600">
-              © {new Date().getFullYear()} ContentOS. All rights reserved.
+              © {new Date().getFullYear()} octa-studio. All rights reserved.
             </p>
           </div>
         </div>

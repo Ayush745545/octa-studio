@@ -4,12 +4,16 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function CalendarPage() {
-  const [scheduledPublications, connectedChannels, mediaCount] = await Promise.all([
+  const now = new Date();
+
+  const [scheduledPublications, connectedChannels] = await Promise.all([
     prisma.publication.findMany({
       where: {
         status: "SCHEDULED",
         scheduledAt: {
           not: null,
+          // Only show upcoming posts — past ones are published (or being published) and can't be rescheduled
+          gt: now,
         },
       },
       include: {
@@ -52,7 +56,6 @@ export default async function CalendarPage() {
         externalId: true,
       },
     }),
-    prisma.media.count(),
   ]);
 
   const posts = scheduledPublications
@@ -75,7 +78,6 @@ export default async function CalendarPage() {
       posts={posts}
       connectedPlatforms={connectedPlatforms}
       connectedChannels={connectedChannels}
-      mediaCount={mediaCount}
     />
   );
 }

@@ -1,0 +1,1 @@
+Schema changes are applied via Prisma migrations in `prisma/migrations/`; run `npx prisma migrate deploy` against the configured PostgreSQL instance to apply pending migrations.

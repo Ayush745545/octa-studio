@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: app_pages/api_routes
+title: Next.js API Routes (AI, Media & Publishing)
+scope:
+    - app/api/
+source_files: []
+depends_on: []
+related_to:
+    - path: app_pages/ideas
+    - path: app_pages/publishing
+    - path: components

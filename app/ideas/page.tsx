@@ -1,6 +1,9 @@
 import WorkspaceLayout from "@/components/layout/workspace-layout";
 import { prisma } from "@/lib/prisma";
 import NewIdeaModal from "@/components/ideas/new-idea-modal";
+import CategoryBadge from "@/components/ideas/category-badge";
+
+export const dynamic = "force-dynamic";
 
 export default async function IdeasPage() {
   const ideas = await prisma.idea.findMany({
@@ -47,16 +50,12 @@ export default async function IdeasPage() {
                 ideas.map((idea) => (
                   <article
                     key={idea.id}
-                    className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 transition hover:border-zinc-300 hover:bg-zinc-100"
+                    className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 transition hover:border-zinc-300 hover:bg-zinc-900"
                   >
                     <div className="flex items-start justify-between gap-6">
                       <div>
                         <div className="flex items-center gap-2">
-                          {idea.category && (
-                            <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500">
-                              {idea.category}
-                            </span>
-                          )}
+                          {idea.category && <CategoryBadge category={idea.category} />}
 
                           <span className="text-xs text-zinc-500">{idea.status}</span>
                         </div>

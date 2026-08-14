@@ -75,7 +75,7 @@ export function createImageWorkflow(params: {
     "9": {
       class_type: "SaveImage",
       inputs: {
-        filename_prefix: "contentos-ai",
+        filename_prefix: "octa-studio-ai",
         images: ["8", 0],
       },
     },

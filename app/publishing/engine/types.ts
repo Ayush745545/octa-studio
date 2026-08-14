@@ -25,6 +25,7 @@ export interface PublishResult {
   success: boolean;
   externalId?: string;
   error?: string;
+  executionTimeMs?: number;
 }
 
 export interface PublishingProvider {

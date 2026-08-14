@@ -1,0 +1,1 @@
+Next.js App Router root layout that configures global fonts, Tailwind theme, and CSS animations, plus the landing page that fetches live counts from Prisma and renders the client-side landing component.

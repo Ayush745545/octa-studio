@@ -1,0 +1,3 @@
+- Server-side state is accessed through a singleton Prisma client exported from `lib_shared` rather than per-file instantiation.
+- Database schema changes are versioned as Prisma migrations under `database/prisma/migrations` and applied via the root `prisma.config.ts` datasource configuration.
+- UI is built as React client components in `components` and composed inside App Router page/server-action flows in `app_pages`.

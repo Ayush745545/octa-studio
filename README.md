@@ -10,13 +10,13 @@
 </div>
 
 <div align="center">
-  <img src="public/images/logo.png" alt="ContentOS Logo" width="100" />
+  <img src="public/images/logo.png" alt="octa-studio Logo" width="100" />
 </div>
 
 <h1 align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/ContentOS-Your_Content_Operating_System-ff66ff?style=for-the-badge">
-    <img src="https://img.shields.io/badge/ContentOS-Your_Content_Operating_System-000000?style=for-the-badge" alt="ContentOS" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/octa-studio-Your_Content_Operating_System-ff66ff?style=for-the-badge">
+    <img src="https://img.shields.io/badge/octa-studio-Your_Content_Operating_System-000000?style=for-the-badge" alt="octa-studio" />
   </picture>
 </h1>
 
@@ -34,9 +34,9 @@
 
 ---
 
-## What is ContentOS?
+## What is octa-studio?
 
-**ContentOS** is your all-in-one content operating system. Plan, create, schedule, and publish content across multiple platforms from a single, unified workspace. Built for creators who want to move fast without losing control.
+**octa-studio** is your all-in-one content operating system. Plan, create, schedule, and publish content across multiple platforms from a single, unified workspace. Built for creators who want to move fast without losing control.
 
 - Transform raw ideas into polished content with **AI Studio**
 - Manage your content pipeline with a powerful **Calendar view**
@@ -136,8 +136,8 @@ cp .env.example .env
 
 # Or create .env manually with:
 cat > .env << 'EOF'
-DATABASE_URL="postgres://postgres:postgres@localhost:5432/contentos"
-SHADOW_DATABASE_URL="postgres://postgres:postgres@localhost:5432/contentos"
+DATABASE_URL="postgres://postgres:postgres@localhost:5432/octa-studio"
+SHADOW_DATABASE_URL="postgres://postgres:postgres@localhost:5432/octa-studio"
 AI_PROVIDER=ollama
 AI_BASE_URL=http://localhost:11434/v1
 AI_MODEL=qwen2.5-coder:7b
@@ -216,8 +216,8 @@ graph TD
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/contentos.git
-cd contentos
+git clone https://github.com/your-username/octa-studio.git
+cd octa-studio
 ```
 
 ---
@@ -348,6 +348,26 @@ export default defineConfig({
 
 ---
 
+## 📡 API Endpoints
+
+<div align="center">
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/ai/generate` | POST | Generate AI text content |
+| `/api/ai/image` | POST | Generate AI images |
+| `/api/ai/video` | POST | Generate AI videos |
+| `/api/media` | GET, POST | List and upload media assets |
+| `/api/media/[id]` | GET, DELETE | Get or delete a specific media asset |
+| `/api/media/upload` | POST | Upload media files |
+| `/api/publishing/linkedin/connect` | GET | Initiate LinkedIn OAuth |
+| `/api/publishing/linkedin/callback` | GET | LinkedIn OAuth callback |
+| `/api/publishing/process` | POST | Process queued publications |
+
+</div>
+
+---
+
 ## 🗄️ Database Schema
 
 <div align="center">
@@ -385,7 +405,7 @@ export default defineConfig({
 
 ## 🎨 Animations
 
-ContentOS uses **GSAP 3.15.0** with ScrollTrigger for scroll-based animations and **Lenis** for smooth scrolling.
+octa-studio uses **GSAP 3.15.0** with ScrollTrigger for scroll-based animations and **Lenis** for smooth scrolling.
 
 ### Key Animation Features
 
@@ -393,6 +413,7 @@ ContentOS uses **GSAP 3.15.0** with ScrollTrigger for scroll-based animations an
 - **Smooth scrolling** via Lenis
 - **CSS keyframe animations** for modals, toasts, and transitions
 - **Interactive AI Studio** demo with animated generation states
+- **Landing page** animations for feature cards and phone mockup
 
 ```css
 /* Available animation classes */
@@ -425,7 +446,7 @@ This project is licensed under the **MIT License**.
 ```
 MIT License
 
-Copyright (c) 2026 ContentOS
+Copyright (c) 2026 octa-studio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -464,7 +485,7 @@ SOFTWARE.
 
 <div align="center">
 
-  Made with ❤️ by the ContentOS Team
+  Made with ❤️ by the octa-studio Team
 
   <a href="https://discord.gg/TGtuxX5AG">
     <img src="https://img.shields.io/badge/Join_our_Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" />

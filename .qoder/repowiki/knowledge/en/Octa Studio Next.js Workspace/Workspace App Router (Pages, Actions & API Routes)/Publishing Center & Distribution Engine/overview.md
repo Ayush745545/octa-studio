@@ -1,0 +1,1 @@
+Next.js publishing center page and server actions that schedule, cancel, reschedule, and dispatch content to external platforms via a pluggable provider engine.

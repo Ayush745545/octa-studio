@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: database
+title: Prisma Database Schema & Migrations
+scope:
+    - prisma/
+source_files: []
+depends_on: []
+related_to:
+    - path: app_pages/shared_layout

@@ -5,8 +5,11 @@ import WorkspaceLayout from "@/components/layout/workspace-layout";
 import ContentEditor from "@/components/content/content-editor";
 import ContentStatusSelector from "@/components/content/content-status-selector";
 import PublishButton from "@/components/content/publish-button";
+import DeleteContentButton from "@/components/content/delete-content-button";
 import PublicationSelector from "@/components/content/publication-selector";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 interface ContentPageProps {
   params: Promise<{
@@ -110,10 +113,17 @@ export default async function ContentPage({
                 disabled={content.status === "PUBLISHED"}
               />
 
-              <PublishButton
-                id={content.id}
-                status={content.status}
-              />
+              <div className="mt-4 flex items-center gap-3">
+                <PublishButton
+                  id={content.id}
+                  status={content.status}
+                />
+
+                <DeleteContentButton
+                  id={content.id}
+                  status={content.status}
+                />
+              </div>
 
               {content.status === "PUBLISHED" &&
                 content.publishedAt && (

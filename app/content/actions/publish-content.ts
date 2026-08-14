@@ -20,9 +20,9 @@ export async function publishContent(id: string) {
     throw new Error("Content is already published.");
   }
 
-  if (content.status !== "READY") {
+  if (content.status !== "READY" && content.status !== "SCHEDULED") {
     throw new Error(
-      "Only content marked READY can be published.",
+      "Only content marked READY or SCHEDULED can be published.",
     );
   }
 

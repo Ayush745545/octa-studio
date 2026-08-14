@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useCallback, useTransition } from "react";
+import { useState, useCallback, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { WorkspaceSidebar } from "../layout/workspace-sidebar";
 import { WorkspaceTopBar } from "../layout/workspace-top-bar";
 import { CalendarToolbar } from "./calendar-toolbar";
 import CalendarView from "./calendar-view";
 import type { ScheduledPost } from "./calendar-view";
+import CalendarMonthView from "./calendar-month-view";
+import CalendarListView from "./calendar-list-view";
 import MediaDrawer from "./media-drawer";
 import type { MediaItem } from "./media-drawer";
-import { MediaPanelClosed } from "./media-panel-closed";
 import CreatePostModal from "./create-post-modal";
+import PostDetailPanel from "./post-detail-panel";
 import { Toast } from "./toast";
+import { MediaPanelClosed } from "./media-panel-closed";
 import { reschedulePublication } from "@/app/publishing/actions/reschedule-publication";
 
 interface ConnectedChannel {
@@ -30,11 +33,18 @@ interface SelectedMedia {
   preview?: string;
 }
 
+interface DragMedia {
+  id: string;
+  url: string;
+  filename: string;
+  mimeType?: string;
+  type?: string;
+}
+
 interface CalendarWorkspaceProps {
   posts: ScheduledPost[];
   connectedPlatforms: string[];
   connectedChannels: ConnectedChannel[];
-  mediaCount: number;
 }
 
 function getWeekStart(date: Date): Date {
@@ -49,46 +59,75 @@ export default function CalendarWorkspace({
   posts,
   connectedPlatforms,
   connectedChannels,
-  mediaCount,
 }: CalendarWorkspaceProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // Week navigation
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  // The real current week is applied after mount; until then both server
+  // and client render the same placeholder state (avoids hydration
+  // mismatches from Date-based initial state).
+  const [weekStart, setWeekStart] = useState<Date | null>(null);
   const [activeView, setActiveView] = useState<"week" | "month" | "list">("week");
 
-  // Media drawer state
   const [mediaDrawerOpen, setMediaDrawerOpen] = useState(false);
-  const [activeItem, setActiveItem] = useState<"calendar" | "media">("calendar");
+  const [activeItem, setActiveItem] = useState<"calendar">("calendar");
 
-  // Create post modal state
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [createPostDate, setCreatePostDate] = useState("");
   const [createPostTime, setCreatePostTime] = useState("");
   const [pendingMedia, setPendingMedia] = useState<SelectedMedia[] | undefined>(undefined);
 
-  // Post detail state
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null);
+  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
 
-  // Toast state
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error" | "info">("success");
 
-  // Week navigation handlers
+  // Media library (uploads not attached to any post yet)
+  const [libraryMedia, setLibraryMedia] = useState<MediaItem[]>([]);
+
+  const loadMedia = useCallback(() => {
+    fetch("/api/media")
+      .then((res) => res.json())
+      .then((data) => {
+        const all: MediaItem[] = data.media ?? [];
+        setLibraryMedia(all.filter((m) => !m.contentId));
+      })
+      .catch((err) => console.error("Failed to fetch media:", err));
+  }, []);
+
+  useEffect(() => {
+    loadMedia();
+    setWeekStart(getWeekStart(new Date()));
+  }, [loadMedia]);
+
   function previousWeek() {
+    if (!weekStart) return;
     setWeekStart((d) => {
+      if (!d) return d;
       const next = new Date(d);
-      next.setDate(d.getDate() - 7);
+      if (activeView === "month") {
+        next.setDate(1);
+        next.setMonth(next.getMonth() - 1);
+      } else {
+        next.setDate(d.getDate() - 7);
+      }
       return next;
     });
   }
 
   function nextWeek() {
+    if (!weekStart) return;
     setWeekStart((d) => {
+      if (!d) return d;
       const next = new Date(d);
-      next.setDate(d.getDate() + 7);
+      if (activeView === "month") {
+        next.setDate(1);
+        next.setMonth(next.getMonth() + 1);
+      } else {
+        next.setDate(d.getDate() + 7);
+      }
       return next;
     });
   }
@@ -97,14 +136,12 @@ export default function CalendarWorkspace({
     setWeekStart(getWeekStart(new Date()));
   }
 
-  // Media drawer handlers
   function handleMediaClick() {
     if (mediaDrawerOpen) {
       setMediaDrawerOpen(false);
       setActiveItem("calendar");
     } else {
       setMediaDrawerOpen(true);
-      setActiveItem("media");
     }
   }
 
@@ -113,7 +150,6 @@ export default function CalendarWorkspace({
     setActiveItem("calendar");
   }
 
-  // Calendar cell click → open create post modal
   function handleCellClick(date: string, time: string) {
     setCreatePostDate(date);
     setCreatePostTime(time);
@@ -121,27 +157,20 @@ export default function CalendarWorkspace({
     setCreatePostOpen(true);
   }
 
-  // Post card click → open detail/reschedule
   function handlePostClick(post: ScheduledPost) {
     setSelectedPost(post);
-    // Open the post in the create modal for editing/viewing
-    const scheduled = new Date(post.scheduledAt);
-    const dateStr = `${scheduled.getFullYear()}-${String(scheduled.getMonth() + 1).padStart(2, "0")}-${String(scheduled.getDate()).padStart(2, "0")}`;
-    const timeStr = `${String(scheduled.getHours()).padStart(2, "0")}:${String(scheduled.getMinutes()).padStart(2, "0")}`;
-    setCreatePostDate(dateStr);
-    setCreatePostTime(timeStr);
-    setPendingMedia(post.media?.map((m) => ({
-      id: m.id,
-      url: m.url,
-      filename: m.filename,
-      mimeType: m.mimeType,
-      type: m.type,
-    })));
-    setCreatePostOpen(true);
+    setDetailPanelOpen(true);
   }
 
-  // Drag-and-drop reschedule
   function handleReschedule(postId: string, newScheduledAt: string) {
+    // A post that already passed its scheduled time was published (or is being
+    // published) by the cron — it can never be rescheduled.
+    const post = posts.find((p) => p.id === postId);
+    if (post && new Date(post.scheduledAt) <= new Date()) {
+      showToast("This post was already published and can't be rescheduled", "error");
+      return;
+    }
+
     startTransition(async () => {
       try {
         await reschedulePublication(postId, newScheduledAt);
@@ -154,19 +183,14 @@ export default function CalendarWorkspace({
         }).format(dt);
         showToast(`Post rescheduled to ${formatted}`, "success");
         router.refresh();
-      } catch (error) {
-        showToast("Failed to reschedule post", "error");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to reschedule post";
+        showToast(message, "error");
       }
     });
   }
 
-  // Media drop on calendar cell
-  function handleMediaDrop(date: string, time: string, mediaData: any) {
-    // Close the media drawer
-    setMediaDrawerOpen(false);
-    setActiveItem("calendar");
-
-    // Open create post with the dropped media attached
+  function handleMediaDrop(date: string, time: string, mediaData: DragMedia) {
     setCreatePostDate(date);
     setCreatePostTime(time);
 
@@ -182,9 +206,22 @@ export default function CalendarWorkspace({
     setCreatePostOpen(true);
   }
 
-  // Media drawer select → can drag later
   function handleMediaSelect(media: MediaItem) {
     // Selection visual state is handled in the drawer itself
+  }
+
+  function handleClearAllMedia() {
+    startTransition(async () => {
+      try {
+        await Promise.all(
+          libraryMedia.map((item) => fetch(`/api/media/${item.id}`, { method: "DELETE" })),
+        );
+        showToast("Unused media cleared", "success");
+        loadMedia();
+      } catch {
+        showToast("Failed to clear media", "error");
+      }
+    });
   }
 
   function handleMediaDragStart(event: React.DragEvent, media: MediaItem) {
@@ -195,9 +232,7 @@ export default function CalendarWorkspace({
     event.dataTransfer.effectAllowed = "move";
   }
 
-  // Upload handler
   function handleUploadMedia() {
-    // Trigger file input or open media picker
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime";
@@ -220,12 +255,12 @@ export default function CalendarWorkspace({
         }
       }
       showToast(`${files.length} file${files.length > 1 ? "s" : ""} uploaded`, "success");
+      loadMedia();
       router.refresh();
     };
     input.click();
   }
 
-  // Media panel upload (drag-and-drop files)
   function handleMediaPanelUpload(files: FileList) {
     startTransition(async () => {
       try {
@@ -238,6 +273,7 @@ export default function CalendarWorkspace({
           });
         }
         showToast(`${files.length} file${files.length > 1 ? "s" : ""} uploaded`, "success");
+        loadMedia();
         router.refresh();
       } catch {
         showToast("Upload failed", "error");
@@ -245,7 +281,6 @@ export default function CalendarWorkspace({
     });
   }
 
-  // Toast helpers
   function showToast(message: string, type: "success" | "error" | "info" = "success") {
     setToastMessage(message);
     setToastType(type);
@@ -256,39 +291,30 @@ export default function CalendarWorkspace({
     setToastVisible(false);
   }, []);
 
-  // Scheduled callback from CreatePostModal
   function handlePostScheduled(message: string) {
     showToast(message, "success");
   }
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   return (
-    <div className="flex h-[100dvh] bg-[#0a0a0c] text-white overflow-hidden">
-      {/* Sidebar */}
-      <WorkspaceSidebar
-        onMediaClick={handleMediaClick}
-        isMediaOpen={mediaDrawerOpen}
-        activeItem={activeItem}
-      />
-
-      {/* Media Drawer (overlays calendar when open) */}
-      <MediaDrawer
-        open={mediaDrawerOpen}
-        onClose={handleMediaDrawerClose}
-        onMediaSelect={handleMediaSelect}
-        onDragStart={handleMediaDragStart}
-      />
-
-      {/* Main Content Area */}
-      <div className="ml-[130px] flex flex-1 flex-col min-w-0">
-        {/* Top Bar */}
-        <WorkspaceTopBar
-          connectedChannels={connectedChannels}
-          onUploadMedia={handleUploadMedia}
+      <div className="flex h-[100dvh] bg-[#0a0a0c] text-white overflow-hidden">
+        <WorkspaceSidebar
+          activeItem={activeItem}
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed((prev) => !prev)}
         />
 
-        {/* Calendar Toolbar */}
+        <div className="flex flex-1 flex-col min-w-0" style={{ marginLeft: sidebarCollapsed ? 88 : 116 }}>
+          <WorkspaceTopBar
+            connectedChannels={connectedChannels}
+            onUploadMedia={handleUploadMedia}
+            onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)}
+          />
+
+        {/* Calendar Toolbar (deterministic fallback date until mounted) */}
         <CalendarToolbar
-          weekStart={weekStart}
+          weekStart={weekStart ?? new Date(0)}
           onPreviousWeek={previousWeek}
           onNextWeek={nextWeek}
           onToday={goToday}
@@ -303,29 +329,62 @@ export default function CalendarWorkspace({
             <MediaPanelClosed
               onGetContentIdeas={() => router.push("/ai-studio")}
               onUploadMedia={handleMediaPanelUpload}
-              mediaCount={mediaCount}
+              onClearAll={handleClearAllMedia}
+              onLibraryChange={loadMedia}
+              onNotify={showToast}
+              media={libraryMedia}
             />
           )}
 
-          {/* Calendar Grid */}
-          <CalendarView
-            posts={posts}
-            weekStart={weekStart}
-            onCellClick={handleCellClick}
-            onPostClick={handlePostClick}
-            onReschedule={handleReschedule}
-            onMediaDrop={handleMediaDrop}
-          />
+          {/* Calendar grid renders after mount so Date-based state never
+              differs between server HTML and client hydration. */}
+          {!weekStart ? (
+            <div className="flex flex-1 items-center justify-center text-sm text-zinc-500">
+              Loading calendar…
+            </div>
+          ) : (
+            <>
+              {activeView === "week" && (
+                <CalendarView
+                  posts={posts}
+                  weekStart={weekStart}
+                  onCellClick={handleCellClick}
+                  onPostClick={handlePostClick}
+                  onReschedule={handleReschedule}
+                  onMediaDrop={handleMediaDrop}
+                />
+              )}
+              {activeView === "month" && (
+                <CalendarMonthView
+                  posts={posts}
+                  cursor={weekStart}
+                  onCellClick={handleCellClick}
+                  onPostClick={handlePostClick}
+                  onReschedule={handleReschedule}
+                  onMediaDrop={handleMediaDrop}
+                />
+              )}
+              {activeView === "list" && (
+                <CalendarListView posts={posts} onPostClick={handlePostClick} />
+              )}
+            </>
+          )}
         </div>
       </div>
 
-      {/* Create Post Modal */}
+      <MediaDrawer
+        open={mediaDrawerOpen}
+        onClose={handleMediaDrawerClose}
+        onMediaSelect={handleMediaSelect}
+        onDragStart={handleMediaDragStart}
+        sidebarWidth={sidebarCollapsed ? 88 : 116}
+      />
+
       <CreatePostModal
         open={createPostOpen}
         onClose={() => {
           setCreatePostOpen(false);
           setPendingMedia(undefined);
-          setSelectedPost(null);
         }}
         date={createPostDate}
         time={createPostTime}
@@ -334,6 +393,17 @@ export default function CalendarWorkspace({
         onScheduled={handlePostScheduled}
         initialMedia={pendingMedia}
       />
+
+      {detailPanelOpen && selectedPost && (
+        <PostDetailPanel
+          post={selectedPost}
+          onClose={() => {
+            setDetailPanelOpen(false);
+            setSelectedPost(null);
+          }}
+          onNotify={showToast}
+        />
+      )}
 
       {/* Toast Notifications */}
       <Toast

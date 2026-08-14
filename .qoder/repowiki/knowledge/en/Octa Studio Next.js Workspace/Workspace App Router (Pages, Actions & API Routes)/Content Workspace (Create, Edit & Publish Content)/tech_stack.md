@@ -1,0 +1,1 @@
+Next.js App Router server components with `'use server'` actions, Prisma ORM for database access, and a separate publishing engine at `@/app/publishing/engine/publish` invoked from `publish-content`.

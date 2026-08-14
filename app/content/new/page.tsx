@@ -47,7 +47,7 @@ function NewContentForm() {
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">Create your content</h1>
 
           <p className="mt-4 text-base leading-7 text-zinc-500">
-            Review the AI result and save it as a ContentOS draft.
+            Review the AI result and save it as a octa-studio draft.
           </p>
         </div>
 

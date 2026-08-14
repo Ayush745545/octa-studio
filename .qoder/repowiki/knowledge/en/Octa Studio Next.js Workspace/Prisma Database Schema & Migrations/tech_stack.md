@@ -1,0 +1,1 @@
+Prisma ORM with PostgreSQL provider; cuid-based string IDs; Prisma Client generated into the app package.

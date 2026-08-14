@@ -1,0 +1,5 @@
+- Each page is a default-exported function component wrapped in `<WorkspaceLayout activeItem="...">` to integrate with the workspace navigation.
+- Server-side data fetching uses parallel `Promise.all([...])` calls against the Prisma client to gather independent metrics in a single render pass.
+- Dates are formatted consistently using `Intl.DateTimeFormat` with `timeZone: "Asia/Kolkata"` for display helpers like `formatDate`, `formatTime`, and `formatDateTime`.
+- Placeholder pages follow an identical structure: centered dark background with a title and an 'under construction' subtitle, sharing the same Tailwind class set.
+- Empty states are handled inline by checking array length and rendering a centered fallback message inside a styled container.

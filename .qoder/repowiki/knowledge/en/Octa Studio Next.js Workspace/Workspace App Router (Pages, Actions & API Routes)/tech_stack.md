@@ -1,0 +1,1 @@
+Next.js App Router (pages + server actions + API routes), Prisma for data access, Tailwind CSS with custom theme/fonts configured in the root layout, and a provider-registry pattern for external platform integrations (LinkedIn, simulated).

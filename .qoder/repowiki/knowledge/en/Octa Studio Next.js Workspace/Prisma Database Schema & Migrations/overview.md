@@ -1,0 +1,1 @@
+Defines the PostgreSQL data model for ideas, content, media, publishing channels, and publications using Prisma ORM, with versioned migrations.

@@ -1,0 +1,1 @@
+Next.js App Router workspace that wires pages, server actions, and API routes into a unified creator dashboard backed by Prisma and a pluggable publishing engine.

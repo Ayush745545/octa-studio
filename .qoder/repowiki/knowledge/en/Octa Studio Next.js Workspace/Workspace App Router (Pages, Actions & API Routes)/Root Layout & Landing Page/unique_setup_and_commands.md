@@ -1,0 +1,1 @@
+None beyond standard `next dev` / `next build`; the layout requires the database to be reachable at runtime because the landing page executes Prisma queries on each request.

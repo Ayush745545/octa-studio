@@ -1,0 +1,4 @@
+- Fonts are loaded through `next/font/google` and exposed as CSS custom properties (e.g., `--font-geist-sans`) which are then referenced in both the layout's `className` and Tailwind's `@theme inline` block.
+- Global design tokens (colors, fonts) are declared as CSS custom properties under `:root` and consumed via Tailwind's `@theme inline` mapping rather than inline style objects.
+- Reusable UI transitions are defined as paired `@keyframes` + class names (e.g., `modal-in` / `.modal-enter`, `toast-in` / `.toast-enter`, `slide-in-left` / `slide-out-left`) so components can trigger them by toggling classes.
+- Server components that perform data fetching use `export const dynamic = "force-dynamic"` and wrap async Prisma calls in try/catch blocks, falling back to zeroed defaults when queries fail.

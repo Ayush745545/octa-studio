@@ -1,0 +1,1 @@
+Next.js App Router route pages for Settings, Link-in-Bio, and Creator Home that currently render placeholder UIs inside the shared WorkspaceLayout.

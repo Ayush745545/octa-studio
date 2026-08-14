@@ -1,0 +1,6 @@
+- Server Actions are declared with the `'use server'` directive at the top of each file and return Prisma update results after calling `revalidatePath` on every route that shows publication data.
+- Each publishing platform is implemented as a `PublishingProvider` object exported from its own file under `engine/providers/` and registered in `providers/index.ts` via a string-keyed `Record`.
+- Platform lookup goes through `getPublishingProvider(platform)` which throws a descriptive error when no provider is registered, rather than returning undefined or null.
+- State transitions on publications are guarded by explicit status checks (e.g. reject scheduling past-due dates, reject rescheduling already published items, reject cancelling non-SCHEDULED items) before any Prisma mutation.
+- Multi-table mutations use `prisma.$transaction` to keep `publication` and `content` rows consistent (see `cancelPublication`).
+- Errors from external APIs are caught and returned as `{ success: false, error: message }` instead of throwing, allowing the scheduler to continue processing remaining publications.

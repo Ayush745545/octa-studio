@@ -1,0 +1,6 @@
+- Server actions are placed in `app/content/actions/*.ts` files, declared with the `'use server'` directive at the top, and export a single async function per mutation.
+- Each server action validates its inputs and throws descriptive `Error` messages for invalid state (not found, already published, missing fields, invalid dates).
+- Mutations call `revalidatePath` for every route that may display stale data (`/`, `/content`, `/content/${id}`, `/calendar`, `/analytics`, `/publishing`).
+- Pages read data directly in server components using `await prisma.*` queries with explicit `include` clauses for related entities rather than fetching in client components.
+- Route handlers use the `params: Promise<{ id: string }>` shape and `await params` to resolve dynamic route segments in server components.
+- Content status changes enforce a finite-state machine: DRAFT, READY, SCHEDULED, PUBLISHED — with PUBLISHED treated as terminal and SCHEDULED requiring a non-null `scheduledAt`.

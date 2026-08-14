@@ -9,6 +9,7 @@ export interface MediaItem {
   filename: string;
   mimeType?: string;
   type?: string;
+  contentId?: string | null;
 }
 
 interface MediaDrawerProps {
@@ -16,6 +17,7 @@ interface MediaDrawerProps {
   onClose: () => void;
   onMediaSelect: (media: MediaItem) => void;
   onDragStart: (event: React.DragEvent, media: MediaItem) => void;
+  sidebarWidth: number;
 }
 
 export default function MediaDrawer({
@@ -23,6 +25,7 @@ export default function MediaDrawer({
   onClose,
   onMediaSelect,
   onDragStart,
+  sidebarWidth,
 }: MediaDrawerProps) {
   const [media, setMedia] = useState<MediaItem[]>([]);
 
@@ -51,12 +54,15 @@ export default function MediaDrawer({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[35] bg-black/30 fade-in left-[130px]"
+        className="fixed inset-0 z-[35] bg-black/30 fade-in"
+        style={{ left: sidebarWidth }}
         onClick={onClose}
       />
 
       {/* Drawer */}
-      <div className="fixed top-0 left-[130px] z-[40] h-[100vh] w-[280px] bg-[#0a0a0c] border-r border-zinc-800 shadow-[4px_0_12px_rgba(0,0,0,0.08)] slide-in-left overflow-y-auto">
+      <div className="fixed top-0 z-[40] h-[100vh] w-[280px] bg-[#0a0a0c] border-r border-zinc-800 shadow-[4px_0_12px_rgba(0,0,0,0.08)] slide-in-left overflow-y-auto"
+        style={{ left: sidebarWidth }}
+      >
         {/* Header */}
         <div className="px-4 py-3 border-b border-zinc-800">
           <h2 className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">

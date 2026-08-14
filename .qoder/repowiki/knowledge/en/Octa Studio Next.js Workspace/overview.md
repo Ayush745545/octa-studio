@@ -1,0 +1,1 @@
+Monorepo-root Next.js application that composes the App Router pages, shared UI components, Prisma-backed database schema, and AI/animation utilities into a single creator dashboard.

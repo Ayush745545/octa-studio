@@ -1,0 +1,3 @@
+- Each route is implemented as a single `page.tsx` exporting a default function component that renders only JSX without side effects.
+- Pages wrap their content in the shared `WorkspaceLayout` component with an `activeItem` prop to highlight the corresponding sidebar entry.
+- Placeholder pages follow a uniform structure: a centered dark container (`bg-[#0a0a0c] text-white`) holding a capitalized `<h1>` title and a 'under construction' paragraph.

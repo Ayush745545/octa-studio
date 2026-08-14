@@ -1,0 +1,1 @@
+Next.js App Router pages for capturing and browsing ideas in the workspace, plus a client-side AI content generation studio with write/image/video/pipeline tabs.

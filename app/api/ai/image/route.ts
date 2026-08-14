@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ComfyUIClient } from "@/lib/ai/comfyui";
 import { createImageWorkflow } from "@/lib/ai/workflows/image";
+import { generateFallbackImage } from "@/lib/ai/fallback";
 
 const client = new ComfyUIClient({
   url: process.env.COMFYUI_URL,
@@ -33,45 +34,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    /*
+     * Prefer the local ComfyUI engine; when it is offline (or a
+     * generation fails) fall back to the cloud image service so
+     * generation always works.
+     */
     const isHealthy = await client.checkHealth();
-    if (!isHealthy) {
-      return NextResponse.json(
-        { success: false, error: "AI engine is offline. Start ComfyUI and try again." },
-        { status: 503 },
-      );
+
+    if (isHealthy) {
+      try {
+        const workflow = createImageWorkflow({
+          prompt,
+          negativePrompt,
+          width,
+          height,
+          steps,
+          cfg,
+        });
+
+        const promptId = await client.submitWorkflow(workflow);
+        const entry = await client.pollUntilComplete(promptId);
+        const filename = await client.getOutputFilename(entry);
+
+        if (filename) {
+          const uploadDir = process.env.AI_UPLOAD_DIR ?? "public/uploads";
+          const localPath = await client.downloadFile(filename, uploadDir);
+          const urlPath = localPath.startsWith("public/")
+            ? `/${localPath.slice("public/".length)}`
+            : localPath;
+
+          return NextResponse.json({
+            success: true,
+            type: "image",
+            engine: "comfyui",
+            url: urlPath,
+            filename,
+            prompt,
+          });
+        }
+
+        console.warn("[AI image] ComfyUI returned no output; using fallback.");
+      } catch (comfyError) {
+        console.warn("[AI image] ComfyUI failed; using fallback:", comfyError);
+      }
     }
 
-    const workflow = createImageWorkflow({
-      prompt,
-      negativePrompt,
-      width,
-      height,
-      steps,
-      cfg,
-    });
-
-    const promptId = await client.submitWorkflow(workflow);
-    const entry = await client.pollUntilComplete(promptId);
-    const filename = await client.getOutputFilename(entry);
-
-    if (!filename) {
-      return NextResponse.json(
-        { success: false, error: "Generation failed. Please try again." },
-        { status: 500 },
-      );
-    }
-
-    const uploadDir = process.env.AI_UPLOAD_DIR ?? "public/uploads";
-    const localPath = await client.downloadFile(filename, uploadDir);
-    const urlPath = localPath.startsWith("public/")
-      ? `/${localPath.slice("public/".length)}`
-      : localPath;
+    const fallback = await generateFallbackImage({ prompt, width, height });
 
     return NextResponse.json({
       success: true,
       type: "image",
-      url: urlPath,
-      filename,
+      engine: fallback.engine,
+      url: fallback.url,
+      filename: fallback.filename,
       prompt,
     });
   } catch (error) {

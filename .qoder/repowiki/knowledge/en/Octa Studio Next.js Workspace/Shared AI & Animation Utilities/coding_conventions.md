@@ -1,0 +1,6 @@
+- Server-side singletons are cached on `globalThis` during development to survive Node hot-reload while creating a fresh instance per process in production.
+- External service clients expose a constructor options object with sensible defaults resolved from `process.env` (e.g. `ComfyUIClientOptions` falling back to `COMFYUI_URL`).
+- ComfyUI workflows are constructed as plain objects keyed by node id strings with `class_type` and `inputs`, returned from factory functions typed against the shared `ComfyUIWorkflow` interface.
+- Long-running async operations over HTTP use an `AbortController` driven by a configurable timeout, with cleanup in a `finally` block.
+- React animation hooks wrap all GSAP/ScrollTrigger usage in `gsap.context()` and return a cleanup function via `ctx.revert()` in the effect teardown.
+- Browser-only code is guarded with `typeof window === 'undefined'` checks or marked with `'use client'` directives for Next.js App Router compatibility.

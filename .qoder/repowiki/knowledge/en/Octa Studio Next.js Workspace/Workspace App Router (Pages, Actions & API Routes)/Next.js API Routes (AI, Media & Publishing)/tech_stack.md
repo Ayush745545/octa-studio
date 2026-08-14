@@ -1,0 +1,1 @@
+Next.js App Router API routes running on Node.js runtime; Prisma ORM for database access; OpenAI-compatible chat completions via `fetch` (defaulting to Ollama at localhost:11434); ComfyUI client for image/video generation with workflow polling; LinkedIn OAuth 2.0 (authorization_code flow).

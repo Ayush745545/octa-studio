@@ -1,0 +1,1 @@
+Prisma with `@prisma/adapter-pg` for PostgreSQL connection pooling; ComfyUI HTTP API (`/prompt`, `/history`, `/view`, `/system_stats`) for latent diffusion image/video generation using SDXL (`sd_xl_base_1.0.safetensors`) and Wan2.1 (`wan_2.1_t2v_1.3b.safetensors`) checkpoints; GSAP + ScrollTrigger for scroll-driven animations; @studio-freight/lenis for smooth scrolling.

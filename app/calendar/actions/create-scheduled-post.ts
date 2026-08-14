@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { schedulePublication } from "@/app/publishing/actions/schedule-publication";
 
 interface CreateScheduledPostInput {
   title: string;
@@ -13,48 +12,69 @@ interface CreateScheduledPostInput {
 }
 
 export async function createScheduledPost(input: CreateScheduledPostInput) {
-  // Determine if it's using old single platform or new multi platform structure
-  const platformsToSchedule = input.channelPlatforms && input.channelPlatforms.length > 0 
-    ? input.channelPlatforms 
-    : (input.platform ? [input.platform] : []);
+  const platformsToSchedule =
+    input.channelPlatforms && input.channelPlatforms.length > 0
+      ? input.channelPlatforms
+      : input.platform
+        ? [input.platform]
+        : [];
 
   if (platformsToSchedule.length === 0) {
     throw new Error("No platform selected.");
   }
 
-  const content = await prisma.content.create({
-    data: {
-      title: input.title,
-      body: input.body || null,
-      platform: platformsToSchedule[0], // primary platform
-      status: "SCHEDULED",
-      scheduledAt: new Date(input.scheduledAt),
-    },
-  });
+  // Parse the scheduled date. The datetime-local input produces a local time
+  // string like "2026-08-15T14:30" which new Date() interprets as local time.
+  const scheduledDate = new Date(input.scheduledAt);
 
+  if (Number.isNaN(scheduledDate.getTime())) {
+    throw new Error("Invalid schedule date.");
+  }
+
+  if (scheduledDate <= new Date()) {
+    throw new Error("Schedule time must be in the future.");
+  }
+
+  // Look up connected channels BEFORE creating content so we fail fast.
   const channels = await prisma.publishingChannel.findMany({
-    where: { 
+    where: {
       platform: { in: platformsToSchedule },
-      connected: true 
+      connected: true,
     },
   });
 
   if (channels.length === 0) {
-    throw new Error("No connected channels found for selected platforms.");
+    throw new Error(
+      "No connected channels found for the selected platforms. Connect your channel in Publishing settings first.",
+    );
   }
 
-  for (const channel of channels) {
-    const publication = await prisma.publication.create({
+  // Create everything in a single transaction so nothing is left
+  // half-created if one step fails.
+  const content = await prisma.$transaction(async (tx) => {
+    const newContent = await tx.content.create({
       data: {
-        contentId: content.id,
-        channelId: channel.id,
-        status: "QUEUED",
-        scheduledAt: new Date(input.scheduledAt),
+        title: input.title,
+        body: input.body || null,
+        platform: platformsToSchedule[0],
+        status: "SCHEDULED",
+        scheduledAt: scheduledDate,
       },
     });
 
-    await schedulePublication(publication.id, input.scheduledAt);
-  }
+    for (const channel of channels) {
+      await tx.publication.create({
+        data: {
+          contentId: newContent.id,
+          channelId: channel.id,
+          status: "SCHEDULED",
+          scheduledAt: scheduledDate,
+        },
+      });
+    }
+
+    return newContent;
+  });
 
   revalidatePath("/");
   revalidatePath("/content");

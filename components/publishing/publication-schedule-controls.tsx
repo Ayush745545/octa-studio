@@ -1,14 +1,24 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { schedulePublication } from "@/app/publishing/actions/schedule-publication";
 import { cancelPublication } from "@/app/publishing/actions/cancel-publication";
+import { publishNow } from "@/app/publishing/actions/publish-now";
 
 interface PublicationScheduleControlsProps {
   publicationId: string;
   status: string;
   scheduledAt: Date | string | null;
 }
+
+interface Toast {
+  id: number;
+  type: "success" | "error";
+  message: string;
+  executionTimeMs: number | null;
+}
+
+let toastId = 0;
 
 export default function PublicationScheduleControls({
   publicationId,
@@ -18,6 +28,23 @@ export default function PublicationScheduleControls({
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const addToast = useCallback(
+    (type: "success" | "error", message: string, executionTimeMs: number | null) => {
+      const id = ++toastId;
+      setToasts((prev) => [...prev, { id, type, message, executionTimeMs }]);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (toasts.length === 0) return;
+    const timer = setTimeout(() => {
+      setToasts((prev) => prev.slice(1));
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [toasts]);
 
   const initialValue = scheduledAt
     ? new Date(scheduledAt).toLocaleString("sv-SE", {
@@ -42,8 +69,6 @@ export default function PublicationScheduleControls({
       return;
     }
 
-    // datetime-local represents the user's local time.
-    // Convert that local time to an absolute UTC timestamp.
     const localDate = new Date(`${datePart}T${timePart}:00`);
 
     if (Number.isNaN(localDate.getTime())) {
@@ -89,6 +114,28 @@ export default function PublicationScheduleControls({
     });
   }
 
+  function handlePublishNow() {
+    setError("");
+
+    startTransition(async () => {
+      const result = await publishNow(publicationId);
+
+      if (result.success) {
+        addToast(
+          "success",
+          "Published successfully",
+          result.executionTimeMs,
+        );
+      } else {
+        addToast(
+          "error",
+          result.error ?? "Publishing failed.",
+          result.executionTimeMs,
+        );
+      }
+    });
+  }
+
   if (status === "PUBLISHED") {
     return (
       <span className="text-xs text-zinc-400">
@@ -119,6 +166,35 @@ export default function PublicationScheduleControls({
             Cancel
           </button>
         </>
+      ) : status === "QUEUED" ? (
+        <>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={handlePublishNow}
+            className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {isPending ? "Publishing..." : "Publish now"}
+          </button>
+
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => setOpen((current) => !current)}
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-950 disabled:opacity-50"
+          >
+            Schedule
+          </button>
+        </>
+      ) : status === "FAILED" ? (
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={handlePublishNow}
+          className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+        >
+          {isPending ? "Retrying..." : "Retry"}
+        </button>
       ) : (
         <button
           type="button"
@@ -173,6 +249,47 @@ export default function PublicationScheduleControls({
               {isPending ? "Saving..." : "Save"}
             </button>
           </div>
+        </div>
+      )}
+
+      {toasts.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              className={`flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg transition ${
+                toast.type === "success"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                  : "border-red-200 bg-red-50 text-red-900"
+              }`}
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">
+                  {toast.type === "success" ? "Published" : "Failed"}
+                </p>
+                <p className="mt-0.5 text-xs opacity-75">
+                  {toast.message}
+                </p>
+                {toast.executionTimeMs != null && (
+                  <p className="mt-1 text-[10px] opacity-50">
+                    {(toast.executionTimeMs / 1000).toFixed(1)}s
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setToasts((prev) =>
+                    prev.filter((t) => t.id !== toast.id),
+                  )
+                }
+                className="mt-0.5 text-xs opacity-50 hover:opacity-100"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -47,6 +47,8 @@ export async function publishPublication(publicationId: string) {
     publication.channel.platform,
   );
 
+  const startedAt = Date.now();
+
   const result = await provider.publish(
     {
       title: publication.content.title,
@@ -69,6 +71,8 @@ export async function publishPublication(publicationId: string) {
     },
   );
 
+  const executionTimeMs = Date.now() - startedAt;
+
   if (!result.success) {
     await prisma.publication.update({
       where: {
@@ -77,10 +81,11 @@ export async function publishPublication(publicationId: string) {
       data: {
         status: "FAILED",
         error: result.error ?? "Publishing failed.",
+        executionTimeMs,
       },
     });
 
-    return result;
+    return { ...result, executionTimeMs };
   }
 
   const now = new Date();
@@ -96,6 +101,7 @@ export async function publishPublication(publicationId: string) {
         scheduledAt: null,
         externalId: result.externalId ?? null,
         error: null,
+        executionTimeMs,
       },
     });
 
@@ -111,5 +117,5 @@ export async function publishPublication(publicationId: string) {
     });
   });
 
-  return result;
+  return { ...result, executionTimeMs };
 }

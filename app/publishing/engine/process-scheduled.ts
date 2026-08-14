@@ -45,6 +45,7 @@ export async function processScheduledPublications() {
         success: result.success,
         externalId: result.externalId ?? null,
         error: result.error ?? null,
+        executionTimeMs: result.executionTimeMs ?? null,
       });
     } catch (error) {
       console.error(

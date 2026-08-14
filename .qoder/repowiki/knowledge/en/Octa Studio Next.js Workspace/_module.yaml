@@ -1,0 +1,20 @@
+schema_version: 1
+module_path: ""
+title: Octa Studio Next.js Workspace
+scope:
+    - README.md
+    - package.json
+    - next.config.ts
+    - tsconfig.json
+    - prisma.config.ts
+    - vercel.json
+    - .gitignore
+    - eslint.config.mjs
+    - postcss.config.mjs
+    - AGENTS.md
+    - CLAUDE.md
+    - package-lock.json
+    - vercel.json.backup
+source_files: []
+depends_on: []
+related_to: []

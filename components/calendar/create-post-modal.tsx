@@ -213,7 +213,21 @@ export default function CreatePostModal({
     setError("");
 
     try {
-      const scheduledAt = `${scheduleDate}T${scheduleTime}`;
+      // Build a local-time Date and convert to ISO so the server stores
+      // the correct absolute instant regardless of timezone.
+      const localDate = new Date(`${scheduleDate}T${scheduleTime}:00`);
+      if (Number.isNaN(localDate.getTime())) {
+        setError("Invalid date.");
+        setIsScheduling(false);
+        return;
+      }
+      if (localDate <= new Date()) {
+        setError("Choose a future date and time.");
+        setIsScheduling(false);
+        return;
+      }
+      const scheduledAt = localDate.toISOString();
+
       const content = await createScheduledPost({
         title: body.trim().substring(0, 50) + (body.length > 50 ? "..." : ""),
         body: body.trim(),
@@ -404,6 +418,7 @@ export default function CreatePostModal({
             </button>
             <button
               type="button"
+              onClick={() => setShowMediaPicker(true)}
               className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-[#0a0a0c] px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-[#7C3AED] hover:text-[#7C3AED]"
             >
               Design Media

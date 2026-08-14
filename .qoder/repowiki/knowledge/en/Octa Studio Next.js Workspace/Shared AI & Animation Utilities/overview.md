@@ -1,0 +1,1 @@
+Provides shared server-side Prisma client singleton, ComfyUI workflow builders and client for image/video generation, and React hooks wrapping GSAP ScrollTrigger and Lenis smooth scrolling.

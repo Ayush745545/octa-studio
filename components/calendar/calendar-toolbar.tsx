@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface CalendarToolbarProps {
   weekStart: Date;
@@ -21,6 +21,13 @@ export function CalendarToolbar({
 }: CalendarToolbarProps) {
   // Generate date range string like 'Aug 9 – 15, 2026'
   const generateDateRange = () => {
+    if (activeView === 'month') {
+      return weekStart.toLocaleString('default', { month: 'long', year: 'numeric' });
+    }
+    if (activeView === 'list') {
+      return 'Upcoming posts';
+    }
+
     const endOfWeek = new Date(weekStart);
     endOfWeek.setDate(weekStart.getDate() + 6);
 
@@ -40,7 +47,11 @@ export function CalendarToolbar({
     }
   };
 
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace('_', ' ');
+  const [timezone, setTimezone] = useState<string>('');
+
+  useEffect(() => {
+    setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone.replace('_', ' '));
+  }, []);
 
   return (
     <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-[#0a0a0c]">
@@ -77,9 +88,11 @@ export function CalendarToolbar({
       </div>
 
       <div className="flex items-center gap-4">
-        <span className="text-xs text-zinc-500 font-medium">
-          {timezone}
-        </span>
+        {timezone && (
+          <span className="text-xs text-zinc-500 font-medium">
+            {timezone}
+          </span>
+        )}
 
         <div className="flex items-center border border-zinc-800 rounded-lg p-0.5">
           {(['week', 'month', 'list'] as const).map((view) => (

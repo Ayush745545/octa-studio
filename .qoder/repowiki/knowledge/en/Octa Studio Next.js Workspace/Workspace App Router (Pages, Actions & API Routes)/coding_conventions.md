@@ -1,0 +1,3 @@
+- Each feature folder pairs a route page with co-located server actions under an `actions/` subdirectory, keeping mutations next to their UI.
+- Domain-scoped API endpoints live under `app/api/<domain>/...` mirroring the feature they serve (e.g., `api/ai`, `api/media`, `api/publishing`).
+- External platform integrations are implemented as pluggable providers registered in a central index, so pages and API routes invoke them through a uniform interface.

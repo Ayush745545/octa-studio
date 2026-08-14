@@ -2,7 +2,7 @@ import WorkspaceLayout from "@/components/layout/workspace-layout";
 
 export default function LinkInBioPage() {
   return (
-    <WorkspaceLayout activeItem="link-in-bio">
+    <WorkspaceLayout activeItem="custom-analytics">
       <div className="min-h-screen bg-[#0a0a0c] text-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold capitalize">Link in Bio</h1>

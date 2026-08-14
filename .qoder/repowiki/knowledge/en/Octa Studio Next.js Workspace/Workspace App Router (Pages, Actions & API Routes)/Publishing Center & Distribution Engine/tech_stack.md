@@ -1,0 +1,1 @@
+Next.js App Router Server Components + Server Actions; Prisma for persistence; LinkedIn REST API v202601 with Bearer token auth; simulated provider for development.

@@ -1,0 +1,1 @@
+Next.js App Router routes and server actions for listing, creating, editing, scheduling, and publishing content items within the workspace.

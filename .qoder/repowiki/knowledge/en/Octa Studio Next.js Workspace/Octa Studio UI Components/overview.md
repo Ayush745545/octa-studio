@@ -1,0 +1,1 @@
+React client components that compose the octa-studio landing page and the in-app workspace (calendar, content editor, ideas, publishing, AI studio) with shared layout shell.

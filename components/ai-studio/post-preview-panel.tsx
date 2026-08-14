@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface PostPreviewPanelProps {
   content: string;
@@ -8,9 +8,19 @@ interface PostPreviewPanelProps {
   contentType: string;
   isGenerating: boolean;
   prompt: string;
+  imageUrl?: string | null;
 }
 
-type DeviceView = 'phone' | 'tablet';
+// Keeps device frames scrolled to the top whenever new content arrives.
+function useScrollTopOnContentChange(content: string) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (ref.current) ref.current.scrollTop = 0;
+  }, [content]);
+  return ref;
+}
+
+type DeviceView = 'phone' | 'tablet' | 'macbook';
 
 export function PostPreviewPanel({
   content,
@@ -18,6 +28,7 @@ export function PostPreviewPanel({
   contentType,
   isGenerating,
   prompt,
+  imageUrl = null,
 }: PostPreviewPanelProps) {
   const [deviceView, setDeviceView] = useState<DeviceView>('phone');
 
@@ -25,7 +36,7 @@ export function PostPreviewPanel({
   const hasContent = !!content;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-[520px]">
       {/* Panel Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/60">
         <div className="flex items-center gap-2.5">
@@ -64,12 +75,26 @@ export function PostPreviewPanel({
             </svg>
             Tablet
           </button>
+          <button
+            type="button"
+            onClick={() => setDeviceView('macbook')}
+            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
+              deviceView === 'macbook'
+                ? 'bg-zinc-800 text-white shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 5h16a1 1 0 011 1v10H3V6a1 1 0 011-1zM2 18h20l-1-2H3l-1 2z" />
+            </svg>
+            MacBook
+          </button>
         </div>
       </div>
 
       {/* Device Frame Area */}
       <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
-        {deviceView === 'phone' ? (
+        {deviceView === 'phone' && (
           <PhoneFrame
             content={displayContent}
             platform={platform}
@@ -77,8 +102,10 @@ export function PostPreviewPanel({
             isGenerating={isGenerating}
             hasContent={hasContent}
             prompt={prompt}
+            imageUrl={imageUrl}
           />
-        ) : (
+        )}
+        {deviceView === 'tablet' && (
           <TabletFrame
             content={displayContent}
             platform={platform}
@@ -86,6 +113,18 @@ export function PostPreviewPanel({
             isGenerating={isGenerating}
             hasContent={hasContent}
             prompt={prompt}
+            imageUrl={imageUrl}
+          />
+        )}
+        {deviceView === 'macbook' && (
+          <MacBookFrame
+            content={displayContent}
+            platform={platform}
+            contentType={contentType}
+            isGenerating={isGenerating}
+            hasContent={hasContent}
+            prompt={prompt}
+            imageUrl={imageUrl}
           />
         )}
       </div>
@@ -144,6 +183,7 @@ function PostContent({
   isGenerating,
   hasContent,
   prompt,
+  imageUrl = null,
   compact = false,
 }: {
   content: string;
@@ -152,6 +192,7 @@ function PostContent({
   isGenerating: boolean;
   hasContent: boolean;
   prompt: string;
+  imageUrl?: string | null;
   compact?: boolean;
 }) {
   if (isGenerating) {
@@ -190,8 +231,18 @@ function PostContent({
       {/* Platform Header */}
       <PlatformPostHeader platform={platform} />
       
-      {/* Post Media Placeholder */}
-      {(contentType === 'Reel' || contentType === 'Video') && (
+      {/* Post Media */}
+      {imageUrl ? (
+        <div
+          className={`${
+            contentType === 'Reel' || contentType === 'Video'
+              ? 'aspect-[9/16] max-h-[220px]'
+              : 'aspect-square max-h-[220px]'
+          } mx-3 rounded-lg overflow-hidden mb-2 border border-zinc-800/30 bg-zinc-900`}
+        >
+          <img src={imageUrl} alt="Post media" className="h-full w-full object-cover" />
+        </div>
+      ) : (contentType === 'Reel' || contentType === 'Video') ? (
         <div className="aspect-[9/16] max-h-[200px] bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center mx-3 rounded-lg overflow-hidden mb-2">
           <div className="text-center">
             <svg className="w-8 h-8 text-zinc-700 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,9 +252,7 @@ function PostContent({
             <p className="text-[9px] text-zinc-600">{contentType} Preview</p>
           </div>
         </div>
-      )}
-
-      {contentType !== 'Reel' && contentType !== 'Video' && (
+      ) : (
         <div className="aspect-square max-h-[180px] bg-gradient-to-br from-fuchsia-950/30 via-zinc-900 to-zinc-950 flex items-center justify-center mx-3 rounded-lg overflow-hidden mb-2 border border-zinc-800/30">
           <div className="text-center px-4">
             <p className="text-[10px] text-zinc-500 font-medium leading-relaxed line-clamp-3">
@@ -217,13 +266,11 @@ function PostContent({
       <PlatformPostActions platform={platform} />
 
       {/* Post Caption / Content */}
-      <div className={`px-3 pb-3 ${compact ? 'max-h-[120px]' : 'max-h-[200px]'} overflow-y-auto`}>
-        <div className="flex items-start gap-1.5">
-          <span className="text-[10px] font-bold text-zinc-200 shrink-0">contentos_ai</span>
-          <p className="text-[10px] text-zinc-400 leading-relaxed whitespace-pre-wrap break-words">
-            {content.length > 500 ? content.slice(0, 500) + '...' : content}
-          </p>
-        </div>
+      <div className={`px-3 pb-3 ${compact ? 'max-h-[140px]' : 'max-h-[240px]'} overflow-y-auto`}>
+        <p className="text-[10px] text-zinc-400 leading-relaxed whitespace-pre-wrap break-words">
+          <span className="font-bold text-zinc-200">octa-studio_ai</span>{' '}
+          {content}
+        </p>
       </div>
     </div>
   );
@@ -240,7 +287,7 @@ function PlatformPostHeader({ platform }: { platform: string }) {
           </div>
         </div>
         <div className="flex-1">
-          <p className="text-[10px] font-semibold text-zinc-200 leading-tight">contentos_ai</p>
+          <p className="text-[10px] font-semibold text-zinc-200 leading-tight">octa-studio_ai</p>
           <p className="text-[8px] text-zinc-500 leading-tight">Content Creator</p>
         </div>
         <svg className="w-3.5 h-3.5 text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
@@ -257,7 +304,7 @@ function PlatformPostHeader({ platform }: { platform: string }) {
           <span className="text-[9px] font-bold text-white">C</span>
         </div>
         <div className="flex-1">
-          <p className="text-[10px] font-semibold text-zinc-200 leading-tight">ContentOS AI</p>
+          <p className="text-[10px] font-semibold text-zinc-200 leading-tight">octa-studio AI</p>
           <p className="text-[8px] text-zinc-500 leading-tight">Just now · 🌐</p>
         </div>
         <svg className="w-3.5 h-3.5 text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
@@ -275,10 +322,10 @@ function PlatformPostHeader({ platform }: { platform: string }) {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-1">
-            <p className="text-[10px] font-bold text-zinc-200 leading-tight">ContentOS AI</p>
+            <p className="text-[10px] font-bold text-zinc-200 leading-tight">octa-studio AI</p>
             <svg className="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
-          <p className="text-[8px] text-zinc-500 leading-tight">@contentos_ai · now</p>
+          <p className="text-[8px] text-zinc-500 leading-tight">@octa-studio_ai · now</p>
         </div>
       </div>
     );
@@ -291,7 +338,7 @@ function PlatformPostHeader({ platform }: { platform: string }) {
         <span className="text-[9px] font-bold text-white">C</span>
       </div>
       <div className="flex-1">
-        <p className="text-[10px] font-semibold text-zinc-200 leading-tight">ContentOS AI</p>
+        <p className="text-[10px] font-semibold text-zinc-200 leading-tight">octa-studio AI</p>
         <p className="text-[8px] text-zinc-500 leading-tight">{platform} · Just now</p>
       </div>
     </div>
@@ -380,6 +427,7 @@ function PhoneFrame({
   isGenerating,
   hasContent,
   prompt,
+  imageUrl = null,
 }: {
   content: string;
   platform: string;
@@ -387,7 +435,9 @@ function PhoneFrame({
   isGenerating: boolean;
   hasContent: boolean;
   prompt: string;
+  imageUrl?: string | null;
 }) {
+  const scrollRef = useScrollTopOnContentChange(content);
   return (
     <div className="relative">
       {/* Phone outer shell */}
@@ -425,7 +475,7 @@ function PhoneFrame({
           </div>
 
           {/* Post Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto">
             <PostContent
               content={content}
               platform={platform}
@@ -433,6 +483,7 @@ function PhoneFrame({
               isGenerating={isGenerating}
               hasContent={hasContent}
               prompt={prompt}
+              imageUrl={imageUrl}
               compact
             />
           </div>
@@ -447,6 +498,75 @@ function PhoneFrame({
   );
 }
 
+/* ─── MacBook Frame ────────────────────────────── */
+function MacBookFrame({
+  content,
+  platform,
+  contentType,
+  isGenerating,
+  hasContent,
+  prompt,
+  imageUrl = null,
+}: {
+  content: string;
+  platform: string;
+  contentType: string;
+  isGenerating: boolean;
+  hasContent: boolean;
+  prompt: string;
+  imageUrl?: string | null;
+}) {
+  const scrollRef = useScrollTopOnContentChange(content);
+  return (
+    <div className="relative w-full max-w-[400px]">
+      {/* Screen lid */}
+      <div className="rounded-t-2xl bg-zinc-800 p-[6px] shadow-2xl shadow-black/60">
+        <div className="rounded-t-[14px] bg-[#0c0c0e] overflow-hidden border border-zinc-800/40">
+          {/* Camera notch bar */}
+          <div className="flex items-center justify-center bg-black py-1">
+            <div className="w-3 h-3 rounded-full bg-zinc-900 border border-zinc-800/50" />
+          </div>
+
+          {/* Browser chrome */}
+          <div className="flex items-center gap-2 px-3 py-1.5 border-b border-zinc-800/40 bg-zinc-950">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-red-500/70" />
+              <div className="w-2 h-2 rounded-full bg-amber-500/70" />
+              <div className="w-2 h-2 rounded-full bg-emerald-500/70" />
+            </div>
+            <div className="flex-1 mx-2">
+              <div className="rounded-md bg-zinc-900 border border-zinc-800/50 px-2 py-0.5">
+                <p className="text-[8px] text-zinc-500 text-center truncate">
+                  {platform.toLowerCase()}.com
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Screen content */}
+          <div ref={scrollRef} className="h-[300px] overflow-y-auto bg-[#0c0c0e]">
+            <PostContent
+              content={content}
+              platform={platform}
+              contentType={contentType}
+              isGenerating={isGenerating}
+              hasContent={hasContent}
+              prompt={prompt}
+              imageUrl={imageUrl}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Keyboard base */}
+      <div className="relative">
+        <div className="h-[10px] rounded-b-xl bg-gradient-to-b from-zinc-700 to-zinc-800 mx-[-14px] shadow-lg shadow-black/50" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 w-16 h-[4px] rounded-b-md bg-zinc-900/80" />
+      </div>
+    </div>
+  );
+}
+
 /* ─── Tablet Frame ─────────────────────────────── */
 function TabletFrame({
   content,
@@ -455,6 +575,7 @@ function TabletFrame({
   isGenerating,
   hasContent,
   prompt,
+  imageUrl = null,
 }: {
   content: string;
   platform: string;
@@ -462,7 +583,9 @@ function TabletFrame({
   isGenerating: boolean;
   hasContent: boolean;
   prompt: string;
+  imageUrl?: string | null;
 }) {
+  const scrollRef = useScrollTopOnContentChange(content);
   return (
     <div className="relative">
       {/* Tablet outer shell */}
@@ -500,7 +623,7 @@ function TabletFrame({
           </div>
 
           {/* Tablet layout: two-column for wide view */}
-          <div className="flex-1 overflow-y-auto flex">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto flex">
             <div className="flex-1">
               <PostContent
                 content={content}
@@ -509,6 +632,7 @@ function TabletFrame({
                 isGenerating={isGenerating}
                 hasContent={hasContent}
                 prompt={prompt}
+                imageUrl={imageUrl}
               />
             </div>
             {/* Side engagement panel */}

@@ -1,0 +1,1 @@
+Next.js App Router client components (`"use client"`), Tailwind CSS for styling, GSAP + ScrollTrigger for landing-page scroll animations, Next.js `useTransition` for optimistic rescheduling, and direct fetch to `/api/media/upload` plus server actions from `@/app/publishing/actions/reschedule-publication`.

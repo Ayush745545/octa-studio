@@ -45,6 +45,12 @@ export default async function PublishingPage() {
     },
   });
 
+  const publicationsWithTime = publications.map((pub) => ({
+    ...pub,
+    executionTimeMs: pub.executionTimeMs,
+    error: pub.error,
+  }));
+
   const connectedPlatforms = connectedChannels.map(
     (channel) => channel.platform,
   );
@@ -85,12 +91,12 @@ export default async function PublishingPage() {
               </div>
 
               <span className="text-xs text-zinc-500">
-                {publications.length} publication
-                {publications.length === 1 ? "" : "s"}
+                {publicationsWithTime.length} publication
+                {publicationsWithTime.length === 1 ? "" : "s"}
               </span>
             </div>
 
-            {publications.length === 0 ? (
+            {publicationsWithTime.length === 0 ? (
               <div className="mt-5 rounded-2xl border border-dashed border-zinc-800 bg-zinc-950 px-5 py-10 text-center">
                 <p className="text-sm font-medium text-zinc-300">No publications yet</p>
 
@@ -102,19 +108,20 @@ export default async function PublishingPage() {
             ) : (
               <div className="mt-5 overflow-x-auto rounded-2xl border border-zinc-800">
                 <div className="min-w-[900px]">
-                  <div className="grid grid-cols-[minmax(0,1fr)_110px_110px_220px_160px] border-b border-zinc-800 bg-zinc-950 px-5 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                  <div className="grid grid-cols-[minmax(0,1fr)_110px_110px_220px_160px_100px] border-b border-zinc-800 bg-zinc-950 px-5 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
                     <span>Content</span>
                     <span>Channel</span>
                     <span>Status</span>
                     <span>Schedule</span>
                     <span>Published</span>
+                    <span>Time</span>
                   </div>
 
                   <div className="divide-y divide-zinc-800">
-                    {publications.map((publication) => (
+                    {publicationsWithTime.map((publication) => (
                       <div
                         key={publication.id}
-                        className="grid grid-cols-[minmax(0,1fr)_110px_110px_220px_160px] items-center px-5 py-4"
+                        className="grid grid-cols-[minmax(0,1fr)_110px_110px_220px_160px_100px] items-center px-5 py-4"
                       >
                         <div className="min-w-0 pr-6">
                           <p className="truncate text-sm font-medium text-white">
@@ -124,6 +131,14 @@ export default async function PublishingPage() {
                           <p className="mt-1 text-xs text-zinc-500">
                             Content: {publication.content.status}
                           </p>
+
+                          {publication.status === "FAILED" && publication.error && (
+                            <p className="mt-1 text-xs text-red-400">
+                              {publication.error.length > 80
+                                ? `${publication.error.slice(0, 80)}...`
+                                : publication.error}
+                            </p>
+                          )}
                         </div>
 
                         <div className="text-sm text-zinc-300">
@@ -159,6 +174,12 @@ export default async function PublishingPage() {
                         <div className="text-xs text-zinc-500">
                           {formatDateTime(publication.publishedAt)}
                         </div>
+
+                        <div className="text-xs text-zinc-500">
+                          {publication.executionTimeMs != null
+                            ? `${(publication.executionTimeMs / 1000).toFixed(1)}s`
+                            : "—"}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -169,13 +190,13 @@ export default async function PublishingPage() {
 
           <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
             <p className="text-xs font-semibold text-zinc-300">
-              Publishing connections are simulated
+              LinkedIn publishing is live
             </p>
 
             <p className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
-              ContentOS currently manages your content workflow, scheduling,
-              and publishing status internally. Real platform authentication
-              will be connected later.
+              Posts are published directly to your connected LinkedIn account
+              via the official API. Execution time and results are tracked for
+              every publication.
             </p>
           </div>
         </main>

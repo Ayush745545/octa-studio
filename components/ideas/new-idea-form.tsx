@@ -3,6 +3,19 @@
 import { useState } from "react";
 import { createIdea } from "@/app/ideas/actions/create-idea";
 
+const CATEGORY_OPTIONS = [
+  "Creative",
+  "Design",
+  "Photography",
+  "Video",
+  "Music",
+  "Writing",
+  "AI",
+  "Tech",
+  "Lifestyle",
+  "Business",
+];
+
 interface NewIdeaFormProps {
   onCreated: () => void;
 }
@@ -10,6 +23,7 @@ interface NewIdeaFormProps {
 export default function NewIdeaForm({ onCreated }: NewIdeaFormProps) {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
+  const [category, setCategory] = useState("");
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
@@ -68,19 +82,28 @@ export default function NewIdeaForm({ onCreated }: NewIdeaFormProps) {
       </div>
 
       <div>
-        <label
-          htmlFor="category"
-          className="mb-2 block text-sm font-medium text-zinc-900"
-        >
+        <label className="mb-2 block text-sm font-medium text-zinc-900">
           Category
         </label>
 
-        <input
-          id="category"
-          name="category"
-          placeholder="AI, SaaS, YouTube..."
-          className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-zinc-400"
-        />
+        <input type="hidden" name="category" value={category} />
+
+        <div className="flex flex-wrap gap-2">
+          {CATEGORY_OPTIONS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setCategory((current) => (current === option ? "" : option))}
+              className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                category === option
+                  ? "border-zinc-950 bg-zinc-950 text-white"
+                  : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
       </div>
 
       {error && (

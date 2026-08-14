@@ -1,0 +1,1 @@
+Next.js App Router (file-based routing) with React Server Components; styling via Tailwind CSS utility classes.

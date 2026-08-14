@@ -1,7 +1,10 @@
 import Link from "next/link";
 
 import WorkspaceLayout from "@/components/layout/workspace-layout";
+import ContentListItem from "@/components/content/content-list-item";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export default async function ContentPage() {
   const contents = await prisma.content.findMany({
@@ -56,39 +59,15 @@ export default async function ContentPage() {
           ) : (
             <div className="space-y-3">
               {contents.map((content) => (
-                <Link
+                <ContentListItem
                   key={content.id}
-                  href={`/content/${content.id}`}
-                  className="group block rounded-2xl border border-zinc-800 bg-zinc-950 p-5 transition hover:border-zinc-300 hover:bg-zinc-100"
-                >
-                  <div className="flex items-start justify-between gap-6">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500">
-                          {content.status}
-                        </span>
-
-                        {content.platform && (
-                          <span className="text-xs text-zinc-500">{content.platform}</span>
-                        )}
-                      </div>
-
-                      <h3 className="mt-3 truncate text-base font-semibold text-white">{content.title}</h3>
-
-                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-500">
-                        {content.body || "No content written yet."}
-                      </p>
-
-                      {content.idea && (
-                        <p className="mt-3 text-xs text-zinc-500">From idea: {content.idea.title}</p>
-                      )}
-                    </div>
-
-                    <span className="shrink-0 pt-1 text-sm font-medium text-zinc-500 transition group-hover:text-white">
-                      Open →
-                    </span>
-                  </div>
-                </Link>
+                  id={content.id}
+                  title={content.title}
+                  body={content.body}
+                  status={content.status}
+                  platform={content.platform}
+                  ideaTitle={content.idea?.title ?? null}
+                />
               ))}
             </div>
           )}

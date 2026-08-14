@@ -1,0 +1,6 @@
+- Each route file exports only the HTTP method handlers it needs (`GET`/`POST`/`DELETE`) and returns responses via `NextResponse.json` with explicit status codes.
+- Input validation is performed inline at the top of each handler, returning `{ error: ... }` with 400/404 status for missing or invalid fields before any side effects.
+- External service calls are wrapped in try/catch blocks that log the error and respond with a uniform `{ error: ... }` JSON body and 500 status.
+- Configuration is read exclusively from `process.env` with sensible fallback defaults (e.g. `AI_BASE_URL || 'http://localhost:11434/v1'`, `AI_UPLOAD_DIR ?? 'public/uploads'`).
+- Long-running AI tasks follow a submit-and-poll pattern: check engine health, submit a workflow, then poll until complete before downloading the output file.
+- Prisma models are imported as a singleton via `@/lib/prisma` and used directly inside route handlers without an intermediate service layer.

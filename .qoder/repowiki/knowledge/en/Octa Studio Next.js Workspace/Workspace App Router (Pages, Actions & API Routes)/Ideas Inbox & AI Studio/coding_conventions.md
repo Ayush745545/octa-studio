@@ -1,0 +1,5 @@
+- Server-rendered pages load data directly with Prisma in the component body and pass it as props to child components.
+- Mutations are implemented as separate server actions marked with `"use server"` that validate inputs, perform DB writes, call `revalidatePath`, and return a `{ success, error }` shape.
+- Route handlers use the Next.js App Router params pattern where `params` is typed as `Promise<{ id: string }>` and awaited before use.
+- Missing resources are handled by calling `notFound()` rather than returning custom error pages inline.
+- Client-side features gate long-running operations behind loading/error state flags and surface errors through a local `error` state variable rendered in a styled alert div.

@@ -90,7 +90,7 @@ export function createVideoWorkflow(params: {
     "8": {
       class_type: "SaveVideo",
       inputs: {
-        filename_prefix: "contentos-ai-video",
+        filename_prefix: "octa-studio-ai-video",
         format: "image/gif",
         fps,
         images: ["7", 0],

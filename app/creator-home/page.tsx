@@ -2,7 +2,7 @@ import WorkspaceLayout from "@/components/layout/workspace-layout";
 
 export default function CreatorHomePage() {
   return (
-    <WorkspaceLayout activeItem="creator-home">
+    <WorkspaceLayout activeItem="custom-analytics">
       <div className="min-h-screen bg-[#0a0a0c] text-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold capitalize">Creator Home</h1>

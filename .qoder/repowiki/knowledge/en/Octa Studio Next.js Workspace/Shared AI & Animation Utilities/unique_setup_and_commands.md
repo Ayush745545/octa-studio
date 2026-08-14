@@ -1,0 +1,1 @@
+Requires `DATABASE_URL` environment variable at import time of `lib/prisma.ts`; requires `COMFYUI_URL` (defaulting to `http://127.0.0.1:8188`) for the AI client; production deployments must ensure the ComfyUI instance is reachable and models are preloaded before first use.

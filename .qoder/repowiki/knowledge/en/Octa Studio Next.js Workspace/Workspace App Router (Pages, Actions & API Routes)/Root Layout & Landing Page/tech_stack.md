@@ -1,0 +1,1 @@
+Next.js App Router with TypeScript; Google Fonts loaded via `next/font/google` (Geist Sans/Mono, Inter); Tailwind CSS v4 using `@import "tailwindcss"` with `@theme inline` for design tokens; Prisma Client for server-side data fetching on the landing page.
