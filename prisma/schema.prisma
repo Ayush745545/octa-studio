@@ -92,3 +92,51 @@ model Publication {
 
   @@unique([contentId, channelId])
 }
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  name         String?
+  avatarUrl    String?
+  provider     String   @default("credentials")
+  plan         String   @default("FREE")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  generations Generation[]
+  payments    Payment[]
+}
+
+model Generation {
+  id       String  @id @default(cuid())
+  userId   String?
+  type     String
+  tool     String?
+  platform String?
+  prompt   String
+  result   String?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+model Payment {
+  id                String  @id @default(cuid())
+  userId            String?
+  plan              String
+  amount            Int
+  currency          String  @default("INR")
+  status            String  @default("PENDING")
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  mode              String  @default("razorpay")
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

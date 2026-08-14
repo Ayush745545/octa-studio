@@ -2,6 +2,18 @@
 
 import { useState } from "react";
 
+// Parses API responses without crashing on non-JSON bodies (dev overlay, HTML errors).
+async function safeJson(response: Response): Promise<Record<string, any>> {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      error: `The server returned an unexpected response (${response.status}). Please try again.`,
+    };
+  }
+}
+
 type GenerationMode = "text" | "image" | "video";
 
 interface MediaItem {
@@ -81,7 +93,7 @@ export default function AIAssistantPanel({
         }),
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!response.ok) throw new Error(data.error || "Generation failed.");
       if (!data.result?.trim()) throw new Error("AI returned an empty result.");
 
@@ -113,7 +125,7 @@ export default function AIAssistantPanel({
         }),
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!response.ok) throw new Error(data.error || "Enhance failed.");
       if (!data.result?.trim()) throw new Error("AI returned an empty result.");
 
@@ -143,7 +155,7 @@ export default function AIAssistantPanel({
         }),
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!response.ok) throw new Error(data.error || "Image generation failed.");
       if (!data.success || !data.url) throw new Error("No image returned.");
 
@@ -176,7 +188,7 @@ export default function AIAssistantPanel({
         }),
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!response.ok) throw new Error(data.error || "Video generation failed.");
       if (!data.success || !data.url) throw new Error("No video returned.");
 

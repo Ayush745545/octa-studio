@@ -603,24 +603,40 @@ function AiPipelineAnimation() {
       const lines = gsap.utils.toArray<HTMLElement>("[data-pipe-line]", rootRef.current);
       const result = rootRef.current?.querySelector("[data-pipe-result]");
 
+      const badge = rootRef.current?.querySelector("[data-pipe-badge]");
+      // Phone mockup sits above this card — it pops up once the pipeline completes
+      const phone = document.querySelector<HTMLElement>("[data-pipe-phone]");
+
       const tl = gsap.timeline({
         repeat: -1,
-        repeatDelay: 1.2,
+        repeatDelay: 2.4,
         scrollTrigger: { trigger: rootRef.current, start: "top 80%", once: true },
       });
 
       tl.set(nodes, { autoAlpha: 0.35, scale: 1 })
         .set(lines, { scaleX: 0, transformOrigin: "left center" });
-      if (result) tl.set(result, { autoAlpha: 0, y: 16 });
+      if (result) tl.set(result, { autoAlpha: 0, y: 28, scale: 0.88, transformOrigin: "center center" });
+      if (phone) tl.set(phone, { autoAlpha: 0, y: 32, scale: 0.85, transformOrigin: "center center" });
 
+      // Slower, more deliberate stage-by-stage build
       nodes.forEach((node, i) => {
         if (i > 0) {
-          tl.to(lines[i - 1], { scaleX: 1, duration: 0.45, ease: "power2.inOut" }, "+=0.15");
+          tl.to(lines[i - 1], { scaleX: 1, duration: 0.9, ease: "power2.inOut" }, "+=0.35");
         }
-        tl.to(node, { autoAlpha: 1, scale: 1.08, duration: 0.22, ease: "power2.out", yoyo: true, repeat: 1 }, "<");
+        tl.to(node, { autoAlpha: 1, scale: 1.08, duration: 0.45, ease: "power2.out", yoyo: true, repeat: 1 }, "<");
       });
 
-      if (result) tl.to(result, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, "+=0.2");
+      // Finished post pops up like a notification when the pipeline completes
+      if (result) {
+        tl.to(result, { autoAlpha: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" }, "+=0.5");
+      }
+      // …and the phone mockup pops in alongside it
+      if (phone) {
+        tl.to(phone, { autoAlpha: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.6)" }, "<");
+      }
+      if (badge) {
+        tl.to(badge, { scale: 1.2, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 }, "-=0.2");
+      }
     }, rootRef);
 
     return () => ctx.revert();
@@ -664,7 +680,7 @@ function AiPipelineAnimation() {
       <div data-pipe-result className="mt-8 rounded-xl border border-zinc-800 bg-[#111113] p-4 sm:p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+            <span data-pipe-badge className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
             </span>
             <p className="text-[12px] font-semibold text-white">Post ready to publish</p>
@@ -864,7 +880,7 @@ export function LandingClient({
             <div className="grid items-start gap-12 lg:grid-cols-[0.8fr_1.2fr]">
               <div className="lg:sticky lg:top-32">
                 <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Create with AI</p>
-                <h3 className="mt-3 text-[clamp(1.5rem,2.5vw,2rem)] font-semibold tracking-[-0.02em]">Your OLED Creative Workspace.</h3>
+                <h3 className="headline-apple mt-3 text-[clamp(2rem,3.5vw,3rem)]">Your OLED Creative Workspace.</h3>
                 <p className="mt-4 text-[14px] leading-[1.7] text-zinc-500">Write text, build pipelines, generate images, and create videos in dark mode. Configure the platform, tone, and content type, and watch the AI build a ready-to-publish post.</p>
                 <ul className="mt-6 space-y-3">
                   {["Real-time post preview", "Text, Image & Video generation", "Context-aware models", "Brand tone enforcement"].map((item) => (
@@ -876,11 +892,11 @@ export function LandingClient({
                 </ul>
               </div>
               <div className="flex flex-col items-center gap-6">
-                <div className="relative mx-auto w-[280px] rounded-[32px] border-2 border-zinc-700 bg-black p-2 shadow-2xl shadow-black/80">
+                <div data-pipe-phone className="relative mx-auto w-[280px] rounded-[32px] border-2 border-zinc-700 bg-black p-2 shadow-2xl shadow-black/80">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 rounded-b-xl bg-black border-b border-x border-zinc-700 z-10" />
                   <div className="rounded-[24px] bg-[#111113] overflow-hidden">
                     <div className="aspect-[9/16] w-full">
-                      <Image src="/images/img.png" alt="Live Preview Mockup" width={280} height={500} className="w-full h-full object-cover" />
+                      <Image src="/my.png" alt="Live Preview Mockup" width={798} height={1648} className="w-full h-full object-cover" />
                     </div>
                   </div>
                   <div className="mx-auto mt-2 h-1 w-12 rounded-full bg-zinc-700" />

@@ -107,6 +107,57 @@ function toLocalInputValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+// Parses API responses without crashing on non-JSON bodies
+// (dev overlay, HTML error pages, proxy hiccups).
+async function safeJson(response: Response): Promise<Record<string, any>> {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      error: `The server returned an unexpected response (${response.status}). Please try again.`,
+    };
+  }
+}
+
+declare global {
+  interface Window {
+    Razorpay?: any;
+  }
+}
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+function openRazorpayCheckout(options: {
+  key: string;
+  orderId: string;
+  name: string;
+  description: string;
+}): Promise<{ razorpay_payment_id: string; razorpay_signature: string } | null> {
+  return new Promise((resolve) => {
+    if (!window.Razorpay) return resolve(null);
+    const checkout = new window.Razorpay({
+      key: options.key,
+      order_id: options.orderId,
+      name: options.name,
+      description: options.description,
+      theme: { color: "#7C3AED" },
+      handler: (res: any) => resolve(res),
+      modal: { ondismiss: () => resolve(null) },
+    });
+    checkout.open();
+  });
+}
+
 type Generation = {
   id: string;
   prompt: string;
@@ -115,6 +166,8 @@ type Generation = {
   platform: string;
   contentType: string;
   timestamp: number;
+  type?: "text" | "image" | "video";
+  mediaUrl?: string;
 };
 
 type PipelineStep = {
@@ -192,6 +245,12 @@ export default function AIStudioPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [activeGenerationId, setActiveGenerationId] = useState<string | null>(null);
+  const [user, setUser] = useState<{ id: string; email: string; name: string | null; plan: string } | null>(null);
+  const [usage, setUsage] = useState({ used: 0, limit: 10 });
+  const [showPurchase, setShowPurchase] = useState(false);
+  const [purchaseBusy, setPurchaseBusy] = useState(false);
+  const [purchaseError, setPurchaseError] = useState("");
+  const [purchaseNotice, setPurchaseNotice] = useState("");
   const [streamingText, setStreamingText] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -238,6 +297,44 @@ export default function AIStudioPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [streamingText, result, isGenerating]);
 
+  // Load session, usage and persisted recent generations
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [meRes, genRes] = await Promise.all([
+          fetch("/api/auth/me"),
+          fetch("/api/ai/generations"),
+        ]);
+        const me = await safeJson(meRes);
+        const gens = await safeJson(genRes);
+        if (cancelled) return;
+        if (me.user) setUser(me.user);
+        if (me.usage) setUsage(me.usage);
+        if (Array.isArray(gens.items)) {
+          setGenerations(
+            gens.items.map((g: any) => ({
+              id: g.id,
+              prompt: g.prompt,
+              result: g.result ?? "",
+              tool: g.tool ?? "Write Content",
+              platform: g.platform ?? "Instagram",
+              contentType: "Post",
+              timestamp: new Date(g.createdAt).getTime(),
+              type: g.type === "image" || g.type === "video" ? g.type : "text",
+              mediaUrl: g.type === "text" ? undefined : g.result ?? undefined,
+            })),
+          );
+        }
+      } catch {
+        // keep defaults when offline
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Simulate streaming effect
   function simulateStream(fullText: string, onComplete: (text: string) => void) {
     setStreamingText("");
@@ -258,12 +355,33 @@ export default function AIStudioPage() {
     type();
   }
 
+  const limitReached = user?.plan !== "PRO" && usage.used >= usage.limit;
+
+  function recordGeneration(entry: {
+    type: "text" | "image" | "video";
+    prompt: string;
+    result: string;
+    tool?: string;
+    platform?: string;
+  }) {
+    setUsage((prev) => ({ ...prev, used: prev.used + 1 }));
+    void fetch("/api/ai/generations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry),
+    }).catch(() => {});
+  }
+
   async function runGeneration(opts: {
     promptText: string;
     tool?: string;
     context?: string;
   }) {
     if (!opts.promptText.trim() || isGenerating) return;
+    if (limitReached) {
+      setShowPurchase(true);
+      return;
+    }
 
     setIsGenerating(true);
     setResult("");
@@ -287,7 +405,7 @@ export default function AIStudioPage() {
         }),
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!response.ok) throw new Error(data.error || "Generation failed.");
       
       const finalResult = data.result || "";
@@ -301,9 +419,17 @@ export default function AIStudioPage() {
         platform,
         contentType,
         timestamp: Date.now(),
+        type: "text",
       };
       
       setGenerations((prev) => [newGeneration, ...prev]);
+      recordGeneration({
+        type: "text",
+        prompt: newGeneration.prompt,
+        result: finalResult,
+        tool: newGeneration.tool,
+        platform,
+      });
       
       // Simulate streaming
       simulateStream(finalResult, (text) => {
@@ -332,12 +458,22 @@ export default function AIStudioPage() {
 
   function loadGeneration(gen: Generation) {
     setPrompt(gen.prompt);
+    setActiveGenerationId(gen.id);
+    setStreamingText("");
+    if (gen.type === "image") {
+      setActiveTab("image");
+      setGeneratedImage(gen.mediaUrl ?? null);
+      return;
+    }
+    if (gen.type === "video") {
+      setActiveTab("video");
+      setGeneratedVideo(gen.mediaUrl ?? null);
+      return;
+    }
     setResult(gen.result);
     setActiveTool(gen.tool);
     setPlatform(gen.platform);
     setContentType(gen.contentType);
-    setActiveGenerationId(gen.id);
-    setStreamingText("");
   }
 
   async function handleCreateContent() {
@@ -392,6 +528,10 @@ export default function AIStudioPage() {
   // Pipeline handlers
   async function handleRunPipeline() {
     if (isPipelineRunning || !prompt.trim()) return;
+    if (limitReached) {
+      setShowPurchase(true);
+      return;
+    }
     setIsPipelineRunning(true);
     setPipelineDone(false);
     setResult("");
@@ -429,7 +569,7 @@ export default function AIStudioPage() {
           }),
         });
 
-        const data = await response.json();
+        const data = await safeJson(response);
         if (!response.ok) throw new Error(data.error || "Pipeline step failed.");
         if (!data.result?.trim()) throw new Error("AI returned an empty result.");
 
@@ -449,6 +589,13 @@ export default function AIStudioPage() {
     setResult(hashtags ? `${postText}\n\n${hashtags}` : postText);
     setPipelineMediaPrompt(mediaPrompt);
     setPipelineDone(true);
+    recordGeneration({
+      type: "text",
+      prompt: prompt.trim(),
+      result: hashtags ? `${postText}\n\n${hashtags}` : postText,
+      tool: "Pipeline",
+      platform,
+    });
     setIsPipelineRunning(false);
 
     // Automatically generate a matching image from the AI-written media prompt.
@@ -459,6 +606,10 @@ export default function AIStudioPage() {
   async function handleImageGenerate(customPrompt?: string) {
     const imagePrompt = (customPrompt ?? prompt).trim();
     if (!imagePrompt || isGeneratingImage) return;
+    if (limitReached) {
+      setShowPurchase(true);
+      return;
+    }
     setIsGeneratingImage(true);
     setGeneratedImage(null);
     setImageError("");
@@ -475,11 +626,26 @@ export default function AIStudioPage() {
         }),
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!response.ok) throw new Error(data.error || "Image generation failed.");
       if (!data.success || !data.url) throw new Error("No image returned.");
 
       setGeneratedImage(data.url);
+      recordGeneration({ type: "image", prompt: imagePrompt, result: data.url });
+      setGenerations((prev) => [
+        {
+          id: `img-${Date.now()}`,
+          prompt: imagePrompt,
+          result: data.url,
+          tool: "Image",
+          platform,
+          contentType: "Image",
+          timestamp: Date.now(),
+          type: "image",
+          mediaUrl: data.url,
+        },
+        ...prev,
+      ]);
     } catch (err) {
       setImageError(err instanceof Error ? err.message : "Image generation failed. Please try again.");
     } finally {
@@ -490,6 +656,10 @@ export default function AIStudioPage() {
   async function handleVideoGenerate(customPrompt?: string) {
     const videoPrompt = (customPrompt ?? prompt).trim();
     if (!videoPrompt || isGeneratingVideo) return;
+    if (limitReached) {
+      setShowPurchase(true);
+      return;
+    }
     setIsGeneratingVideo(true);
     setGeneratedVideo(null);
     setVideoError("");
@@ -513,12 +683,27 @@ export default function AIStudioPage() {
         }),
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!response.ok) throw new Error(data.error || "Video generation failed.");
       if (!data.success || !data.url) throw new Error("No video returned.");
 
       setVideoProgress(100);
       setGeneratedVideo(data.url);
+      recordGeneration({ type: "video", prompt: videoPrompt, result: data.url });
+      setGenerations((prev) => [
+        {
+          id: `vid-${Date.now()}`,
+          prompt: videoPrompt,
+          result: data.url,
+          tool: "Video",
+          platform,
+          contentType: "Video",
+          timestamp: Date.now(),
+          type: "video",
+          mediaUrl: data.url,
+        },
+        ...prev,
+      ]);
     } catch (err) {
       setVideoError(err instanceof Error ? err.message : "Video generation failed. Please try again.");
     } finally {
@@ -527,6 +712,69 @@ export default function AIStudioPage() {
         videoProgressTimer.current = null;
       }
       setIsGeneratingVideo(false);
+    }
+  }
+
+  // ── Subscription purchase (Razorpay with test-mode fallback) ──
+  async function handlePurchase() {
+    if (purchaseBusy) return;
+    setPurchaseBusy(true);
+    setPurchaseError("");
+    setPurchaseNotice("");
+
+    try {
+      const orderRes = await fetch("/api/billing/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: "PRO" }),
+      });
+      const order = await safeJson(orderRes);
+      if (!orderRes.ok) {
+        setPurchaseError(order.error || "Could not start the payment.");
+        return;
+      }
+
+      let paymentId = "pay_simulated";
+      let signature = "";
+
+      if (!order.simulated) {
+        const loaded = await loadRazorpayScript();
+        if (!loaded) {
+          setPurchaseError("Could not load Razorpay checkout. Check your connection.");
+          return;
+        }
+        const paid = await openRazorpayCheckout({
+          key: order.keyId,
+          orderId: order.orderId,
+          name: "octa-studio",
+          description: "PRO subscription — unlimited AI generations",
+        });
+        if (!paid) {
+          setPurchaseError("Payment was cancelled.");
+          return;
+        }
+        paymentId = paid.razorpay_payment_id;
+        signature = paid.razorpay_signature;
+      } else {
+        setPurchaseNotice("Test mode: Razorpay keys not configured — activating PRO without charge.");
+      }
+
+      const verifyRes = await fetch("/api/billing/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.orderId, paymentId, signature }),
+      });
+      const verify = await safeJson(verifyRes);
+      if (!verifyRes.ok || !verify.success) {
+        setPurchaseError(verify.error || "Payment verification failed.");
+        return;
+      }
+
+      setUser(verify.user);
+      setPurchaseNotice("PRO activated — unlimited AI generations unlocked.");
+      window.setTimeout(() => setShowPurchase(false), 1400);
+    } finally {
+      setPurchaseBusy(false);
     }
   }
 
@@ -595,6 +843,29 @@ export default function AIStudioPage() {
           Back to Workspace
         </Link>
         <span className="text-sm font-medium text-zinc-400 border-l border-zinc-800 pl-4">Draft once. Preview everywhere.</span>
+        <div className="ml-auto flex items-center gap-3">
+          {user ? (
+            <span className="hidden max-w-[160px] truncate text-xs text-zinc-500 sm:block">{user.name || user.email}</span>
+          ) : (
+            <Link href="/login?next=/ai-studio" className="text-xs font-medium text-zinc-400 transition hover:text-white">
+              Sign in
+            </Link>
+          )}
+          {user?.plan === "PRO" ? (
+            <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2.5 py-1 text-[10px] font-semibold text-violet-300">PRO</span>
+          ) : (
+            <>
+              <span className="hidden text-[10px] text-zinc-500 sm:block">{usage.used}/{usage.limit} free generations</span>
+              <button
+                type="button"
+                onClick={() => setShowPurchase(true)}
+                className="rounded-full bg-[#7C3AED] px-3 py-1 text-[10px] font-semibold text-white transition hover:bg-[#6D28D9]"
+              >
+                Upgrade
+              </button>
+            </>
+          )}
+        </div>
       </header>
 
       <div className="flex h-[calc(100vh-4rem)]">
@@ -624,7 +895,9 @@ export default function AIStudioPage() {
                     }`}
                   >
                     <p className="text-xs font-medium text-zinc-200 truncate">{gen.prompt}</p>
-                    <p className="text-[10px] text-zinc-500 mt-1 truncate">{gen.tool} · {gen.platform}</p>
+                    <p className="text-[10px] text-zinc-500 mt-1 truncate">
+                      {gen.type === "image" ? "Image" : gen.type === "video" ? "Video" : gen.tool} · {gen.platform}
+                    </p>
                     <p className="text-[10px] text-zinc-600 mt-1">
                       {new Date(gen.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
@@ -1184,6 +1457,67 @@ export default function AIStudioPage() {
           )}
         </aside>
       </div>
+
+      {showPurchase && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Unlock unlimited AI</h2>
+                <p className="mt-1 text-xs text-zinc-500">
+                  You used all {usage.limit} free generations. Go PRO to keep creating.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPurchase(false)}
+                className="rounded-lg p-1 text-zinc-500 transition hover:bg-zinc-900 hover:text-white"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-4">
+              <div className="flex items-baseline justify-between">
+                <p className="text-sm font-semibold text-white">octa-studio PRO</p>
+                <p className="text-sm font-semibold text-violet-300">₹999<span className="text-[10px] text-zinc-500">/month</span></p>
+              </div>
+              <ul className="mt-3 space-y-1.5 text-xs text-zinc-300">
+                <li>· Unlimited AI text, image & video generations</li>
+                <li>· Full pipeline automation</li>
+                <li>· Priority generation queue</li>
+              </ul>
+            </div>
+
+            {purchaseError && (
+              <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{purchaseError}</p>
+            )}
+            {purchaseNotice && (
+              <p className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">{purchaseNotice}</p>
+            )}
+
+            {user ? (
+              <button
+                type="button"
+                onClick={() => void handlePurchase()}
+                disabled={purchaseBusy}
+                className="mt-5 w-full rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-60"
+              >
+                {purchaseBusy ? "Processing..." : "Buy with Razorpay"}
+              </button>
+            ) : (
+              <div className="mt-5 grid gap-2">
+                <Link href="/signup?next=/ai-studio" className="rounded-xl bg-[#7C3AED] px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-[#6D28D9]">
+                  Sign up to buy PRO
+                </Link>
+                <Link href="/login?next=/ai-studio" className="rounded-xl border border-zinc-800 px-4 py-2.5 text-center text-sm font-medium text-zinc-300 transition hover:border-zinc-700 hover:text-white">
+                  Sign in
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

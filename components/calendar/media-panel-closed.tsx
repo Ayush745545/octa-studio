@@ -79,7 +79,17 @@ export function MediaPanelClosed({
         { signal: controller.signal },
       );
       const data = await res.json();
-      setItems((prev) => (append ? [...prev, ...(data.items ?? [])] : data.items ?? []));
+      setItems((prev) => {
+        // stock APIs can repeat items within/across pages — keep keys unique
+        const seen = new Set(append ? prev.map((p) => p.id) : []);
+        const fresh: StockItem[] = [];
+        for (const item of (data.items ?? []) as StockItem[]) {
+          if (seen.has(item.id)) continue;
+          seen.add(item.id);
+          fresh.push(item);
+        }
+        return append ? [...prev, ...fresh] : fresh;
+      });
     } catch {
       if (append) {
         // keep existing items when paging fails
