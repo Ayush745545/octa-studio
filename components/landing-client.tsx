@@ -743,7 +743,11 @@ export function LandingClient({
 
   // Scroll-reveal every [data-reveal] block across all sections
   useLayoutEffect(() => {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion()) {
+      // No animations — show chart bars in their final state
+      document.querySelectorAll("[data-chart]").forEach((el) => el.classList.add("chart-play"));
+      return;
+    }
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
@@ -828,8 +832,8 @@ export function LandingClient({
           from { transform: scaleY(0); }
           to { transform: scaleY(1); }
         }
-        .chart-bar { animation-play-state: paused; }
-        .chart-play .chart-bar { animation-play-state: running; }
+        .chart-bar { transform: scaleY(0); }
+        .chart-play .chart-bar { animation: scaleUp 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
       `}} />
 
       {/* ━━━ Navigation ━━━ */}
@@ -1005,12 +1009,7 @@ export function LandingClient({
                   <div key={i} className="group relative flex-1 h-full flex items-end">
                     <div 
                       className="chart-bar w-full rounded-t-sm bg-gradient-to-t from-blue-600/30 to-blue-500 transition-all hover:opacity-80 origin-bottom"
-                      style={{ 
-                        height: `${h}%`, 
-                        animation: `scaleUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards ${i * 0.08}s`,
-                        animationPlayState: 'paused',
-                        transform: 'scaleY(0)'
-                      }}
+                      style={{ height: `${h}%`, animationDelay: `${i * 0.08}s` }}
                     />
                     <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-white px-2 py-1 text-[10px] font-bold text-black transition-opacity pointer-events-none">
                       {h}k
