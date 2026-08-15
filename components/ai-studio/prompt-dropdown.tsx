@@ -1,85 +1,111 @@
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/animate-ui/components/radix/popover";
+"use client";
 
-interface PromptDropdownProps {
+import { useEffect, useRef, useState, type ReactNode } from "react";
+
+export interface PromptDropdownOption {
   label: string;
-  value: string;
-  options: string[];
-  onChange: (value: string) => void;
+  value?: string;
+  description?: string;
+  icon?: ReactNode;
 }
 
-export const PromptDropdown = ({
+export interface PromptDropdownProps {
+  label?: string;
+  value?: string;
+  options?: (PromptDropdownOption | string)[];
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  onChange?: (value: string) => void;
+  onSelect?: (value: string) => void;
+}
+
+function normalize(option: PromptDropdownOption | string): PromptDropdownOption {
+  return typeof option === "string" ? { label: option, value: option } : option;
+}
+
+/**
+ * Compact dropdown used next to the AI Studio prompt bar for picking a
+ * preset (mode, style, suggested prompt, …).
+ */
+export function PromptDropdown({
   label,
   value,
-  options,
+  options = [],
+  placeholder = "Select",
+  className = "",
+  disabled = false,
   onChange,
-}: PromptDropdownProps) => {
+  onSelect,
+}: PromptDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(event: MouseEvent) {
+      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  const items = options.map(normalize);
+  const selected = items.find((item) => (item.value ?? item.label) === value);
+
+  function choose(option: PromptDropdownOption) {
+    const next = option.value ?? option.label;
+    setOpen(false);
+    onChange?.(next);
+    onSelect?.(next);
+  }
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 outline-none transition hover:border-white/25 hover:text-zinc-100 focus-visible:ring-1 focus-visible:ring-[#7C3AED]"
-        >
-          <span>{value}</span>
-          <span className="text-zinc-500">
-            <svg
-              className="h-3 w-3"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-              />
-            </svg>
-          </span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        sideOffset={6}
-        align="start"
-        className="w-40 overflow-hidden rounded-xl border border-white/10 bg-[#131317] p-1 shadow-xl shadow-black/50"
+    <div ref={containerRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 transition hover:border-white/25 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <p className="px-2.5 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-          {label}
-        </p>
-        {options.map((opt) => (
-          <button
-            key={opt}
-            type="button"
-            onClick={() => onChange(opt)}
-            className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition ${
-              value === opt
-                ? "bg-[#7C3AED]/20 text-violet-300"
-                : "text-zinc-300 hover:bg-white/[0.06] hover:text-white"
-            }`}
-          >
-            <span>{opt}</span>
-            {value === opt && (
-              <svg
-                className="h-3 w-3 text-[#7C3AED]"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={3}
-                viewBox="0 0 24 24"
+        {label && <span className="text-xs uppercase tracking-wide text-zinc-500">{label}</span>}
+        <span>{selected?.label ?? placeholder}</span>
+        <svg className="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 20 20" fill="currentColor">
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+
+      {open && items.length > 0 && (
+        <div className="absolute z-30 mt-2 max-h-72 w-56 overflow-y-auto rounded-xl border border-white/10 bg-[#111114] p-1 shadow-xl">
+          {items.map((item) => {
+            const itemValue = item.value ?? item.label;
+            return (
+              <button
+                key={itemValue}
+                type="button"
+                onClick={() => choose(item)}
+                className={`flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-white/10 ${
+                  itemValue === value ? "text-white" : "text-zinc-300"
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            )}
-          </button>
-        ))}
-      </PopoverContent>
-    </Popover>
+                {item.icon}
+                <span>
+                  {item.label}
+                  {item.description && (
+                    <span className="block text-xs text-zinc-500">{item.description}</span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
-};
+}
+
+export default PromptDropdown;
