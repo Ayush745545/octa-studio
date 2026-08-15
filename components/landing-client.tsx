@@ -731,11 +731,18 @@ export function LandingClient({
         </div>
       </nav>
 
-      {/* 1. HERO ("plan create publish page 1") */}
+        {/* 1. HERO ("plan create publish page 1") */}
       <section className="relative overflow-hidden pt-16">
-        {/* Background image — full, no fade */}
+        {/* Background video loop */}
         <div className="absolute inset-0">
-          <Image src="/images/bg.png" alt="" fill className="object-cover" priority />
+          <video
+            src="/ai/banner-374a8e61.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="object-cover w-full h-full"
+          />
           <div className="absolute inset-0 bg-black/55" />
         </div>
         <div className="relative z-10 mx-auto max-w-5xl px-6 pt-32 pb-16 text-center lg:px-8 lg:pt-40 lg:pb-24">
@@ -798,37 +805,27 @@ export function LandingClient({
             </div>
           </div>
 
-          {/* ── Create Post + AI Assistant Showcase ── */}
-          <div data-reveal className="mt-32">
-            <div className="grid items-start gap-12 lg:grid-cols-[0.8fr_1.2fr]">
-              <div className="lg:sticky lg:top-32">
-                <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Create with AI</p>
-                <h3 className="headline-apple mt-3 text-[clamp(2rem,3.5vw,3rem)]">Your OLED Creative Workspace.</h3>
-                <p className="mt-4 text-[14px] leading-[1.7] text-zinc-500">Write text, build pipelines, generate images, and create videos in dark mode. Configure the platform, tone, and content type, and watch the AI build a ready-to-publish post.</p>
-                <ul className="mt-6 space-y-3">
-                  {["Real-time post preview", "Text, Image & Video generation", "Context-aware models", "Brand tone enforcement"].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-[13px] text-zinc-400">
-                      <svg className="h-4 w-4 shrink-0 text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex flex-col items-center gap-6">
-                <div data-pipe-phone className="relative mx-auto w-[280px] rounded-[32px] border-2 border-zinc-700 bg-black p-2 shadow-2xl shadow-black/80">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 rounded-b-xl bg-black border-b border-x border-zinc-700 z-10" />
-                  <div className="rounded-[24px] bg-[#111113] overflow-hidden">
-                    <div className="aspect-[798/1648] w-full">
-                      <Image src="/my.png" alt="Live Preview Mockup" width={798} height={1648} className="w-full h-full object-cover" />
-                    </div>
-                  </div>
-                  <div className="mx-auto mt-2 h-1 w-12 rounded-full bg-zinc-700" />
-                </div>
-                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Live Preview</p>
-              </div>
-            </div>
-
-          </div>
+{/* ── Create Post + AI Assistant Showcase ── */}
+           <div data-reveal className="mt-32">
+             <div className="grid items-start gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+               <div className="lg:sticky lg:top-32">
+                 <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Create with AI</p>
+                 <h3 className="headline-apple mt-3 text-[clamp(2rem,3.5vw,3rem)]">Your OLED Creative Workspace.</h3>
+                 <p className="mt-4 text-[14px] leading-[1.7] text-zinc-500">Write text, build pipelines, generate images, and create videos in dark mode. Configure the platform, tone, and content type, and watch the AI build a ready-to-publish post.</p>
+                 <ul className="mt-6 space-y-3">
+                   {["Real-time post preview", "Text, Image & Video generation", "Context-aware models", "Brand tone enforcement"].map((item) => (
+                     <li key={item} className="flex items-center gap-3 text-[13px] text-zinc-400">
+                       <svg className="h-4 w-4 shrink-0 text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                       {item}
+                     </li>
+                   ))}
+                 </ul>
+               </div>
+               <div>
+                 <img src="/images/hompage.png" alt="AI Creative Workspace" className="rounded-2xl border border-zinc-800 shadow-2xl shadow-black/60 w-full object-cover" />
+               </div>
+             </div>
+           </div>
 
           {/* ── Bulk Scheduling + Post Preview ── */}
           <div data-reveal className="mt-32 grid items-start gap-12 lg:grid-cols-2">

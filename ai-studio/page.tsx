@@ -568,59 +568,59 @@ export default function AIStudioPage() {
     }));
     setPipelineSteps(steps);
 
-    let context = "";
-    let postText = "";
-    let hashtags = "";
-    let mediaPrompt = "";
+let context = "";
+     let postText = "";
+     let hashtags = "";
+     let mediaPrompt = "";
 
-    for (const step of steps) {
-      setPipelineSteps((prev) => prev.map((s) => (s.id === step.id ? { ...s, status: "running" } : s)));
-      try {
-        const response = await fetch("/api/ai/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: step.prompt,
-            tool: step.tool,
-            platform,
-            contentType,
-            tone,
-            length,
-            context,
-          }),
-        });
+     for (const step of steps) {
+       setPipelineSteps((prev) => prev.map((s) => (s.id === step.id ? { ...s, status: "running" } : s)));
+       try {
+         const response = await fetch("/api/ai/generate", {
+           method: "POST",
+           headers: { "Content-Type": "application/json" },
+           body: JSON.stringify({
+             prompt: step.prompt,
+             tool: step.tool,
+             platform,
+             contentType,
+             tone,
+             length,
+             context,
+           }),
+         });
 
-        const data = await safeJson(response);
-        if (!response.ok) throw new Error(data.error || "Pipeline step failed.");
-        if (!data.result?.trim()) throw new Error("AI returned an empty result.");
+         const data = await safeJson(response);
+         if (!response.ok) throw new Error(data.error || "Pipeline step failed.");
+         if (!data.result?.trim()) throw new Error("AI returned an empty result.");
 
-        context = data.result.trim();
-        if (step.title === "Polish" || step.title === "Enhance") postText = context;
-        if (step.title === "Hashtags") hashtags = context;
-        if (step.title === "Media Prompt") mediaPrompt = context;
-        setPipelineSteps((prev) => prev.map((s) => (s.id === step.id ? { ...s, status: "done", result: context } : s)));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Pipeline step failed.";
-        setPipelineSteps((prev) => prev.map((s) => (s.id === step.id ? { ...s, status: "error", error: message } : s)));
-        setIsPipelineRunning(false);
-        return;
-      }
-    }
+         context = data.result.trim();
+         if (step.title === "Polish" || step.title === "Enhance") postText = context;
+         if (step.title === "Hashtags") hashtags = context;
+         if (step.title === "Media Prompt") mediaPrompt = context;
+         setPipelineSteps((prev) => prev.map((s) => (s.id === step.id ? { ...s, status: "done", result: context } : s)));
+       } catch (err) {
+         const message = err instanceof Error ? err.message : "Pipeline step failed.";
+         setPipelineSteps((prev) => prev.map((s) => (s.id === step.id ? { ...s, status: "error", error: message } : s)));
+         setIsPipelineRunning(false);
+         return;
+       }
+     }
 
-    setResult(hashtags ? `${postText}\n\n${hashtags}` : postText);
-    setPipelineMediaPrompt(mediaPrompt);
-    setPipelineDone(true);
-    recordGeneration({
-      type: "text",
-      prompt: prompt.trim(),
-      result: hashtags ? `${postText}\n\n${hashtags}` : postText,
-      tool: "Pipeline",
-      platform,
-    });
-    setIsPipelineRunning(false);
+     setResult(hashtags ? `${postText}\n\n${hashtags}` : postText);
+     setPipelineMediaPrompt(mediaPrompt);
+     setPipelineDone(true);
+     recordGeneration({
+       type: "text",
+       prompt: prompt.trim(),
+       result: hashtags ? `${postText}\n\n${hashtags}` : postText,
+       tool: "Pipeline",
+       platform,
+     });
+     setIsPipelineRunning(false);
 
-    // Automatically generate a matching image from the AI-written media prompt.
-    if (mediaPrompt) void handleImageGenerate(mediaPrompt);
+     // Auto-generated media for this post.
+     if (mediaPrompt) handleImageGenerate(mediaPrompt);
   }
 
   // Image & Video handlers (real generation via /api/ai/image + /api/ai/video)
@@ -950,14 +950,15 @@ export default function AIStudioPage() {
           <div className={`mx-auto px-4 py-8 sm:px-6 lg:px-7 ${showPreview ? 'max-w-4xl' : 'max-w-6xl'}`}>
             {/* Cinematic hero */}
             <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/10">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=2400&q=80')" }}
-              />
-              <div className="animate-kenburns absolute inset-0 scale-110 bg-cover bg-center"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=2400&q=80')" }}
-                aria-hidden
-              />
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              >
+                <source src="/ai/page9-new.mp4" type="video/mp4" />
+              </video>
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-[#0a0a0c]" />
               <div className="relative px-6 pb-20 pt-16 text-center sm:px-10">
                 <h1 className="headline text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl animate-fade-up">

@@ -362,7 +362,7 @@ export default function LandingPage() {
         {/* Side Image with Fade */}
         <div className="absolute inset-y-0 right-0 w-1/2 pointer-events-none hidden lg:block">
           <img
-            src="/images/hompage.png"
+            src="/images/how.png"
             alt="octa-studio workspace"
             className="h-full w-full object-cover opacity-80 rounded-l-3xl"
           />
@@ -428,7 +428,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <PhoneMockup imageSrc="/images/img.png" alt="octa-studio Instagram preview" />
+              <div className="mx-auto w-[300px]"><div className="rounded-[2rem] border-[3px] border-zinc-800 bg-black p-2.5 shadow-2xl shadow-black/80"><div className="relative overflow-hidden rounded-[1.75rem] bg-zinc-900"><Image src="/images/how.png" alt="octa-studio post" width={300} height={600} className="w-full h-auto object-cover" /><div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" /><div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-3 pb-6"><div className="flex items-center gap-2.5"><span className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-lg shadow-purple-500/20"><Image src="/images/logo.png" alt="octa-studio" width={32} height={32} className="object-cover" /></span><span className="text-[15px] font-semibold tracking-tight text-white">Today,</span></div></div></div></div></div></div></div>
             </div>
           </div>
         </div>

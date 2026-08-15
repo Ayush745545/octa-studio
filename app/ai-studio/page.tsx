@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { createContent } from "@/app/content/actions/create-content";
 import { scheduleContent } from "@/app/content/actions/schedule-content";
 import { PostPreviewPanel } from "@/components/ai-studio/post-preview-panel";
+import { PhoneMockup } from "@/components/ai-studio/phone-mockup";
 
 const tools = [
   {
@@ -248,6 +249,7 @@ export default function AIStudioPage() {
   const [purchaseError, setPurchaseError] = useState("");
   const [purchaseNotice, setPurchaseNotice] = useState("");
   const [streamingText, setStreamingText] = useState("");
+  const [showPhoneMockup, setShowPhoneMockup] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Pipeline state
@@ -368,18 +370,6 @@ export default function AIStudioPage() {
     }).catch(() => {});
   }
 
-  function navigateToCreation(tab: string) {
-    const qs = new URLSearchParams({
-      p: prompt.trim(),
-      tool: activeTool,
-      platform,
-      contentType,
-      tone,
-      tab,
-    });
-    window.location.href = `/ai-studio/creation?${qs.toString()}`;
-  }
-
   async function runGeneration(opts: {
     promptText: string;
     tool?: string;
@@ -391,7 +381,7 @@ export default function AIStudioPage() {
       return;
     }
 
-    navigateToCreation("write");
+    // Remove redirect - just set state flags
     setIsGenerating(true);
     setResult("");
     setError("");
@@ -483,12 +473,22 @@ export default function AIStudioPage() {
     setError("");
 
     try {
-      const content = await createContent({
-        title: prompt.trim().slice(0, 80) || `${activeTool} — ${platform}`,
-        body: result.trim(),
-        platform: platform || null,
-      });
-      router.push(`/content/${content.id}`);
+       const content = await createContent({
+         title: prompt.trim().slice(0, 80) || `${activeTool} \${platform}`,
+         body: result.trim(),
+         platform: platform || null,
+         // Remove contentType from client-side call
+       });
+
+       // Keep contentType tracking for UI purposes only
+       const contentType = activeTab;
+
+if (contentType in ['image', 'video']) {
+          router.push(`/content/${content.id}`);
+        } else {
+          // Update UI with text content
+          setResult(content.body);
+        }
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Could not create content.");
@@ -533,14 +533,7 @@ export default function AIStudioPage() {
       setShowPurchase(true);
       return;
     }
-    window.location.href = `/ai-studio/creation?${new URLSearchParams({
-      p: prompt.trim(),
-      tool: "Pipeline",
-      platform,
-      contentType,
-      tone,
-      tab: "pipeline",
-    }).toString()}`;
+    // Remove redirect - stay on page
     setIsPipelineRunning(true);
     setPipelineDone(false);
     setResult("");
@@ -619,14 +612,6 @@ export default function AIStudioPage() {
       setShowPurchase(true);
       return;
     }
-    window.location.href = `/ai-studio/creation?${new URLSearchParams({
-      p: imagePrompt,
-      tool: "Image Generator",
-      platform,
-      contentType,
-      tone,
-      tab: "image",
-    }).toString()}`;
     setIsGeneratingImage(true);
     setGeneratedImage(null);
     setImageError("");
@@ -677,14 +662,6 @@ export default function AIStudioPage() {
       setShowPurchase(true);
       return;
     }
-    window.location.href = `/ai-studio/creation?${new URLSearchParams({
-      p: videoPrompt,
-      tool: "Video Generator",
-      platform,
-      contentType,
-      tone,
-      tab: "video",
-    }).toString()}`;
     setIsGeneratingVideo(true);
     setGeneratedVideo(null);
     setVideoError("");
@@ -825,21 +802,29 @@ export default function AIStudioPage() {
     ? "Run Pipeline"
     : "Generate";
 
-  const primaryPlaceholder =
-    activeTab === "image"
-      ? "Describe the image you want to generate..."
-      : activeTab === "video"
-      ? "Describe the video you want to generate..."
-      : activeTab === "pipeline"
-      ? "Describe the post you want..."
-      : tools.find((t) => t.title === activeTool)?.placeholder ?? "Type a prompt...";
+  const primaryPlaceholder = activeTab === "image" ? "Describe the image you want to generate..." : activeTab === "video" ? "Describe the video you want to generate..." : activeTab === "pipeline" ? "Describe the post you want..." : tools.find((t) => t.title === activeTool)?.placeholder ?? "Type a prompt...";
 
   function handlePrimaryAction() {
     if (activeTab === "write") void handleGenerate();
     else if (activeTab === "image") void handleImageGenerate();
     else if (activeTab === "video") void handleVideoGenerate();
     else void handleRunPipeline();
+
+    // Show phone mockup for visual generation tabs
+    if (activeTab === "image" || activeTab === "video") {
+      setShowPhoneMockup(true);
+    }
   }
+
+  // AI Editor suggestions
+  const aiSuggestions = [
+    { label: "Improve", instruction: "Improve this draft: make it clearer, more engaging, and better structured. Keep the core message." },
+    { label: "Rewrite", instruction: "Rewrite this completely with a fresh perspective while keeping the same topic and intent." },
+    { label: "Shorten", instruction: "Shorten this significantly while keeping the key points. Make it punchy and concise." },
+    { label: "Expand", instruction: "Expand this with more detail, examples, and depth. Make it comprehensive." },
+    { label: "Fix Grammar", instruction: "Fix any grammar, punctuation, or spelling errors. Keep the exact same wording otherwise." },
+    { label: "Make Engaging", instruction: "Make this more engaging: add hooks, questions, emojis, and a conversational tone that drives interaction." },
+  ];
 
   // Sparkle button: drop a ready-to-run example into the prompt bar.
   function insertExample() {
@@ -938,14 +923,15 @@ export default function AIStudioPage() {
           <div className={`mx-auto px-4 py-8 sm:px-6 lg:px-7 ${showPreview ? 'max-w-4xl' : 'max-w-6xl'}`}>
             {/* Cinematic hero */}
             <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/10">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=2400&q=80')" }}
-              />
-              <div className="animate-kenburns absolute inset-0 scale-110 bg-cover bg-center"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=2400&q=80')" }}
-                aria-hidden
-              />
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              >
+                <source src="/ai/page9-new.mp4" type="video/mp4" />
+              </video>
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-[#0a0a0c]" />
               <div className="relative px-6 pb-20 pt-16 text-center sm:px-10">
                 <h1 className="headline text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl animate-fade-up">
@@ -1017,7 +1003,7 @@ export default function AIStudioPage() {
                   <button
                     type="button"
                     onClick={handlePrimaryAction}
-                    disabled={!prompt.trim() || primaryBusy}
+                    disabled={!prompt.trim() || !!primaryBusy}
                     className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
                   >
                     {primaryBusy && (
@@ -1353,15 +1339,32 @@ export default function AIStudioPage() {
                           <p className="text-xs text-zinc-400">Generating a matching image for your post…</p>
                         </div>
                       )}
-                      {!isGeneratingImage && (generatedImage || generatedVideo) && (
-                        <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
-                          {generatedVideo ? (
-                            <video src={generatedVideo} controls autoPlay loop playsInline muted className="w-full" />
-                          ) : (
-                            <img src={generatedImage ?? undefined} alt="Generated for this post" className="w-full object-cover" />
-                          )}
-                        </div>
-                      )}
+{!isGeneratingImage && (generatedImage || generatedVideo) && (
+  <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
+    {generatedVideo ? (
+      <video src={generatedVideo} controls autoPlay loop playsInline muted className="w-full" />
+    ) : (
+      <img src={generatedImage ?? undefined} alt="Generated for this post" className="w-full object-cover" />
+    )}
+  </div>
+)}
+
+{!isGeneratingImage && generatedImage && (
+  <div className="mt-3 rounded-xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-3">
+    <div className="flex items-center justify-between">
+      <span className="text-xs font-medium text-violet-300">Last Generated Image</span>
+      <button
+        onClick={() => {
+          setPreviewImage(generatedImage);
+          // Scroll to preview panel or show success message
+        }}
+        className="rounded-lg bg-[#7C3AED] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#6D28D9]"
+      >
+        Use This
+      </button>
+    </div>
+  </div>
+)}
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <button
                           onClick={() => handleVideoGenerate(pipelineMediaPrompt)}
@@ -1514,6 +1517,23 @@ export default function AIStudioPage() {
           )}
         </aside>
       </div>
+
+{showPhoneMockup && activeTab !== "write" && (
+        <PhoneMockup
+          imageUrl={activeTab === "image" ? generatedImage : undefined}
+          videoUrl={activeTab === "video" ? generatedVideo : undefined}
+          isGenerating={isGeneratingImage || isGeneratingVideo}
+          content={pipelineMediaPrompt || prompt}
+          onClick={() => {
+            // Only regenerate if there's no existing content
+            if (activeTab === "image" && !generatedImage && !isGeneratingImage) {
+              void handleImageGenerate();
+            } else if (activeTab === "video" && !generatedVideo && !isGeneratingVideo) {
+              void handleVideoGenerate();
+            }
+          }}
+        />
+      )}
 
       {showPurchase && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">

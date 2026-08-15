@@ -978,7 +978,7 @@ export default function AIStudioPage() {
               <button
                 type="button"
                 onClick={handlePrimaryAction}
-                disabled={!prompt.trim() || primaryBusy}
+                disabled={!prompt.trim() || !!primaryBusy}
                 className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
               >
                 {primaryBusy && (
