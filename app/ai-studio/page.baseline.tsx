@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, type ChangeEvent } from "react";
-import { PromptDropdown } from "@/components/ai-studio/prompt-dropdown";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createContent } from "@/app/content/actions/create-content";
@@ -36,53 +35,15 @@ const tools = [
   },
 ];
 
-const TEMPLATES = [
-  {
-    key: "content-ideas",
-    name: "Content Ideas",
-    tagline: "Fresh angles from a topic",
-    tool: "Generate Ideas",
-    prompt: "5 fresh content ideas for",
-    img: "/ai/templates/tpl_ideas.png",
-  },
-  {
-    key: "write-post",
-    name: "Write a Post",
-    tagline: "First draft in seconds",
-    tool: "Write Content",
-    prompt: "Write an engaging post about",
-    img: "/ai/templates/tpl_write.png",
-  },
-  {
-    key: "strong-hook",
-    name: "Strong Hook",
-    tagline: "Stop-the-scroll openers",
-    tool: "Generate Hook",
-    prompt: "3 strong opening hooks for a post about",
-    img: "/ai/templates/tpl_hook.png",
-  },
-  {
-    key: "clickable-title",
-    name: "Clickable Title",
-    tagline: "Titles people tap on",
-    tool: "Generate Title",
-    prompt: "5 clickable titles for a post about",
-    img: "/ai/templates/tpl_title.png",
-  },
-  {
-    key: "repurpose",
-    name: "Repurpose Content",
-    tagline: "One piece, many platforms",
-    tool: "Repurpose",
-    prompt: "Repurpose this for another platform: ",
-    img: "/ai/templates/tpl_repurpose.png",
-  },
-];
-
 const platforms = ["Instagram", "YouTube", "LinkedIn", "X", "Blog"];
 const contentTypes = ["Post", "Reel", "Video", "Article", "Thread", "Caption"];
 const tones = ["Professional", "Casual", "Educational", "Engaging", "Viral"];
 const lengths = ["Short", "Medium", "Long"];
+
+type Suggestion = {
+  label: string;
+  instruction: string;
+};
 
 const AI_CLICHES = [
   "in today's",
@@ -96,6 +57,50 @@ const AI_CLICHES = [
 ];
 
 // Analyzes the generated text and proposes concrete improvements.
+function getSmartSuggestions(text: string, platform: string): Suggestion[] {
+  const suggestions: Suggestion[] = [];
+  const lower = text.toLowerCase();
+
+  if (!/\?/.test(text)) {
+    suggestions.push({
+      label: "Add a question",
+      instruction:
+        "Keep this content exactly as it is, but end with one short engaging question that invites comments.",
+    });
+  }
+
+  if (platform === "Instagram" && !/#[a-z]/i.test(text)) {
+    suggestions.push({
+      label: "Add hashtags",
+      instruction:
+        "Keep this content and add 4 relevant hashtags on the last line.",
+    });
+  }
+
+  if (AI_CLICHES.some((c) => lower.includes(c))) {
+    suggestions.push({
+      label: "Humanize it",
+      instruction:
+        "Rewrite this to sound like a real person wrote it. Remove generic phrases, keep the meaning.",
+    });
+  }
+
+  if (text.split(/\s+/).length > 180) {
+    suggestions.push({
+      label: "Make it shorter",
+      instruction:
+        "Shorten this to under 120 words while keeping the strongest points.",
+    });
+  }
+
+  suggestions.push({
+    label: "Stronger hook",
+    instruction:
+      "Rewrite only the first line to be a stronger attention-grabbing hook. Keep everything else.",
+  });
+
+  return suggestions.slice(0, 4);
+}
 
 function toLocalInputValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -229,7 +234,6 @@ export default function AIStudioPage() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
   const [activeTool, setActiveTool] = useState("Generate Ideas");
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [platform, setPlatform] = useState("Instagram");
   const [contentType, setContentType] = useState("Post");
   const [tone, setTone] = useState("Engaging");
@@ -368,18 +372,6 @@ export default function AIStudioPage() {
     }).catch(() => {});
   }
 
-  function navigateToCreation(tab: string) {
-    const qs = new URLSearchParams({
-      p: prompt.trim(),
-      tool: activeTool,
-      platform,
-      contentType,
-      tone,
-      tab,
-    });
-    window.location.href = `/ai-studio/creation?${qs.toString()}`;
-  }
-
   async function runGeneration(opts: {
     promptText: string;
     tool?: string;
@@ -391,7 +383,6 @@ export default function AIStudioPage() {
       return;
     }
 
-    navigateToCreation("write");
     setIsGenerating(true);
     setResult("");
     setError("");
@@ -456,6 +447,14 @@ export default function AIStudioPage() {
     runGeneration({ promptText: prompt });
   }
 
+  function handleSuggestion(suggestion: Suggestion) {
+    if (!result.trim()) return;
+    runGeneration({
+      promptText: suggestion.instruction,
+      tool: "Write Content",
+      context: result,
+    });
+  }
 
   function loadGeneration(gen: Generation) {
     setPrompt(gen.prompt);
@@ -533,14 +532,6 @@ export default function AIStudioPage() {
       setShowPurchase(true);
       return;
     }
-    window.location.href = `/ai-studio/creation?${new URLSearchParams({
-      p: prompt.trim(),
-      tool: "Pipeline",
-      platform,
-      contentType,
-      tone,
-      tab: "pipeline",
-    }).toString()}`;
     setIsPipelineRunning(true);
     setPipelineDone(false);
     setResult("");
@@ -619,14 +610,6 @@ export default function AIStudioPage() {
       setShowPurchase(true);
       return;
     }
-    window.location.href = `/ai-studio/creation?${new URLSearchParams({
-      p: imagePrompt,
-      tool: "Image Generator",
-      platform,
-      contentType,
-      tone,
-      tab: "image",
-    }).toString()}`;
     setIsGeneratingImage(true);
     setGeneratedImage(null);
     setImageError("");
@@ -677,14 +660,6 @@ export default function AIStudioPage() {
       setShowPurchase(true);
       return;
     }
-    window.location.href = `/ai-studio/creation?${new URLSearchParams({
-      p: videoPrompt,
-      tool: "Video Generator",
-      platform,
-      contentType,
-      tone,
-      tab: "video",
-    }).toString()}`;
     setIsGeneratingVideo(true);
     setGeneratedVideo(null);
     setVideoError("");
@@ -891,7 +866,7 @@ export default function AIStudioPage() {
             </>
           )}
         </div>
-</header>
+      </header>
 
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Posts Sidebar */}
@@ -936,158 +911,130 @@ export default function AIStudioPage() {
         {/* Main Content Area */}
         <main className={`flex-1 overflow-y-auto transition-all duration-300 ${showPreview ? 'mr-0' : ''}`}>
           <div className={`mx-auto px-4 py-8 sm:px-6 lg:px-7 ${showPreview ? 'max-w-4xl' : 'max-w-6xl'}`}>
-            {/* Cinematic hero */}
-            <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/10">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=2400&q=80')" }}
-              />
-              <div className="animate-kenburns absolute inset-0 scale-110 bg-cover bg-center"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=2400&q=80')" }}
-                aria-hidden
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-[#0a0a0c]" />
-              <div className="relative px-6 pb-20 pt-16 text-center sm:px-10">
-                <h1 className="headline text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl animate-fade-up">
-                  YOURS TO CREATE
-                </h1>
-              </div>
+            <div className="max-w-3xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white">
+                Draft once. <span className="text-violet-400">Preview everywhere.</span>
+              </h1>
+              <p className="mt-2 text-sm leading-6 text-zinc-500">Write posts, chain pipelines, and generate images or videos — with a live preview on phone, tablet, and MacBook.</p>
             </div>
 
-            {/* Leonardo-style floating command bar */}
-            <div className="animate-fade-up-delay mx-auto -mt-16 relative z-10 max-w-4xl">
-              <div className="rounded-3xl border border-white/[0.14] bg-black/70 p-2.5 shadow-[0_30px_90px_-20px_rgba(124,58,237,0.35),0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
-                {/* Row 1: attach / prompt / example / generate */}
-                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 transition-colors focus-within:border-white/25">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageAttach}
+            {/* Primary prompt bar */}
+            <div className="mt-6 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2.5 backdrop-blur-xl transition-colors focus-within:border-white/25">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageAttach}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Add image to post"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-white"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
+              {previewImage && (
+                <span className="relative shrink-0">
+                  <img
+                    src={previewImage}
+                    alt="Attached post media"
+                    className="h-9 w-9 rounded-xl border border-zinc-800 object-cover"
                   />
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    title="Add image to post"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-white"
+                    onClick={removePreviewImage}
+                    title="Remove image"
+                    className="absolute -right-1.5 -top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-zinc-800 text-zinc-300 transition hover:bg-red-500 hover:text-white"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
-                  {previewImage && (
-                    <span className="relative shrink-0">
-                      <img
-                        src={previewImage}
-                        alt="Attached post media"
-                        className="h-9 w-9 rounded-xl border border-zinc-800 object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={removePreviewImage}
-                        title="Remove image"
-                        className="absolute -right-1.5 -top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-zinc-800 text-zinc-300 transition hover:bg-red-500 hover:text-white"
-                      >
-                        <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
-                    </span>
-                  )}
-                  <textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder={primaryPlaceholder}
-                    rows={1}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handlePrimaryAction();
-                      }
-                    }}
-                    className="max-h-40 flex-1 resize-none bg-transparent px-1 py-1.5 text-sm text-zinc-200 outline-none placeholder:text-zinc-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={insertExample}
-                    title="Try an example prompt"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-violet-300"
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handlePrimaryAction}
-                    disabled={!prompt.trim() || primaryBusy}
-                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
-                  >
-                    {primaryBusy && (
-                      <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
-                    )}
-                    {primaryLabel}
-                  </button>
-                </div>
-
-                {/* Row 2: mode pills (left) + setting chips (right) */}
-                <div className="mt-2 flex flex-wrap items-center justify-between gap-3 px-1 pb-0.5">
-                  <div className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] p-1">
-                    {(["write", "image", "video", "pipeline"] as const).map((tab) => (
-                      <button
-                        key={tab}
-                        type="button"
-                        onClick={() => setActiveTab(tab)}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition ${
-                          activeTab === tab
-                            ? "bg-[#7C3AED] text-white shadow-lg shadow-[#7C3AED]/30"
-                            : "text-zinc-400 hover:text-zinc-200"
-                        }`}
-                      >
-                        {tab === "write" && (
-                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
-                        )}
-                        {tab === "image" && (
-                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" /></svg>
-                        )}
-                        {tab === "video" && (
-                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" /></svg>
-                        )}
-                        {tab === "pipeline" && (
-                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
-                        )}
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    {(activeTab === "write" || activeTab === "pipeline") && (
-                      <>
-                        <PromptDropdown
-                          label="Content type"
-                          value={contentType}
-                          options={contentTypes}
-                          onChange={setContentType}
-                        />
-                        <PromptDropdown
-                          label="Platform"
-                          value={platform}
-                          options={platforms}
-                          onChange={setPlatform}
-                        />
-                        <PromptDropdown
-                          label="Tone"
-                          value={tone}
-                          options={tones}
-                          onChange={setTone}
-                        />
-                      </>
-                    )}
-                    {(activeTab === "image" || activeTab === "video") && (
-                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300">1:1</span>
-                    )}
-                  </div>
-                </div>
-              </div>
+                </span>
+              )}
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder={primaryPlaceholder}
+                rows={1}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handlePrimaryAction();
+                  }
+                }}
+                className="max-h-40 flex-1 resize-none bg-transparent px-1 py-1.5 text-sm text-zinc-200 outline-none placeholder:text-zinc-600"
+              />
+              <button
+                type="button"
+                onClick={insertExample}
+                title="Try an example prompt"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-violet-300"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
+              </button>
+              <button
+                type="button"
+                onClick={handlePrimaryAction}
+                disabled={!prompt.trim() || primaryBusy}
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
+              >
+                {primaryBusy && (
+                  <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                )}
+                {primaryLabel}
+              </button>
             </div>
+
+            {/* Mode chips */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {(["write", "image", "video", "pipeline"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`rounded-full border px-3.5 py-1.5 text-xs font-medium capitalize transition ${
+                    activeTab === tab
+                      ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-300"
+                      : "border-zinc-800 bg-black text-zinc-500 hover:border-zinc-700 hover:text-zinc-200"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Global Settings */}
+            {(activeTab === "write" || activeTab === "pipeline") && (
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <label className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                  Platform
+                  <select value={platform} onChange={(e) => setPlatform(e.target.value)} className="rounded-lg border border-zinc-800 bg-[#0c0c0e] px-2.5 py-1.5 text-xs font-medium text-zinc-300 outline-none focus:border-zinc-700">
+                    {platforms.map((i) => <option key={i} value={i}>{i}</option>)}
+                  </select>
+                </label>
+                <label className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                  Content type
+                  <select value={contentType} onChange={(e) => setContentType(e.target.value)} className="rounded-lg border border-zinc-800 bg-[#0c0c0e] px-2.5 py-1.5 text-xs font-medium text-zinc-300 outline-none focus:border-zinc-700">
+                    {contentTypes.map((i) => <option key={i} value={i}>{i}</option>)}
+                  </select>
+                </label>
+                <label className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                  Tone
+                  <select value={tone} onChange={(e) => setTone(e.target.value)} className="rounded-lg border border-zinc-800 bg-[#0c0c0e] px-2.5 py-1.5 text-xs font-medium text-zinc-300 outline-none focus:border-zinc-700">
+                    {tones.map((i) => <option key={i} value={i}>{i}</option>)}
+                  </select>
+                </label>
+                <label className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                  Length
+                  <select value={length} onChange={(e) => setLength(e.target.value)} className="rounded-lg border border-zinc-800 bg-[#0c0c0e] px-2.5 py-1.5 text-xs font-medium text-zinc-300 outline-none focus:border-zinc-700">
+                    {lengths.map((i) => <option key={i} value={i}>{i}</option>)}
+                  </select>
+                </label>
+              </div>
+            )}
 
             {/* --- WRITE TAB --- */}
             {activeTab === "write" && (
@@ -1095,21 +1042,24 @@ export default function AIStudioPage() {
                 <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden">
                   {/* Tool Selector */}
                   <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800">
-                    <div className="flex flex-wrap gap-2">
-                      {tools.map((t) => (
-                        <button
-                          key={t.title}
-                          type="button"
-                          onClick={() => setActiveTool(t.title)}
-                          className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
-                            activeTool === t.title
-                              ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-300"
-                              : "border-zinc-800 bg-black text-zinc-500 hover:border-zinc-700 hover:text-zinc-200"
-                          }`}
-                        >
-                          {t.title}
-                        </button>
-                      ))}
+                    <div>
+                      <div className="flex flex-wrap gap-2">
+                        {tools.map((t) => (
+                          <button
+                            key={t.title}
+                            type="button"
+                            onClick={() => setActiveTool(t.title)}
+                            className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
+                              activeTool === t.title
+                                ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-300"
+                                : "border-zinc-800 bg-black text-zinc-500 hover:border-zinc-700 hover:text-zinc-200"
+                            }`}
+                          >
+                            {t.title}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="mt-2 text-xs text-zinc-600">Tell AI what you want to create.</p>
                     </div>
                     <button
                       type="button"
@@ -1120,60 +1070,7 @@ export default function AIStudioPage() {
                       {isSidebarOpen ? "Hide" : "Show"} Posts
                     </button>
                   </div>
-                  {/* Featured Templates */}
-                  <div className="px-5 py-4 border-b border-zinc-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-semibold text-white">AI Templates</h2>
-                        <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">Featured</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 [scrollbar-width:thin]">
-                      {TEMPLATES.map((tpl) => (
-                        <button
-                          key={tpl.key}
-                          type="button"
-                          onClick={() => {
-                            setActiveTool(tpl.tool);
-                            setSelectedTemplate(tpl.key);
-                            if (!prompt.trim()) {
-                              setPrompt(tpl.prompt + " your topic...");
-                            }
-                          }}
-                          className={`group relative shrink-0 w-28 rounded-xl border overflow-hidden text-left transition ${
-                            selectedTemplate === tpl.key
-                              ? "border-[#7C3AED] ring-2 ring-[#7C3AED]/40"
-                              : "border-zinc-800 hover:border-[#7C3AED]/60"
-                          }`}
-                        >
-                          <img
-                            src={tpl.img}
-                            alt={tpl.name}
-                            loading="lazy"
-                            className="h-36 w-28 object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-2 pt-6 pb-1.5">
-                            <p className="text-[11px] font-semibold leading-tight text-white">{tpl.name}</p>
-                            <p className="text-[9px] leading-tight text-zinc-400">{tpl.tagline}</p>
-                          </div>
-                          {selectedTemplate === tpl.key && (
-                            <span className="absolute right-1.5 top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#7C3AED] text-white">
-                              <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                    {selectedTemplate && (
-                      <p className="mt-2 text-xs text-zinc-500">
-                        Template:{" "}
-                        <span className="text-violet-300 font-medium">
-                          {TEMPLATES.find((t) => t.key === selectedTemplate)?.name}
-                        </span>{" "}
-                        — tell it your topic and press Generate.
-                      </p>
-                    )}
-                  </div>
+
                   {/* Chat Area */}
                   <div className="p-5 min-h-[280px]">
                     {prompt && (isGenerating || Boolean(result)) && (
@@ -1198,12 +1095,58 @@ export default function AIStudioPage() {
                       </div>
                     )}
 
+                    {!isGenerating && !result && !streamingText && (
+                      <div className="flex flex-col items-center justify-center py-10 text-center">
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-900/80 border border-zinc-800/50 flex items-center justify-center mb-3">
+                          <svg className="w-6 h-6 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-zinc-500 font-medium">Start a conversation</p>
+                        <p className="text-xs text-zinc-600 mt-1">Enter a prompt above and AI will respond in real-time</p>
+                      </div>
+                    )}
 
                     <div ref={chatEndRef} />
                   </div>
                 </section>
 
 
+
+                {/* AI Assistant */}
+                <section className="mt-5 rounded-2xl border border-[#7C3AED]/30 bg-gradient-to-br from-[#7C3AED]/10 via-zinc-950 to-zinc-950 p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#7C3AED] to-violet-600">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-white">AI Assistant</p>
+                      <p className="mt-1 text-sm leading-6 text-zinc-400">
+                        {isGenerating
+                          ? "Writing your post now — clean text, human tone, no markdown symbols."
+                          : result
+                          ? "Nice draft. Polish it with a smart suggestion below, or schedule it to go live automatically."
+                          : "Pick a tool, describe your topic, and press Enter. I will draft it, improve it, and schedule it for you."}
+                      </p>
+
+                      {result && !isGenerating && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {getSmartSuggestions(result, platform).map((s) => (
+                            <button
+                              key={s.label}
+                              type="button"
+                              onClick={() => handleSuggestion(s)}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-[#7C3AED]/40 bg-black/40 px-3 py-1.5 text-xs font-medium text-violet-300 transition hover:border-[#8B5CF6] hover:bg-[#6D28D9]/10"
+                            >
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 1l2.2 5.3L18 8l-5.8 1.7L10 15l-2.2-5.3L2 8l5.8-1.7L10 1z" /></svg>
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
 
                 {/* Result Actions */}
                 {result && !isGenerating && (

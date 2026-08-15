@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, type ChangeEvent } from "react";
-import { PromptDropdown } from "@/components/ai-studio/prompt-dropdown";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createContent } from "@/app/content/actions/create-content";
@@ -36,53 +35,15 @@ const tools = [
   },
 ];
 
-const TEMPLATES = [
-  {
-    key: "content-ideas",
-    name: "Content Ideas",
-    tagline: "Fresh angles from a topic",
-    tool: "Generate Ideas",
-    prompt: "5 fresh content ideas for",
-    img: "/ai/templates/tpl_ideas.png",
-  },
-  {
-    key: "write-post",
-    name: "Write a Post",
-    tagline: "First draft in seconds",
-    tool: "Write Content",
-    prompt: "Write an engaging post about",
-    img: "/ai/templates/tpl_write.png",
-  },
-  {
-    key: "strong-hook",
-    name: "Strong Hook",
-    tagline: "Stop-the-scroll openers",
-    tool: "Generate Hook",
-    prompt: "3 strong opening hooks for a post about",
-    img: "/ai/templates/tpl_hook.png",
-  },
-  {
-    key: "clickable-title",
-    name: "Clickable Title",
-    tagline: "Titles people tap on",
-    tool: "Generate Title",
-    prompt: "5 clickable titles for a post about",
-    img: "/ai/templates/tpl_title.png",
-  },
-  {
-    key: "repurpose",
-    name: "Repurpose Content",
-    tagline: "One piece, many platforms",
-    tool: "Repurpose",
-    prompt: "Repurpose this for another platform: ",
-    img: "/ai/templates/tpl_repurpose.png",
-  },
-];
-
 const platforms = ["Instagram", "YouTube", "LinkedIn", "X", "Blog"];
 const contentTypes = ["Post", "Reel", "Video", "Article", "Thread", "Caption"];
 const tones = ["Professional", "Casual", "Educational", "Engaging", "Viral"];
 const lengths = ["Short", "Medium", "Long"];
+
+type Suggestion = {
+  label: string;
+  instruction: string;
+};
 
 const AI_CLICHES = [
   "in today's",
@@ -96,6 +57,50 @@ const AI_CLICHES = [
 ];
 
 // Analyzes the generated text and proposes concrete improvements.
+function getSmartSuggestions(text: string, platform: string): Suggestion[] {
+  const suggestions: Suggestion[] = [];
+  const lower = text.toLowerCase();
+
+  if (!/\?/.test(text)) {
+    suggestions.push({
+      label: "Add a question",
+      instruction:
+        "Keep this content exactly as it is, but end with one short engaging question that invites comments.",
+    });
+  }
+
+  if (platform === "Instagram" && !/#[a-z]/i.test(text)) {
+    suggestions.push({
+      label: "Add hashtags",
+      instruction:
+        "Keep this content and add 4 relevant hashtags on the last line.",
+    });
+  }
+
+  if (AI_CLICHES.some((c) => lower.includes(c))) {
+    suggestions.push({
+      label: "Humanize it",
+      instruction:
+        "Rewrite this to sound like a real person wrote it. Remove generic phrases, keep the meaning.",
+    });
+  }
+
+  if (text.split(/\s+/).length > 180) {
+    suggestions.push({
+      label: "Make it shorter",
+      instruction:
+        "Shorten this to under 120 words while keeping the strongest points.",
+    });
+  }
+
+  suggestions.push({
+    label: "Stronger hook",
+    instruction:
+      "Rewrite only the first line to be a stronger attention-grabbing hook. Keep everything else.",
+  });
+
+  return suggestions.slice(0, 4);
+}
 
 function toLocalInputValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -229,7 +234,6 @@ export default function AIStudioPage() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
   const [activeTool, setActiveTool] = useState("Generate Ideas");
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [platform, setPlatform] = useState("Instagram");
   const [contentType, setContentType] = useState("Post");
   const [tone, setTone] = useState("Engaging");
@@ -456,6 +460,14 @@ export default function AIStudioPage() {
     runGeneration({ promptText: prompt });
   }
 
+  function handleSuggestion(suggestion: Suggestion) {
+    if (!result.trim()) return;
+    runGeneration({
+      promptText: suggestion.instruction,
+      tool: "Write Content",
+      context: result,
+    });
+  }
 
   function loadGeneration(gen: Generation) {
     setPrompt(gen.prompt);
@@ -891,7 +903,7 @@ export default function AIStudioPage() {
             </>
           )}
         </div>
-</header>
+      </header>
 
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Posts Sidebar */}
@@ -1061,24 +1073,15 @@ export default function AIStudioPage() {
                   <div className="flex items-center gap-1.5">
                     {(activeTab === "write" || activeTab === "pipeline") && (
                       <>
-                        <PromptDropdown
-                          label="Content type"
-                          value={contentType}
-                          options={contentTypes}
-                          onChange={setContentType}
-                        />
-                        <PromptDropdown
-                          label="Platform"
-                          value={platform}
-                          options={platforms}
-                          onChange={setPlatform}
-                        />
-                        <PromptDropdown
-                          label="Tone"
-                          value={tone}
-                          options={tones}
-                          onChange={setTone}
-                        />
+                        <select value={contentType} onChange={(e) => setContentType(e.target.value)} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 outline-none transition hover:border-white/25">
+                          {contentTypes.map((i) => <option key={i} value={i}>{i}</option>)}
+                        </select>
+                        <select value={platform} onChange={(e) => setPlatform(e.target.value)} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 outline-none transition hover:border-white/25">
+                          {platforms.map((i) => <option key={i} value={i}>{i}</option>)}
+                        </select>
+                        <select value={tone} onChange={(e) => setTone(e.target.value)} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 outline-none transition hover:border-white/25">
+                          {tones.map((i) => <option key={i} value={i}>{i}</option>)}
+                        </select>
                       </>
                     )}
                     {(activeTab === "image" || activeTab === "video") && (
@@ -1095,21 +1098,24 @@ export default function AIStudioPage() {
                 <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden">
                   {/* Tool Selector */}
                   <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800">
-                    <div className="flex flex-wrap gap-2">
-                      {tools.map((t) => (
-                        <button
-                          key={t.title}
-                          type="button"
-                          onClick={() => setActiveTool(t.title)}
-                          className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
-                            activeTool === t.title
-                              ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-300"
-                              : "border-zinc-800 bg-black text-zinc-500 hover:border-zinc-700 hover:text-zinc-200"
-                          }`}
-                        >
-                          {t.title}
-                        </button>
-                      ))}
+                    <div>
+                      <div className="flex flex-wrap gap-2">
+                        {tools.map((t) => (
+                          <button
+                            key={t.title}
+                            type="button"
+                            onClick={() => setActiveTool(t.title)}
+                            className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
+                              activeTool === t.title
+                                ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-300"
+                                : "border-zinc-800 bg-black text-zinc-500 hover:border-zinc-700 hover:text-zinc-200"
+                            }`}
+                          >
+                            {t.title}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="mt-2 text-xs text-zinc-600">Tell AI what you want to create.</p>
                     </div>
                     <button
                       type="button"
@@ -1120,60 +1126,7 @@ export default function AIStudioPage() {
                       {isSidebarOpen ? "Hide" : "Show"} Posts
                     </button>
                   </div>
-                  {/* Featured Templates */}
-                  <div className="px-5 py-4 border-b border-zinc-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-semibold text-white">AI Templates</h2>
-                        <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">Featured</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 [scrollbar-width:thin]">
-                      {TEMPLATES.map((tpl) => (
-                        <button
-                          key={tpl.key}
-                          type="button"
-                          onClick={() => {
-                            setActiveTool(tpl.tool);
-                            setSelectedTemplate(tpl.key);
-                            if (!prompt.trim()) {
-                              setPrompt(tpl.prompt + " your topic...");
-                            }
-                          }}
-                          className={`group relative shrink-0 w-28 rounded-xl border overflow-hidden text-left transition ${
-                            selectedTemplate === tpl.key
-                              ? "border-[#7C3AED] ring-2 ring-[#7C3AED]/40"
-                              : "border-zinc-800 hover:border-[#7C3AED]/60"
-                          }`}
-                        >
-                          <img
-                            src={tpl.img}
-                            alt={tpl.name}
-                            loading="lazy"
-                            className="h-36 w-28 object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-2 pt-6 pb-1.5">
-                            <p className="text-[11px] font-semibold leading-tight text-white">{tpl.name}</p>
-                            <p className="text-[9px] leading-tight text-zinc-400">{tpl.tagline}</p>
-                          </div>
-                          {selectedTemplate === tpl.key && (
-                            <span className="absolute right-1.5 top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#7C3AED] text-white">
-                              <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                    {selectedTemplate && (
-                      <p className="mt-2 text-xs text-zinc-500">
-                        Template:{" "}
-                        <span className="text-violet-300 font-medium">
-                          {TEMPLATES.find((t) => t.key === selectedTemplate)?.name}
-                        </span>{" "}
-                        — tell it your topic and press Generate.
-                      </p>
-                    )}
-                  </div>
+
                   {/* Chat Area */}
                   <div className="p-5 min-h-[280px]">
                     {prompt && (isGenerating || Boolean(result)) && (
@@ -1198,12 +1151,58 @@ export default function AIStudioPage() {
                       </div>
                     )}
 
+                    {!isGenerating && !result && !streamingText && (
+                      <div className="flex flex-col items-center justify-center py-10 text-center">
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-900/80 border border-zinc-800/50 flex items-center justify-center mb-3">
+                          <svg className="w-6 h-6 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-zinc-500 font-medium">Start a conversation</p>
+                        <p className="text-xs text-zinc-600 mt-1">Enter a prompt above and AI will respond in real-time</p>
+                      </div>
+                    )}
 
                     <div ref={chatEndRef} />
                   </div>
                 </section>
 
 
+
+                {/* AI Assistant */}
+                <section className="mt-5 rounded-2xl border border-[#7C3AED]/30 bg-gradient-to-br from-[#7C3AED]/10 via-zinc-950 to-zinc-950 p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#7C3AED] to-violet-600">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-white">AI Assistant</p>
+                      <p className="mt-1 text-sm leading-6 text-zinc-400">
+                        {isGenerating
+                          ? "Writing your post now — clean text, human tone, no markdown symbols."
+                          : result
+                          ? "Nice draft. Polish it with a smart suggestion below, or schedule it to go live automatically."
+                          : "Pick a tool, describe your topic, and press Enter. I will draft it, improve it, and schedule it for you."}
+                      </p>
+
+                      {result && !isGenerating && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {getSmartSuggestions(result, platform).map((s) => (
+                            <button
+                              key={s.label}
+                              type="button"
+                              onClick={() => handleSuggestion(s)}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-[#7C3AED]/40 bg-black/40 px-3 py-1.5 text-xs font-medium text-violet-300 transition hover:border-[#8B5CF6] hover:bg-[#6D28D9]/10"
+                            >
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 1l2.2 5.3L18 8l-5.8 1.7L10 15l-2.2-5.3L2 8l5.8-1.7L10 1z" /></svg>
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
 
                 {/* Result Actions */}
                 {result && !isGenerating && (

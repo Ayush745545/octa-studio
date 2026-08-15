@@ -8,6 +8,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TextPlugin } from "gsap/TextPlugin";
 import { useSmoothScroll } from "@/lib/animations/smooth-scroll";
 import { prefersReducedMotion } from "@/lib/animations/scroll";
+import DockText from "@/components/registry/eldoraui/dock-text";
+import MotionFillableButton from "@/components/registry/paceui/motion-fillable-button";
 
 /* ─── Animated Components ─── */
 
@@ -594,137 +596,9 @@ function CreativeAdBanner() {
 
 
 /* AI Pipeline Animation — shows how the AI builds a post, stage by stage */
-function AiPipelineAnimation() {
-  const rootRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    if (prefersReducedMotion()) return;
-    gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
-    const ctx = gsap.context(() => {
-      const nodes = gsap.utils.toArray<HTMLElement>("[data-pipe-node]", rootRef.current);
-      const lines = gsap.utils.toArray<HTMLElement>("[data-pipe-line]", rootRef.current);
-      const dots = gsap.utils.toArray<HTMLElement>("[data-pipe-dot]", rootRef.current);
-      const prompt = rootRef.current?.querySelector("[data-pipe-prompt]");
-      const caret = rootRef.current?.querySelector("[data-pipe-caret]");
-      const result = rootRef.current?.querySelector("[data-pipe-result]");
 
-      const badge = rootRef.current?.querySelector("[data-pipe-badge]");
-      // Phone mockup sits above this card — it pops up once the pipeline completes
-      const phone = document.querySelector<HTMLElement>("[data-pipe-phone]");
-
-      const tl = gsap.timeline({
-        // Plays a single time when scrolled into view — no looping
-        scrollTrigger: { trigger: rootRef.current, start: "top 80%", once: true },
-      });
-
-      tl.set(nodes, { autoAlpha: 0.35, scale: 1 })
-        .set(lines, { scaleX: 0, transformOrigin: "left center" })
-        .set(dots, { left: "0%", autoAlpha: 0 });
-      if (prompt) tl.set(prompt, { text: "" });
-      if (result) tl.set(result, { autoAlpha: 0, y: 28, scale: 0.88, transformOrigin: "center center" });
-      if (phone) tl.set(phone, { autoAlpha: 0, y: -40, scale: 0.9, transformOrigin: "center center" });
-
-      // Blinking caret while the user's prompt types itself in
-      let caretTween: gsap.core.Tween | null = null;
-      if (caret) caretTween = gsap.to(caret, { opacity: 0.15, duration: 0.5, repeat: -1, yoyo: true, ease: "power1.inOut" });
-      if (prompt) tl.to(prompt, { text: "5 AI tools every developer should try in 2026…", duration: 1.4, ease: "none" }, "+=0.3");
-
-      // Stage-by-stage build with a light pulse travelling each connector
-      nodes.forEach((node, i) => {
-        if (i > 0) {
-          tl.to(lines[i - 1], { scaleX: 1, duration: 0.9, ease: "power2.inOut" }, "+=0.35")
-            .fromTo(dots[i - 1], { left: "0%", autoAlpha: 1 }, { left: "100%", duration: 0.9, ease: "power2.inOut" }, "<")
-            .to(dots[i - 1], { autoAlpha: 0, duration: 0.2 }, ">-0.15");
-        }
-        tl.to(node, { autoAlpha: 1, scale: 1.08, duration: 0.45, ease: "power2.out", yoyo: true, repeat: 1 }, "<");
-        const chip = node.querySelector("span");
-        if (chip) {
-          tl.fromTo(chip, { boxShadow: "0 0 0 rgba(217,70,239,0)" }, { boxShadow: "0 0 22px rgba(217,70,239,0.45)", duration: 0.45, yoyo: true, repeat: 1 }, "<");
-        }
-      });
-
-      // Finished post pops up like a notification when the pipeline completes
-      if (result) {
-        tl.to(result, { autoAlpha: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" }, "+=0.5");
-      }
-      // …and the phone mockup slides down into place alongside it
-      if (phone) {
-        tl.to(phone, { autoAlpha: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" }, "<");
-      }
-      if (badge) {
-        tl.to(badge, { scale: 1.2, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 }, "-=0.2");
-      }
-      // Settle: stop the caret blink once the one-shot run finishes
-      if (caretTween && caret) {
-        const tw = caretTween;
-        tl.call(() => tw.kill());
-        tl.to(caret, { opacity: 0, duration: 0.4 }, "<0.1");
-      }
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  const stages = [
-    { label: "Prompt", icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" },
-    { label: "Plan", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
-    { label: "Write", icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" },
-    { label: "Polish", icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" },
-    { label: "Publish", icon: "M12 19l9 2-9-18-9 18 9-2zm0 0v-8" },
-  ];
-
-  return (
-    <div ref={rootRef} data-reveal className="mt-16 rounded-2xl border border-zinc-900 bg-zinc-950/60 p-6 sm:p-10">
-      <div className="flex items-center justify-between">
-        <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">How the AI works</p>
-        <p className="text-[11px] text-zinc-600">One prompt in — a ready post out</p>
-      </div>
-
-      {/* Prompt input — types itself in before the pipeline runs */}
-      <div className="mt-6 flex items-center gap-2.5 rounded-xl border border-zinc-800 bg-[#111113] px-4 py-3">
-        <svg className="h-4 w-4 shrink-0 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-        <p data-pipe-prompt className="truncate text-[12px] text-zinc-300" />
-        <span data-pipe-caret className="h-3.5 w-px shrink-0 bg-fuchsia-400" />
-      </div>
-
-      <div className="mt-8 flex items-start">
-        {stages.map((stage, i) => (
-          <React.Fragment key={stage.label}>
-            <div data-pipe-node className="flex w-14 sm:w-16 shrink-0 flex-col items-center gap-2">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-800 bg-[#111113] text-fuchsia-400">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d={stage.icon} />
-                </svg>
-              </span>
-              <span className="text-[10px] font-medium text-zinc-500">{stage.label}</span>
-            </div>
-            {i < stages.length - 1 && (
-              <div className="relative mt-[22px] h-px flex-1 rounded bg-zinc-800">
-                <div data-pipe-line className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-violet-500" />
-                <span data-pipe-dot className="absolute -top-[2.5px] left-0 h-1.5 w-1.5 rounded-full bg-fuchsia-300 shadow-[0_0_8px_2px_rgba(217,70,239,0.55)]" />
-              </div>
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-
-      <div data-pipe-result className="mt-8 rounded-xl border border-zinc-800 bg-[#111113] p-4 sm:p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span data-pipe-badge className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-            </span>
-            <p className="text-[12px] font-semibold text-white">Post ready to publish</p>
-          </div>
-          <span className="rounded-full border border-zinc-800 px-2.5 py-1 text-[10px] font-medium text-zinc-500">LinkedIn · Engaging · Medium</span>
-        </div>
-        <p className="mt-3 text-[12px] leading-relaxed text-zinc-300">🚀 AI is reshaping how devs build products. Here are 5 tools every developer should try…</p>
-        <p className="mt-1 text-[11px] text-fuchsia-400">#AI #DevTools #SaaS</p>
-      </div>
-    </div>
-  );
-}
 
 /* ─── Client Component ─── */
 export function LandingClient({
@@ -852,7 +726,7 @@ export function LandingClient({
           </div>
           <div className="flex items-center gap-3">
             <Link href="/calendar" className="rounded-full border border-zinc-800 px-5 py-2 text-[13px] font-medium text-zinc-300 transition hover:border-zinc-600 hover:text-white">Open App</Link>
-            <Link href="/login" className="rounded-full bg-white px-5 py-2 text-[13px] font-medium text-black transition hover:bg-zinc-200">Get Started</Link>
+            <MotionFillableButton href="/login" className="h-9 px-6 text-[13px]">Get Started</MotionFillableButton>
           </div>
         </div>
       </nav>
@@ -873,9 +747,9 @@ export function LandingClient({
             octa-studio brings your idea inbox, AI composer, visual calendar, publishing queue, and analytics into a single workspace built for modern content creators.
           </p>
           <div data-reveal className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/calendar" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-[14px] font-semibold text-black transition hover:bg-zinc-200">
-              Open Calendar <span>→</span>
-            </Link>
+              <MotionFillableButton href="/calendar">
+                Open Calendar <span>→</span>
+              </MotionFillableButton>
           </div>
         </div>
       </section>
@@ -916,7 +790,7 @@ export function LandingClient({
           <div data-reveal className="mt-32">
             <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400 text-center mb-6">Content Pipeline</p>
             <h3 className="headline-apple mt-3 text-center text-[clamp(2.25rem,4.5vw,4rem)]">
-              See how your posts look at every stage
+              <DockText text="See how your posts look at every stage" />
             </h3>
             <p className="mx-auto mt-4 max-w-xl text-center text-[14px] text-zinc-500">Every post moves through Draft → Ready → Scheduled → Published. Track status at a glance.</p>
             <div className="mt-12">
@@ -954,7 +828,6 @@ export function LandingClient({
               </div>
             </div>
 
-            <AiPipelineAnimation />
           </div>
 
           {/* ── Bulk Scheduling + Post Preview ── */}
