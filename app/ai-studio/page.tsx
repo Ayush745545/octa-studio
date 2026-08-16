@@ -963,7 +963,7 @@ if (contentType in ['image', 'video']) {
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover"
               >
-                <source src="/ai/page9-new.mp4" type="video/mp4" />
+                <source src="/logo/Octa%20ai.mp4" type="video/mp4" />
               </video>
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-[#0a0a0c]" />
               <div className="relative px-6 pb-20 pt-16 text-center sm:px-10">
@@ -1185,110 +1185,6 @@ if (contentType in ['image', 'video']) {
               )}
             </section>
 
-            {/* --- WRITE TAB --- */}
-            {activeTab === "write" && (
-              <>
-                <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden">
-                  {/* Chat Area */}
-                  <div className="p-5 min-h-[280px]">
-                    {prompt && (isGenerating || Boolean(result)) && (
-                      <div className="flex justify-end mb-4">
-                        <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-[#7C3AED]/15 border border-[#7C3AED]/25 px-4 py-3">
-                          <p className="text-sm text-zinc-100 whitespace-pre-wrap">{prompt}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {(isGenerating || streamingText) && (
-                      <div className="flex gap-3 mb-4">
-                        <div className="w-8 h-8 rounded-full bg-[#7C3AED] flex items-center justify-center shrink-0">
-                          <span className="text-xs font-bold text-white">AI</span>
-                        </div>
-                        <div className="flex-1 bg-zinc-900/50 rounded-2xl rounded-tl-sm px-4 py-3 border border-[#7C3AED]/40">
-                          <p className="text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">{streamingText}</p>
-                          {isGenerating && (
-                            <span className="inline-block w-2 h-4 ml-1 bg-[#7C3AED] animate-pulse" />
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-
-                    <div ref={chatEndRef} />
-                  </div>
-                </section>
-
-
-
-                {/* Result Actions */}
-                {result && !isGenerating && (
-                  <div className="mt-5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={handleCreateContent}
-                          disabled={isCreating}
-                          className="rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-black transition hover:bg-zinc-200 disabled:opacity-50"
-                        >
-                          {isCreating ? "Creating..." : "Create Content"}
-                        </button>
-                        <button
-                          onClick={openScheduler}
-                          className="inline-flex items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9]"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                          Schedule
-                        </button>
-                        <button
-                          onClick={() => navigator.clipboard.writeText(result)}
-                          className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:border-zinc-700 hover:text-white"
-                        >
-                          Copy
-                        </button>
-                      </div>
-                      <button
-                        onClick={handleGenerate}
-                        disabled={!prompt.trim() || isGenerating}
-                        className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:border-zinc-700 hover:text-white disabled:opacity-50"
-                      >
-                        Regenerate
-                      </button>
-                    </div>
-
-                    {isScheduleOpen && (
-                      <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
-                        <label className="text-sm font-medium text-zinc-400" htmlFor="schedule-at">
-                          Publish at
-                        </label>
-                        <input
-                          id="schedule-at"
-                          type="datetime-local"
-                          value={scheduleAt}
-                          min={toLocalInputValue(new Date(Date.now() + 5 * 60 * 1000))}
-                          onChange={(e) => setScheduleAt(e.target.value)}
-                          className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7C3AED]/60"
-                        />
-                        <button
-                          onClick={handleSchedule}
-                          disabled={!scheduleAt || isScheduling}
-                          className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-zinc-200 disabled:opacity-50"
-                        >
-                          {isScheduling ? "Scheduling..." : "Confirm Schedule"}
-                        </button>
-                        <button
-                          onClick={() => setIsScheduleOpen(false)}
-                          className="rounded-xl border border-zinc-800 px-4 py-2 text-sm font-medium text-zinc-400 transition hover:border-zinc-700 hover:text-white"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {error && <div className="mt-4 rounded-xl border border-red-900/50 bg-red-950/30 px-4 py-3 text-sm text-red-400">{error}</div>}
-              </>
-            )}
 
             {/* --- PIPELINE TAB --- */}
             {activeTab === "pipeline" && (
