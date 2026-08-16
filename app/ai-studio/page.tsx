@@ -48,15 +48,15 @@ const TEMPLATES: Template[] = [
     tagline: "Clean cutout for any subject",
     tool: "Image",
     prompt: "Remove the background from this product photo and keep a clean, natural edge with studio-quality detail.",
-    img: "/ai/templates/tpl_ideas.png",
+    img: "/ai/templates/remove-object.png",
   },
   {
     key: "ai-background",
     name: "AI Background",
     tagline: "Swap scenes with styled backdrops",
-    tool: "Image",
+    tool: "Video",
     prompt: "Replace the background with a premium studio scene using soft purple lighting and realistic shadows.",
-    img: "/ai/templates/tpl_write.png",
+    img: "/ai/templates/thumbnail-ae4cc4 (1).webm",
   },
   {
     key: "image-upscaler",
@@ -75,12 +75,12 @@ const TEMPLATES: Template[] = [
     img: "/ai/templates/tpl_title.png",
   },
   {
-    key: "product-ad-generator",
+    key: "thumbnail-7ed26e.webm",
     name: "Product Ad Generator",
     tagline: "Turn products into ad creatives",
-    tool: "Image",
+    tool: "Video",
     prompt: "Create a premium product ad visual with dramatic lighting, luxury reflections, and clean marketing composition.",
-    img: "/ai/templates/asthatic-girl.jpg",
+    img: "/ai/templates/thumbnail-7ed26e.webm",
   },
   {
     key: "image-style-generator",
@@ -1135,12 +1135,24 @@ if (contentType in ['image', 'video']) {
                         : "border-zinc-800 hover:border-[#7C3AED]/60"
                     }`}
                   >
-                    <img
-                      src={tpl.img}
-                      alt={tpl.name}
-                      loading="lazy"
-                      className="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    {tpl.tool === "Video" && tpl.img.endsWith(".webm") ? (
+                      <video
+                        src={tpl.img}
+                        alt={tpl.name}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        className="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <img
+                        src={tpl.img}
+                        alt={tpl.name}
+                        loading="lazy"
+                        className="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    )}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent px-3 pb-3 pt-10">
                       <p className="text-sm font-semibold leading-tight text-white">{tpl.name}</p>
                       <p className="mt-1 text-[11px] leading-tight text-zinc-300">{tpl.tagline}</p>
