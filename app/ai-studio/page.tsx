@@ -62,17 +62,9 @@ const TEMPLATES: Template[] = [
     key: "image-upscaler",
     name: "Image Upscaler",
     tagline: "Sharpen and enhance resolution",
-    tool: "Image",
+    tool: "Video",
     prompt: "Upscale this image to high resolution, restore crisp details, and keep textures natural without oversmoothing.",
-    img: "/ai/templates/tpl_hook.png",
-  },
-  {
-    key: "ai-relight",
-    name: "AI Relight",
-    tagline: "Rebuild lighting and shadows",
-    tool: "Image",
-    prompt: "Relight this portrait with cinematic key light, soft rim light, and balanced skin tones on a dark background.",
-    img: "/ai/templates/tpl_title.png",
+    img: "/ai/templates/promo.mp4",
   },
   {
     key: "thumbnail-7ed26e.webm",
@@ -83,14 +75,30 @@ const TEMPLATES: Template[] = [
     img: "/ai/templates/thumbnail-7ed26e.webm",
   },
   {
-    key: "image-style-generator",
-    name: "Image Style Generator",
-    tagline: "Apply a custom visual look",
-    tool: "Image",
-    prompt: "Transform this image into a polished campaign style with bold contrast, vibrant highlights, and premium brand aesthetics.",
-    img: "/ai/templates/tpl_repurpose.png",
+    key: "cinematic-scenario",
+    name: "Cinematic Scenario",
+    tagline: "Create a cinematic scene",
+    tool: "Video",
+    prompt: "Generate a cinematic scenario with dramatic lighting and storytelling elements.",
+    img: "/ai/templates/thumbnail-c7dbbe (2).webm",
+},
+  {
+    key: "product_spin",
+    name: "Product Spin",
+    tagline: "360-degree product visualization",
+    tool: "Video",
+    prompt: "Generate a 360-degree product spin animation.",
+    img: "/ai/templates/product-spin.webm",
   },
-];
+  {
+    key: "model_holding",
+    name: "Model Holding Product",
+    tagline: "Upload a photo of a person and your product to see them holding",
+    tool: "Image",
+    prompt: "Upload a photo of a person and your product to see them holding.",
+    img: "/ai/templates/thumbnail-540062.avif",
+  },
+  ];
 
 const platforms = ["Instagram", "YouTube", "LinkedIn", "X", "Blog"];
 const contentTypes = ["Post", "Reel", "Video", "Article", "Thread", "Caption"];
@@ -1135,7 +1143,7 @@ if (contentType in ['image', 'video']) {
                         : "border-zinc-800 hover:border-[#7C3AED]/60"
                     }`}
                   >
-                    {tpl.tool === "Video" && tpl.img.endsWith(".webm") ? (
+                    {tpl.tool === "Video" && (tpl.img.endsWith(".webm") || tpl.img.endsWith(".mp4")) ? (
                       <video
                         src={tpl.img}
                         alt={tpl.name}
