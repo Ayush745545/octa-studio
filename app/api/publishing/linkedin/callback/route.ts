@@ -1,7 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSessionUserId } from "@/lib/auth";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const userId = getSessionUserId(request);
+
+  if (!userId) {
+    return NextResponse.json(
+      { error: "You must be logged in to connect LinkedIn." },
+      { status: 401 },
+    );
+  }
+
   const url = new URL(request.url);
 
   const code = url.searchParams.get("code");
@@ -132,9 +142,13 @@ console.log("[LinkedIn] Member identity:", {
 
 await prisma.publishingChannel.upsert({
     where: {
-      platform: "LinkedIn",
+      userId_platform: {
+        userId,
+        platform: "LinkedIn",
+      },
     },
     create: {
+      userId,
       platform: "LinkedIn",
       connected: true,
       accountName: "LinkedIn account",

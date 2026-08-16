@@ -1,19 +1,30 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSessionUserId } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const userId = getSessionUserId(request);
+
+  if (!userId) {
+    return NextResponse.json(
+      { error: "You must be logged in to connect Instagram." },
+      { status: 401 },
+    );
+  }
+
   const clientId = process.env.INSTAGRAM_CLIENT_ID;
   const appUrl = process.env.APP_URL;
 
   if (!clientId || !appUrl) {
-    /*
-     * Test mode: no Meta app configured. Connect a simulated Instagram
-     * channel so the whole flow can be exercised end-to-end, matching the
-     * project's simulated-fallback convention (see simulated provider).
-     */
     await prisma.publishingChannel.upsert({
-      where: { platform: "Instagram" },
+      where: {
+        userId_platform: {
+          userId,
+          platform: "Instagram",
+        },
+      },
       create: {
+        userId,
         platform: "Instagram",
         connected: true,
         accountName: "Instagram (test mode)",
@@ -24,9 +35,7 @@ export async function GET() {
       },
     });
 
-    console.log(
-      "[Instagram] Test-mode connection saved (no Meta app configured).",
-    );
+    console.log("[Instagram] Test-mode connection saved.", { userId });
 
     return NextResponse.redirect(
       new URL(
@@ -38,22 +47,21 @@ export async function GET() {
 
   const redirectUri = `${appUrl}/api/publishing/instagram/callback`;
 
-  /*
-   * Business Login for Instagram: the app is configured for "API setup
-   * with Instagram login", so authorization happens on instagram.com
-   * with the Instagram App ID (not the Facebook dialog).
-   */
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
     response_type: "code",
-    scope: "instagram_business_basic,instagram_business_content_publish",
+    scope:
+      "instagram_business_basic,instagram_business_content_publish",
   });
 
   const authorizationUrl =
     `https://www.instagram.com/oauth/authorize?${params.toString()}`;
 
-  console.log("[Instagram] OAuth authorization:", { redirectUri });
+  console.log("[Instagram] OAuth authorization:", {
+    userId,
+    redirectUri,
+  });
 
   return NextResponse.redirect(authorizationUrl);
 }

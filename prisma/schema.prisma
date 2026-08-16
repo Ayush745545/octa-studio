@@ -33,11 +33,12 @@ model Content {
   idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
 
   publications Publication[]
-  media        Media[]
+
+  media Media[]
 }
 
 model Media {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   contentId String?
 
   url      String
@@ -55,21 +56,26 @@ model Media {
 }
 
 model PublishingChannel {
-  id          String   @id @default(cuid())
-  platform    String   @unique
-  connected   Boolean  @default(false)
+  id          String  @id @default(cuid())
+  userId      String
+  platform    String
+  connected   Boolean @default(false)
   accountName String?
 
   accessToken  String?
   refreshToken String?
   expiresAt    DateTime?
   externalId   String?
-  authorUrn     String?
+  authorUrn    String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   publications Publication[]
+
+  @@unique([userId, platform])
+  @@index([userId])
 }
 
 model Publication {
@@ -94,19 +100,20 @@ model Publication {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String  @id @default(cuid())
+  email        String  @unique
   passwordHash String?
   name         String?
   avatarUrl    String?
-  provider     String   @default("credentials")
-  plan         String   @default("FREE")
+  provider     String  @default("credentials")
+  plan         String  @default("FREE")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  generations Generation[]
-  payments    Payment[]
+  generations        Generation[]
+  payments           Payment[]
+  publishingChannels PublishingChannel[]
 }
 
 model Generation {
