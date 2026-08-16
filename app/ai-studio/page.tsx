@@ -251,6 +251,12 @@ export default function AIStudioPage() {
   const [result, setResult] = useState("");
   const [activeTool, setActiveTool] = useState("Generate Ideas");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [templatePanelOpen, setTemplatePanelOpen] = useState(false);
+  const [templateStep, setTemplateStep] = useState(1);
+  const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const [templatePreview, setTemplatePreview] = useState<string | null>(null);
+  const [templateProcessing, setTemplateProcessing] = useState(false);
+  const [templateError, setTemplateError] = useState("");
   const [platform, setPlatform] = useState("Instagram");
   const [contentType, setContentType] = useState("Post");
   const [tone, setTone] = useState("Engaging");
@@ -801,14 +807,15 @@ if (contentType in ['image', 'video']) {
   }
 
   // Primary prompt bar state (shared across all tabs)
-  const primaryBusy =
+  const primaryBusy = Boolean(
     activeTab === "write"
       ? isGenerating
       : activeTab === "image"
-      ? isGeneratingImage
-      : activeTab === "video"
-      ? isGeneratingVideo
-      : isPipelineRunning;
+        ? isGeneratingImage
+        : activeTab === "video"
+          ? isGeneratingVideo
+          : isPipelineRunning
+  );
 
   const primaryLabel = primaryBusy
     ? activeTab === "pipeline"
@@ -846,7 +853,83 @@ if (contentType in ['image', 'video']) {
     setActiveGenerationId(null);
     setGeneratedImage(null);
     setGeneratedVideo(null);
-    setShowPhoneMockup(true);
+
+    setTemplateStep(1);
+    setTemplateFile(null);
+    setTemplatePreview(null);
+    setTemplateError("");
+    setTemplateProcessing(false);
+    setTemplatePanelOpen(true);
+  }
+
+  async function handleTemplateProcess() {
+    if (!templateFile || templateProcessing) return;
+
+    if (selectedTemplate !== "remove-background") {
+      setTemplateError("This template workflow is not connected yet.");
+      return;
+    }
+
+    setTemplateProcessing(true);
+    setTemplateError("");
+    setTemplateStep(2);
+    setIsGeneratingImage(true);
+    setGeneratedImage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", templateFile);
+
+      const response = await fetch("/api/ai/remove-background", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await safeJson(response);
+
+      if (!response.ok) {
+        throw new Error(data.error || "Background removal failed.");
+      }
+
+      if (!data.success || !data.outputUrl) {
+        throw new Error("No processed image was returned.");
+      }
+
+      setGeneratedImage(data.outputUrl);
+      setShowPhoneMockup(true);
+      setTemplateStep(3);
+
+      recordGeneration({
+        type: "image",
+        prompt: "Remove background",
+        result: data.outputUrl,
+      });
+
+      setGenerations((prev) => [
+        {
+          id: `template-${Date.now()}`,
+          prompt: "Remove background",
+          result: data.outputUrl,
+          tool: "Remove Background",
+          platform,
+          contentType: "Image",
+          timestamp: Date.now(),
+          type: "image",
+          mediaUrl: data.outputUrl,
+        },
+        ...prev,
+      ]);
+    } catch (err) {
+      setTemplateStep(1);
+      setTemplateError(
+        err instanceof Error
+          ? err.message
+          : "Background removal failed."
+      );
+    } finally {
+      setTemplateProcessing(false);
+      setIsGeneratingImage(false);
+    }
   }
 
   // AI Editor suggestions
@@ -1036,7 +1119,6 @@ if (contentType in ['image', 'video']) {
                   <button
                     type="button"
                     onClick={handlePrimaryAction}
-                    disabled={!prompt.trim() || !!primaryBusy}
                     className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
                   >
                     {primaryBusy && (
@@ -1458,6 +1540,286 @@ if (contentType in ['image', 'video']) {
             }
           }}
         />
+      )}
+
+      {templatePanelOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 px-4 py-6 backdrop-blur-md">
+          <div className="relative flex max-h-[82vh] w-full max-w-3xl overflow-hidden rounded-3xl border border-zinc-800 bg-[#09090b] shadow-2xl">
+
+            <button
+              type="button"
+              onClick={() => setTemplatePanelOpen(false)}
+              className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-black/60 text-zinc-400 transition hover:border-zinc-600 hover:text-white"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="hidden w-[32%] border-r border-zinc-800 bg-[#0c0c0f] p-5 md:block">
+              <div className="flex h-full flex-col">
+                <div>
+                  <span className="inline-flex rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-violet-300">
+                    AI Template
+                  </span>
+
+                  <h2 className="mt-4 text-2xl font-semibold text-white">
+                    {TEMPLATES.find((t) => t.key === selectedTemplate)?.name}
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-zinc-500">
+                    {TEMPLATES.find((t) => t.key === selectedTemplate)?.tagline}
+                  </p>
+                </div>
+
+                <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-800 bg-black">
+                  {(() => {
+                    const tpl = TEMPLATES.find((t) => t.key === selectedTemplate);
+                    if (!tpl) return null;
+
+                    return tpl.img.endsWith(".webm") || tpl.img.endsWith(".mp4") ? (
+                      <video
+                        src={tpl.img}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        className="aspect-square w-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={tpl.img}
+                        alt={tpl.name}
+                        className="aspect-square w-full object-cover"
+                      />
+                    );
+                  })()}
+                </div>
+
+                <div className="mt-auto pt-6">
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3].map((step) => (
+                      <div
+                        key={step}
+                        className={`h-1 flex-1 rounded-full ${
+                          templateStep >= step
+                            ? "bg-violet-500"
+                            : "bg-zinc-800"
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <p className="mt-3 text-xs text-zinc-600">
+                    Step {templateStep} of 3
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex min-h-[480px] flex-1 flex-col p-6 md:p-7">
+              {templateStep === 1 && (
+                <>
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-violet-400">
+                      Step 1
+                    </p>
+                    <h3 className="mt-2 text-2xl font-semibold text-white">
+                      Add your image
+                    </h3>
+                    <p className="mt-2 max-w-lg text-sm leading-6 text-zinc-500">
+                      Upload the image you want to process with this template.
+                    </p>
+                  </div>
+
+                  <label
+                    htmlFor="template-image-upload"
+                    className="mt-8 flex min-h-[300px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-700 bg-zinc-950/70 p-8 text-center transition hover:border-violet-500/60 hover:bg-violet-500/[0.03]"
+                  >
+                    {templatePreview ? (
+                      <img
+                        src={templatePreview}
+                        alt="Selected"
+                        className="max-h-[260px] max-w-full rounded-xl object-contain"
+                      />
+                    ) : (
+                      <>
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-violet-400">
+                          <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                          </svg>
+                        </div>
+                        <p className="mt-4 text-sm font-medium text-white">
+                          Upload an image
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-600">
+                          PNG, JPG or WEBP
+                        </p>
+                      </>
+                    )}
+
+                    <input
+                      id="template-image-upload"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (!file) return;
+
+                        setTemplateFile(file);
+                        setTemplateError("");
+
+                        const url = URL.createObjectURL(file);
+                        setTemplatePreview(url);
+                      }}
+                    />
+                  </label>
+
+                  {templateFile && (
+                    <div className="mt-4 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-white">
+                          {templateFile.name}
+                        </p>
+                        <p className="text-xs text-zinc-600">
+                          {(templateFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <span className="text-xs text-emerald-400">Ready</span>
+                    </div>
+                  )}
+
+                  {templateError && (
+                    <p className="mt-4 text-sm text-red-400">
+                      {templateError}
+                    </p>
+                  )}
+
+                  <div className="mt-auto flex justify-end pt-8">
+                    <button
+                      type="button"
+                      disabled={!templateFile}
+                      onClick={() => void handleTemplateProcess()}
+                      className="rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {templateStep === 2 && (
+                <div className="flex flex-1 flex-col items-center justify-center text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/10">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+                  </div>
+
+                  <h3 className="mt-6 text-2xl font-semibold text-white">
+                    Processing your image
+                  </h3>
+
+                  <p className="mt-2 max-w-md text-sm leading-6 text-zinc-500">
+                    Octa Studio is sending your image to the local ComfyUI
+                    workflow and removing the background with BiRefNet.
+                  </p>
+
+                  <div className="mt-8 w-full max-w-md overflow-hidden rounded-full bg-zinc-900">
+                    <div className="h-1.5 w-2/3 animate-pulse rounded-full bg-violet-500" />
+                  </div>
+                </div>
+              )}
+
+              {templateStep === 3 && (
+                <>
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-emerald-400">
+                      Complete
+                    </p>
+                    <h3 className="mt-2 text-2xl font-semibold text-white">
+                      Background removed
+                    </h3>
+                    <p className="mt-2 text-sm text-zinc-500">
+                      Your transparent image is ready.
+                    </p>
+                  </div>
+
+                  {generatedImage && (
+                    <div className="mt-7 flex flex-1 items-center justify-center overflow-hidden rounded-2xl border border-zinc-800 bg-[linear-gradient(45deg,#18181b_25%,transparent_25%),linear-gradient(-45deg,#18181b_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#18181b_75%),linear-gradient(-45deg,transparent_75%,#18181b_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0px]">
+                      <img
+                        src={generatedImage}
+                        alt="Background removed"
+                        className="max-h-[320px] max-w-full object-contain"
+                      />
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTemplateStep(1);
+                        setTemplateFile(null);
+                        setTemplatePreview(null);
+                        setGeneratedImage(null);
+                      }}
+                      className="rounded-xl border border-zinc-800 px-5 py-3 text-sm font-medium text-zinc-300 transition hover:border-zinc-700 hover:text-white"
+                    >
+                      Start Again
+                    </button>
+
+                    {generatedImage && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isCreating}
+                          onClick={async () => {
+                            if (!generatedImage || isCreating) return;
+
+                            setIsCreating(true);
+                            setError("");
+
+                            try {
+                              const content = await createContent({
+                                title:
+                                  prompt.trim().slice(0, 80) ||
+                                  "Background Removed Image",
+                                body: result.trim() || "AI generated image",
+                                platform: platform || "Instagram",
+                              });
+
+                              router.push(`/content/${content.id}`);
+                            } catch (err) {
+                              console.error(err);
+                              setError(
+                                err instanceof Error
+                                  ? err.message
+                                  : "Could not open this image in Post Content."
+                              );
+                            } finally {
+                              setIsCreating(false);
+                            }
+                          }}
+                          className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isCreating ? "Opening..." : "Use this image → Post"}
+                        </button>
+
+                        <a
+                          href={generatedImage}
+                          download
+                          className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-600 hover:text-white"
+                        >
+                          Download PNG
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {showPurchase && (

@@ -102,37 +102,184 @@ export class ComfyUIClient {
     throw new Error("ComfyUI generation timed out.");
   }
 
+  async getOutputFile(
+    entry: ComfyUIHistory[string],
+  ): Promise<{ filename: string; subfolder?: string; type?: string } | null> {
+    const outputs = entry.outputs;
+    if (!outputs) return null;
+
+    // Prefer actual saved output files over PreviewImage temp files.
+    for (const nodeOutput of Object.values(outputs)) {
+      const node = nodeOutput as {
+        images?: {
+          filename: string;
+          subfolder?: string;
+          type?: string;
+        }[];
+      };
+
+      if (!node.images?.length) continue;
+
+      const outputImage = node.images.find(
+        (image) => image.type === "output"
+      );
+
+      if (outputImage) {
+        return outputImage;
+      }
+    }
+
+    // Fallback to the first image if no output-type image exists.
+    for (const nodeOutput of Object.values(outputs)) {
+      const node = nodeOutput as {
+        images?: {
+          filename: string;
+          subfolder?: string;
+          type?: string;
+        }[];
+      };
+
+      if (!node.images?.length) continue;
+
+      return node.images[0];
+    }
+
+    return null;
+  }
+
   async getOutputFilename(entry: ComfyUIHistory[string]): Promise<string | null> {
     const outputs = entry.outputs;
     if (!outputs) return null;
 
+    // Prefer real saved output images over PreviewImage temp files.
     for (const nodeOutput of Object.values(outputs)) {
-      const node = nodeOutput as { images?: { filename: string }[] };
-      if (node.images && node.images.length > 0) {
-        return node.images[0].filename;
+      const node = nodeOutput as {
+        images?: {
+          filename: string;
+          subfolder?: string;
+          type?: string;
+        }[];
+      };
+
+      if (!node.images?.length) continue;
+
+      const outputImage = node.images.find(
+        (image) => image.type === "output"
+      );
+
+      if (outputImage) {
+        return outputImage.subfolder
+          ? `${outputImage.subfolder}/${outputImage.filename}`
+          : outputImage.filename;
       }
+    }
+
+    // Fallback to the first available image.
+    for (const nodeOutput of Object.values(outputs)) {
+      const node = nodeOutput as {
+        images?: {
+          filename: string;
+          subfolder?: string;
+          type?: string;
+        }[];
+      };
+
+      if (!node.images?.length) continue;
+
+      const image = node.images[0];
+
+      return image.subfolder
+        ? `${image.subfolder}/${image.filename}`
+        : image.filename;
     }
 
     return null;
   }
 
   async getFileUrl(filename: string): Promise<string> {
-    return `${this.baseUrl}/view?filename=${encodeURIComponent(filename)}`;
+    const parts = filename.split("/");
+    const name = parts.pop() ?? filename;
+    const subfolder = parts.join("/");
+
+    const params = new URLSearchParams({
+      filename: name,
+      type: "output",
+    });
+
+    if (subfolder) {
+      params.set("subfolder", subfolder);
+    }
+
+    return `${this.baseUrl}/view?${params.toString()}`;
   }
 
-  async downloadFile(filename: string, destinationDir: string): Promise<string> {
-    const fileUrl = `${this.baseUrl}/view?filename=${encodeURIComponent(filename)}`;
+  async uploadImage(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("image", file, file.name);
+
+    const response = await fetch(`${this.baseUrl}/upload/image`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(
+        `ComfyUI image upload failed: ${response.status} ${text}`,
+      );
+    }
+
+    const data = (await response.json()) as {
+      name?: string;
+      subfolder?: string;
+      type?: string;
+    };
+
+    if (!data.name) {
+      throw new Error("ComfyUI did not return an uploaded image name.");
+    }
+
+    return data.subfolder
+      ? `${data.subfolder}/${data.name}`
+      : data.name;
+  }
+
+  async downloadFile(
+    filename: string,
+    destinationDir: string,
+  ): Promise<string> {
+    const [subfolder, actualFilename] = filename.includes("/")
+      ? [
+          filename.slice(0, filename.lastIndexOf("/")),
+          filename.slice(filename.lastIndexOf("/") + 1),
+        ]
+      : ["", filename];
+
+    const params = new URLSearchParams({
+      filename: actualFilename,
+      type: "output",
+    });
+
+    if (subfolder) {
+      params.set("subfolder", subfolder);
+    }
+
+    const fileUrl = `${this.baseUrl}/view?${params.toString()}`;
     const response = await fetch(fileUrl);
 
     if (!response.ok) {
-      throw new Error(`Failed to download generated file: ${response.status}`);
+      throw new Error(
+        `Failed to download generated file: ${response.status}`,
+      );
     }
 
-    const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
+    const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${filename}`;
+    const uniqueName = `${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}-${actualFilename}`;
+
     const destinationPath = `${destinationDir}/${uniqueName}`;
 
     const fs = await import("fs/promises");
