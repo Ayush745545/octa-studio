@@ -32,7 +32,16 @@ const tools = [
   },
 ];
 
-const TEMPLATES = [
+type Template = {
+  key: string;
+  name: string;
+  tagline: string;
+  tool: string;
+  prompt: string;
+  img: string;
+};
+
+const TEMPLATES: Template[] = [
   {
     key: "remove-background",
     name: "Remove Background",
@@ -819,6 +828,19 @@ if (contentType in ['image', 'video']) {
     }
   }
 
+  function handleTemplateSelect(template: Template) {
+    setActiveTab("image");
+    setSelectedTemplate(template.key);
+    setPrompt(template.prompt);
+    setResult("");
+    setStreamingText("");
+    setError("");
+    setActiveGenerationId(null);
+    setGeneratedImage(null);
+    setGeneratedVideo(null);
+    setShowPhoneMockup(true);
+  }
+
   // AI Editor suggestions
   const aiSuggestions = [
     { label: "Improve", instruction: "Improve this draft: make it clearer, more engaging, and better structured. Keep the core message." },
@@ -882,11 +904,11 @@ if (contentType in ['image', 'video']) {
 </header>
 
       <div className="flex h-[calc(100vh-4rem)]">
-        {/* Posts Sidebar */}
+        {/* Generations Sidebar */}
         <aside className={`border-r border-zinc-800/50 bg-[#0a0a0c] flex-shrink-0 transition-all duration-300 ${isSidebarOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 overflow-hidden'}`}>
           <div className="p-4 border-b border-zinc-800/50">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Recent Generations</h3>
+              <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Your Generations</h3>
               <span className="text-[10px] text-zinc-600">{generations.length}</span>
             </div>
           </div>
@@ -1078,72 +1100,75 @@ if (contentType in ['image', 'video']) {
               </div>
             </div>
 
+            <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-5">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-semibold text-white">Image Templates</h2>
+                    <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">
+                      {TEMPLATES.length} templates
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Pick a template to load the prompt and jump straight into AI image generation.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="inline-flex items-center gap-2 self-start rounded-full border border-zinc-800 bg-black/30 px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg>
+                  {isSidebarOpen ? "Hide" : "Show"} Your Generations
+                </button>
+              </div>
+
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">
+                {TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.key}
+                    type="button"
+                    onClick={() => handleTemplateSelect(tpl)}
+                    className={`group relative shrink-0 w-36 overflow-hidden rounded-2xl border text-left transition ${
+                      selectedTemplate === tpl.key
+                        ? "border-[#7C3AED] ring-2 ring-[#7C3AED]/40"
+                        : "border-zinc-800 hover:border-[#7C3AED]/60"
+                    }`}
+                  >
+                    <img
+                      src={tpl.img}
+                      alt={tpl.name}
+                      loading="lazy"
+                      className="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent px-3 pb-3 pt-10">
+                      <p className="text-sm font-semibold leading-tight text-white">{tpl.name}</p>
+                      <p className="mt-1 text-[11px] leading-tight text-zinc-300">{tpl.tagline}</p>
+                    </div>
+                    {selectedTemplate === tpl.key && (
+                      <span className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
+                        <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {selectedTemplate && (
+                <p className="mt-3 text-xs text-zinc-500">
+                  Template loaded{" "}
+                  <span className="font-medium text-violet-300">
+                    {TEMPLATES.find((template) => template.key === selectedTemplate)?.name}
+                  </span>
+                  . Update the prompt if needed, then press Generate Image.
+                </p>
+              )}
+            </section>
+
             {/* --- WRITE TAB --- */}
             {activeTab === "write" && (
               <>
                 <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden">
-                  {/* Tool Selector */}
-                  <div className="flex items-center justify-end px-5 py-3.5 border-b border-zinc-800">
-                    <button
-                      type="button"
-                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                      className="flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg>
-                      {isSidebarOpen ? "Hide" : "Show"} Posts
-                    </button>
-                  </div>
-                    <div className="px-5 py-4 border-b border-zinc-800">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <h2 className="text-sm font-semibold text-white">Image Templates</h2>
-                          <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">5 templates</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 [scrollbar-width:thin]">
-                        {TEMPLATES.map((tpl) => (
-                          <button
-                            key={tpl.key}
-                            type="button"
-                            onClick={() => {
-                              setActiveTab("image");
-                              setSelectedTemplate(tpl.key);
-                              setPrompt(tpl.prompt);
-                            }}
-                            className={`group relative shrink-0 w-28 rounded-xl border overflow-hidden text-left transition ${
-                              selectedTemplate === tpl.key
-                                ? "border-[#7C3AED] ring-2 ring-[#7C3AED]/40"
-                                : "border-zinc-800 hover:border-[#7C3AED]/60"
-                            }`}
-                          >
-                            <img
-                              src={tpl.img}
-                              alt={tpl.name}
-                              loading="lazy"
-                              className="h-36 w-28 object-cover transition-transform duration-300 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-2 pt-6 pb-1.5">
-                              <p className="text-[11px] font-semibold leading-tight text-white">{tpl.name}</p>
-                              <p className="text-[9px] leading-tight text-zinc-400">{tpl.tagline}</p>
-                            </div>
-                            {selectedTemplate === tpl.key && (
-                              <span className="absolute right-1.5 top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#7C3AED] text-white">
-                                <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                              </span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                      {selectedTemplate && (
-                        <p className="mt-2 text-xs text-zinc-500">
-                          Template:{" "}
-                          <span className="text-violet-300 font-medium">
-                            {TEMPLATES.find((t) => t.key === selectedTemplate)?.name}
-                          </span>{" "}
-                          — prompt loaded. Press Generate to create the image.
-                        </p>
-                      )}
-                    </div>
                   {/* Chat Area */}
                   <div className="p-5 min-h-[280px]">
                     {prompt && (isGenerating || Boolean(result)) && (
