@@ -1098,26 +1098,7 @@ let context = "";
               <>
                 <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden">
                   {/* Tool Selector */}
-                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800">
-                    <div>
-                      <div className="flex flex-wrap gap-2">
-                        {tools.map((t) => (
-                          <button
-                            key={t.title}
-                            type="button"
-                            onClick={() => setActiveTool(t.title)}
-                            className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
-                              activeTool === t.title
-                                ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-300"
-                                : "border-zinc-800 bg-black text-zinc-500 hover:border-zinc-700 hover:text-zinc-200"
-                            }`}
-                          >
-                            {t.title}
-                          </button>
-                        ))}
-                      </div>
-                      <p className="mt-2 text-xs text-zinc-600">Tell AI what you want to create.</p>
-                    </div>
+                  <div className="flex items-center justify-end px-5 py-3.5 border-b border-zinc-800">
                     <button
                       type="button"
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}

@@ -1,0 +1,124 @@
+{
+  "prompt_type": "image_generation",
+  "reference_image": "Use the uploaded image as the primary visual reference. Preserve the same model, pose, clothing, composition, camera perspective, lighting direction, and overall aesthetic.",
+  "subject": {
+    "gender": "female",
+    "age_appearance": "young adult",
+    "build": "slim, natural fashion-model proportions",
+    "pose": "standing straight and facing the camera, both hands naturally placed inside the front pockets of the jeans",
+    "expression": "calm, confident, neutral expression",
+    "gaze": "directly toward the camera"
+  },
+  "face_and_hair": {
+    "face": "soft youthful facial features, defined but natural jawline, symmetrical facial proportions",
+    "skin": "natural warm-light complexion with realistic skin texture",
+    "hair": "dark brown hair, center-parted and slicked back into a small low bun, clean polished styling",
+    "makeup": "minimal natural makeup, subtle eyes and natural lips"
+  },
+  "accessories": {
+    "earrings": "small silver hoop earrings",
+    "other_accessories": "none"
+  },
+  "clothing": {
+    "top": {
+      "type": "cropped short-sleeve crew-neck T-shirt",
+      "color": "clean white",
+      "collar": "distinct black ribbed crew-neck collar",
+      "sleeves": "short fitted sleeves",
+      "fit": "slightly fitted cropped silhouette",
+      "graphics": "completely blank front, no text, no logo, no artwork, no design"
+    },
+    "bottom": {
+      "type": "high-waisted relaxed wide-leg jeans",
+      "color": "light washed blue denim",
+      "fit": "loose straight-to-wide leg",
+      "details": "realistic denim texture, subtle natural fading, visible waistband, belt loops, front pockets and stitching"
+    }
+  },
+  "environment": {
+    "location": "minimalist professional photography studio",
+    "background": "warm neutral gray-beige seamless studio wall",
+    "floor": "subtle neutral studio floor",
+    "background_details": "clean and uncluttered with a soft diagonal architectural/light shadow"
+  },
+  "camera": {
+    "shot_type": "cinematic fashion editorial portrait",
+    "orientation": "vertical",
+    "aspect_ratio": "3:4",
+    "framing": "full upper body extending to below the knees, similar framing to the reference",
+    "camera_height": "approximately chest-to-eye level",
+    "angle": "straight-on with a very subtle perspective",
+    "lens": "50mm fashion photography lens",
+    "focus": "sharp focus on face, clothing and body",
+    "depth_of_field": "moderate shallow depth of field",
+    "composition": "centered subject with balanced negative space"
+  },
+  "lighting": {
+    "style": "cinematic studio lighting",
+    "key_light": "large soft directional light from the upper front-left",
+    "fill_light": "subtle low-intensity fill from the opposite side",
+    "rim_light": "very subtle edge separation around hair and shoulders",
+    "shadows": "soft but visible cinematic shadows across the face, shirt and background",
+    "contrast": "medium-high cinematic contrast",
+    "mood": "premium, sophisticated, editorial and cinematic"
+  },
+  "color_grading": {
+    "style": "cinematic fashion color grade",
+    "tones": "warm neutral skin tones, muted beige-gray background, clean white shirt and cool washed-blue denim",
+    "contrast": "rich but natural",
+    "saturation": "slightly muted premium editorial colors",
+    "highlights": "soft controlled highlights",
+    "shadows": "deep but detailed shadows"
+  },
+  "image_quality": {
+    "style": "ultra-photorealistic professional fashion photography",
+    "resolution": "8K",
+    "details": [
+      "realistic skin texture",
+      "individual hair strands",
+      "accurate fabric folds",
+      "detailed cotton texture",
+      "realistic denim weave",
+      "natural hands and fingers",
+      "realistic facial proportions",
+      "subtle studio shadows",
+      "premium commercial apparel photography"
+    ],
+    "retouching": "professional subtle retouching while preserving natural skin texture"
+  },
+  "negative_prompt": [
+    "text",
+    "logo",
+    "graphic",
+    "artwork",
+    "print",
+    "watermark",
+    "your design here",
+    "shirt design",
+    "patterned shirt",
+    "colored shirt",
+    "different pose",
+    "hands outside pockets",
+    "extra fingers",
+    "deformed hands",
+    "distorted face",
+    "asymmetrical eyes",
+    "heavy makeup",
+    "long hair",
+    "loose hair",
+    "hat",
+    "necklace",
+    "busy background",
+    "outdoor location",
+    "harsh flash",
+    "overexposure",
+    "underexposure",
+    "plastic skin",
+    "cartoon",
+    "anime",
+    "3D render",
+    "illustration",
+    "low resolution",
+    "blurry image"
+  ]
+}

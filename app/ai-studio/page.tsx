@@ -30,52 +30,55 @@ const tools = [
     description: "Turn your topic into clickable titles.",
     placeholder: "Example: AI tools developers should know",
   },
-  {
-    title: "Repurpose",
-    description: "Transform existing content for another platform.",
-    placeholder: "Paste the content you want to repurpose...",
-  },
 ];
 
 const TEMPLATES = [
   {
-    key: "content-ideas",
-    name: "Content Ideas",
-    tagline: "Fresh angles from a topic",
-    tool: "Generate Ideas",
-    prompt: "5 fresh content ideas for",
+    key: "remove-background",
+    name: "Remove Background",
+    tagline: "Clean cutout for any subject",
+    tool: "Image",
+    prompt: "Remove the background from this product photo and keep a clean, natural edge with studio-quality detail.",
     img: "/ai/templates/tpl_ideas.png",
   },
   {
-    key: "write-post",
-    name: "Write a Post",
-    tagline: "First draft in seconds",
-    tool: "Write Content",
-    prompt: "Write an engaging post about",
+    key: "ai-background",
+    name: "AI Background",
+    tagline: "Swap scenes with styled backdrops",
+    tool: "Image",
+    prompt: "Replace the background with a premium studio scene using soft purple lighting and realistic shadows.",
     img: "/ai/templates/tpl_write.png",
   },
   {
-    key: "strong-hook",
-    name: "Strong Hook",
-    tagline: "Stop-the-scroll openers",
-    tool: "Generate Hook",
-    prompt: "3 strong opening hooks for a post about",
+    key: "image-upscaler",
+    name: "Image Upscaler",
+    tagline: "Sharpen and enhance resolution",
+    tool: "Image",
+    prompt: "Upscale this image to high resolution, restore crisp details, and keep textures natural without oversmoothing.",
     img: "/ai/templates/tpl_hook.png",
   },
   {
-    key: "clickable-title",
-    name: "Clickable Title",
-    tagline: "Titles people tap on",
-    tool: "Generate Title",
-    prompt: "5 clickable titles for a post about",
+    key: "ai-relight",
+    name: "AI Relight",
+    tagline: "Rebuild lighting and shadows",
+    tool: "Image",
+    prompt: "Relight this portrait with cinematic key light, soft rim light, and balanced skin tones on a dark background.",
     img: "/ai/templates/tpl_title.png",
   },
   {
-    key: "repurpose",
-    name: "Repurpose Content",
-    tagline: "One piece, many platforms",
-    tool: "Repurpose",
-    prompt: "Repurpose this for another platform: ",
+    key: "product-ad-generator",
+    name: "Product Ad Generator",
+    tagline: "Turn products into ad creatives",
+    tool: "Image",
+    prompt: "Create a premium product ad visual with dramatic lighting, luxury reflections, and clean marketing composition.",
+    img: "/ai/templates/asthatic-girl.jpg",
+  },
+  {
+    key: "image-style-generator",
+    name: "Image Style Generator",
+    tagline: "Apply a custom visual look",
+    tool: "Image",
+    prompt: "Transform this image into a polished campaign style with bold contrast, vibrant highlights, and premium brand aesthetics.",
     img: "/ai/templates/tpl_repurpose.png",
   },
 ];
@@ -1080,23 +1083,7 @@ if (contentType in ['image', 'video']) {
               <>
                 <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden">
                   {/* Tool Selector */}
-                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800">
-                    <div className="flex flex-wrap gap-2">
-                      {tools.map((t) => (
-                        <button
-                          key={t.title}
-                          type="button"
-                          onClick={() => setActiveTool(t.title)}
-                          className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
-                            activeTool === t.title
-                              ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-300"
-                              : "border-zinc-800 bg-black text-zinc-500 hover:border-zinc-700 hover:text-zinc-200"
-                          }`}
-                        >
-                          {t.title}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="flex items-center justify-end px-5 py-3.5 border-b border-zinc-800">
                     <button
                       type="button"
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -1106,60 +1093,57 @@ if (contentType in ['image', 'video']) {
                       {isSidebarOpen ? "Hide" : "Show"} Posts
                     </button>
                   </div>
-                  {/* Featured Templates */}
-                  <div className="px-5 py-4 border-b border-zinc-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-semibold text-white">AI Templates</h2>
-                        <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">Featured</span>
+                    <div className="px-5 py-4 border-b border-zinc-800">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-sm font-semibold text-white">Image Templates</h2>
+                          <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">5 templates</span>
+                        </div>
                       </div>
+                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 [scrollbar-width:thin]">
+                        {TEMPLATES.map((tpl) => (
+                          <button
+                            key={tpl.key}
+                            type="button"
+                            onClick={() => {
+                              setActiveTab("image");
+                              setSelectedTemplate(tpl.key);
+                              setPrompt(tpl.prompt);
+                            }}
+                            className={`group relative shrink-0 w-28 rounded-xl border overflow-hidden text-left transition ${
+                              selectedTemplate === tpl.key
+                                ? "border-[#7C3AED] ring-2 ring-[#7C3AED]/40"
+                                : "border-zinc-800 hover:border-[#7C3AED]/60"
+                            }`}
+                          >
+                            <img
+                              src={tpl.img}
+                              alt={tpl.name}
+                              loading="lazy"
+                              className="h-36 w-28 object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-2 pt-6 pb-1.5">
+                              <p className="text-[11px] font-semibold leading-tight text-white">{tpl.name}</p>
+                              <p className="text-[9px] leading-tight text-zinc-400">{tpl.tagline}</p>
+                            </div>
+                            {selectedTemplate === tpl.key && (
+                              <span className="absolute right-1.5 top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#7C3AED] text-white">
+                                <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                              </span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                      {selectedTemplate && (
+                        <p className="mt-2 text-xs text-zinc-500">
+                          Template:{" "}
+                          <span className="text-violet-300 font-medium">
+                            {TEMPLATES.find((t) => t.key === selectedTemplate)?.name}
+                          </span>{" "}
+                          — prompt loaded. Press Generate to create the image.
+                        </p>
+                      )}
                     </div>
-                    <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 [scrollbar-width:thin]">
-                      {TEMPLATES.map((tpl) => (
-                        <button
-                          key={tpl.key}
-                          type="button"
-                          onClick={() => {
-                            setActiveTool(tpl.tool);
-                            setSelectedTemplate(tpl.key);
-                            if (!prompt.trim()) {
-                              setPrompt(tpl.prompt + " your topic...");
-                            }
-                          }}
-                          className={`group relative shrink-0 w-28 rounded-xl border overflow-hidden text-left transition ${
-                            selectedTemplate === tpl.key
-                              ? "border-[#7C3AED] ring-2 ring-[#7C3AED]/40"
-                              : "border-zinc-800 hover:border-[#7C3AED]/60"
-                          }`}
-                        >
-                          <img
-                            src={tpl.img}
-                            alt={tpl.name}
-                            loading="lazy"
-                            className="h-36 w-28 object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-2 pt-6 pb-1.5">
-                            <p className="text-[11px] font-semibold leading-tight text-white">{tpl.name}</p>
-                            <p className="text-[9px] leading-tight text-zinc-400">{tpl.tagline}</p>
-                          </div>
-                          {selectedTemplate === tpl.key && (
-                            <span className="absolute right-1.5 top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#7C3AED] text-white">
-                              <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                    {selectedTemplate && (
-                      <p className="mt-2 text-xs text-zinc-500">
-                        Template:{" "}
-                        <span className="text-violet-300 font-medium">
-                          {TEMPLATES.find((t) => t.key === selectedTemplate)?.name}
-                        </span>{" "}
-                        — tell it your topic and press Generate.
-                      </p>
-                    )}
-                  </div>
                   {/* Chat Area */}
                   <div className="p-5 min-h-[280px]">
                     {prompt && (isGenerating || Boolean(result)) && (

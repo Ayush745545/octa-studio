@@ -87,9 +87,7 @@ function PostPreviewCard() {
     <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-[#111113] shadow-2xl max-w-md mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4">
-        <div className="h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
-          <Image src="/images/logo.png" alt="octa-studio" width={40} height={40} className="object-cover" />
-        </div>
+        <Image src="/images/logo.png" alt="octa-studio" width={40} height={40} className="h-10 w-10 object-contain" />
         <div>
           <p className="text-[13px] font-semibold text-white">octa-studio</p>
           <p className="text-[11px] text-zinc-500">@octa-studio · 2h ago</p>
@@ -292,7 +290,7 @@ function GsapCalendarShowcase() {
           <p className="text-[15px] leading-[1.6] text-zinc-400">Write your content in the editor, then drop it into the visual calendar. See your entire pipeline at a glance across the week.</p>
         </div>
         <div ref={text2Ref} className="absolute inset-0 w-full flex items-center justify-center">
-          <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-fuchsia-400">Scheduled.</strong> Your LinkedIn post is locked into Thursday at 10 AM. It's queued and ready to publish automatically.</p>
+          <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-fuchsia-400">Scheduled.</strong> Your LinkedIn post is locked into Thursday at 10 AM. It&apos;s queued and ready to publish automatically.</p>
         </div>
         <div ref={text3Ref} className="absolute inset-0 w-full flex items-center justify-center">
           <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-emerald-400">Rescheduled.</strong> Dragged to Saturday. octa-studio updates the queue instantly — no extra clicks needed.</p>
@@ -392,10 +390,10 @@ function GsapCalendarShowcase() {
             <div className="rounded-[18px] bg-[#111113] overflow-hidden">
               {/* AI Studio Header */}
               <div className="bg-zinc-900 px-3 py-2 flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded overflow-hidden bg-gradient-to-br from-fuchsia-500 to-purple-600">
-                  <Image src="/images/logo.png" alt="octa-studio" width={20} height={20} className="object-cover" />
+                <span className="flex h-5 w-5 items-center justify-center">
+                  <Image src="/images/logo.png" alt="octa-studio" width={20} height={20} className="h-5 w-5 object-contain" />
                 </span>
-                <span className="text-[10px] font-semibold text-white">AI Studio</span>
+                <span className="text-[10px] font-semibold text-white ml-1">AI Studio</span>
               </div>
               {/* Platform Select */}
               <div className="px-3 py-2 flex gap-1.5">
@@ -713,11 +711,15 @@ export function LandingClient({
       {/* ━━━ Navigation ━━━ */}
       <nav className="fixed top-0 z-50 w-full border-b border-zinc-900 bg-black/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-lg shadow-fuchsia-500/10">
-              <Image src="/images/logo.png" alt="octa-studio" width={32} height={32} className="object-cover" />
-            </span>
-            <span className="text-[15px] font-semibold tracking-tight">octa-studio</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo/logo.png"
+              alt="octa-studio"
+              width={132}
+              height={32}
+              className="h-auto w-[132px] object-contain"
+              priority
+            />
           </Link>
           <div className="hidden items-center gap-8 md:flex">
             <a href="#calendar" className="text-[13px] text-zinc-500 transition hover:text-white">Calendar</a>
@@ -919,11 +921,14 @@ export function LandingClient({
       {/* Footer */}
       <footer className="border-t border-zinc-900 bg-zinc-950">
         <div data-reveal className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 sm:flex-row lg:px-8">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md overflow-hidden">
-              <Image src="/images/logo.png" alt="octa-studio" width={28} height={28} className="object-cover" />
-            </span>
-            <span className="text-sm font-semibold">octa-studio</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo/logo.png"
+              alt="octa-studio"
+              width={116}
+              height={28}
+              className="h-auto w-[116px] object-contain"
+            />
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/calendar" className="text-xs text-zinc-500 hover:text-white transition">Open Calendar</Link>
