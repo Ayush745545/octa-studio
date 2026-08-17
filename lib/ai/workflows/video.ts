@@ -17,12 +17,12 @@ export function createVideoWorkflow(params: {
     negativePrompt = "",
     width = 832,
     height = 480,
-    frames = 49,
+    frames = 41,
     fps = 16,
-    steps = 20,
+    steps = 12,
     cfg = 6,
-    seed = Math.floor(Math.random() * 0xffffffff),
-    checkpoint = "wan_2.1_t2v_1.3b.safetensors",
+    seed = Math.floor(Math.random() * 2147483647),
+    checkpoint = "wan2.1_t2v_1.3B_fp16.safetensors",
   } = params;
 
   return {
@@ -33,15 +33,15 @@ export function createVideoWorkflow(params: {
         weight_dtype: "default",
       },
     },
+
     "2": {
-      class_type: "DualCLIPLoader",
+      class_type: "CLIPLoader",
       inputs: {
-        text: prompt,
-        clip_name1: "umt5_xxl_fp16.safetensors",
-        clip_name2: "umt5_xxl_fp16.safetensors",
+        clip_name: "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
         type: "wan",
       },
     },
+
     "3": {
       class_type: "CLIPTextEncode",
       inputs: {
@@ -49,51 +49,76 @@ export function createVideoWorkflow(params: {
         clip: ["2", 0],
       },
     },
+
     "4": {
       class_type: "CLIPTextEncode",
       inputs: {
-        text: negativePrompt || "worst quality, low quality, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry",
+        text:
+          negativePrompt ||
+          "worst quality, low quality, blurry, distorted, bad anatomy, bad motion, deformed, flickering, jitter, artifacts, watermark, text",
         clip: ["2", 0],
       },
     },
+
     "5": {
-      class_type: "EmptyLatentVideo",
+      class_type: "VAELoader",
       inputs: {
+        vae_name: "Wan2.1_VAE.pth",
+      },
+    },
+
+    "6": {
+      class_type: "WanImageToVideo",
+      inputs: {
+        positive: ["3", 0],
+        negative: ["4", 0],
+        vae: ["5", 0],
         width,
         height,
-        frames,
+        length: frames,
         batch_size: 1,
       },
     },
-    "6": {
+
+    "7": {
       class_type: "KSampler",
       inputs: {
+        model: ["1", 0],
         seed,
         steps,
         cfg,
         sampler_name: "euler",
         scheduler: "normal",
+        positive: ["6", 0],
+        negative: ["6", 1],
+        latent_image: ["6", 2],
         denoise: 1,
-        model: ["1", 0],
-        positive: ["3", 0],
-        negative: ["4", 0],
-        latent_image: ["5", 0],
       },
     },
-    "7": {
+
+    "8": {
       class_type: "VAEDecode",
       inputs: {
-        samples: ["6", 0],
-        vae: ["1", 1],
+        samples: ["7", 0],
+        vae: ["5", 0],
       },
     },
-    "8": {
+
+    "9": {
+      class_type: "CreateVideo",
+      inputs: {
+        images: ["8", 0],
+        fps,
+      },
+    },
+
+    "10": {
       class_type: "SaveVideo",
       inputs: {
+        video: ["9", 0],
         filename_prefix: "octa-studio-ai-video",
-        format: "image/gif",
-        fps,
-        images: ["7", 0],
+        format: "mp4",
+        codec: "h264",
       },
     },
   };

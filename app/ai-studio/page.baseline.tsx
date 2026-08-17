@@ -120,12 +120,6 @@ async function safeJson(response: Response): Promise<Record<string, any>> {
   }
 }
 
-declare global {
-  interface Window {
-    Razorpay?: any;
-  }
-}
-
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);

@@ -38,6 +38,10 @@ type Scene = {
   id: string;
   title: string;
   description: string;
+  narration: string;
+  visualPrompt: string;
+  duration: number;
+  generatedUrl?: string;
 };
 
 export default function CreatorStudioPage() {
@@ -48,6 +52,9 @@ export default function CreatorStudioPage() {
       id: "scene-1",
       title: "Scene 01",
       description: "Opening scene",
+      narration: "",
+      visualPrompt: "",
+      duration: 5,
     },
   ]);
 
@@ -57,6 +64,7 @@ export default function CreatorStudioPage() {
   const [prompt, setPrompt] = useState("");
   const [script, setScript] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [generatingScene, setGeneratingScene] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [projectName, setProjectName] = useState("Untitled Video");
   const [duration, setDuration] = useState(60);
@@ -153,19 +161,29 @@ export default function CreatorStudioPage() {
         id: `scene-${number}`,
         title: `Scene ${String(number).padStart(2, "0")}`,
         description: "New scene",
+        narration: "",
+        visualPrompt: "",
+        duration: 5,
       },
     ]);
   }
 
   function newVideoProject() {
-    setProjectName("Untitled Video");
+    const projectNumber = Date.now().toString().slice(-4);
+
+    setProjectName(`New Video ${projectNumber}`);
+
     setScenes([
       {
         id: "scene-1",
         title: "Scene 01",
         description: "Opening scene",
+        narration: "",
+        visualPrompt: "",
+        duration: 5,
       },
     ]);
+
     setActiveSceneId("scene-1");
     setClips([]);
     setSelectedClip(null);
@@ -254,6 +272,9 @@ export default function CreatorStudioPage() {
           id: "scene-1",
           title: "Scene 01",
           description: source.slice(0, 120),
+          narration: source,
+          visualPrompt: `${source.slice(0, 180)}, cinematic long-form video, realistic, professional camera movement, dramatic lighting`,
+          duration: 5,
         },
       ]);
       setActiveSceneId("scene-1");
@@ -279,11 +300,91 @@ export default function CreatorStudioPage() {
         id: `scene-${index + 1}`,
         title: `Scene ${String(number).padStart(2, "0")}`,
         description: description || "AI-generated scene",
+        narration: description || "AI-generated scene",
+        visualPrompt: `${description || "AI-generated scene"}, cinematic long-form video, realistic, professional camera movement, dramatic lighting, detailed environment`,
+        duration: 5,
       };
     });
 
     setScenes(nextScenes);
     setActiveSceneId(nextScenes[0].id);
+  }
+
+  async function generateActiveScene() {
+    if (generatingScene) return;
+
+    const activeScene =
+      scenes.find((scene) => scene.id === activeSceneId) ?? scenes[0];
+
+    if (!activeScene) return;
+
+    const scenePrompt =
+      activeScene.visualPrompt ||
+      activeScene.description ||
+      prompt.trim();
+
+    if (!scenePrompt) {
+      alert("Generate scenes or enter a video description first.");
+      return;
+    }
+
+    setGeneratingScene(true);
+
+    try {
+      const response = await fetch("/api/ai/video", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: scenePrompt,
+          width: 832,
+          height: 480,
+          frames: Math.max(49, Math.round(activeScene.duration * 16)),
+          fps: 16,
+          steps: 20,
+          cfg: 6,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success || !data.url) {
+        throw new Error(data.error || "Scene generation failed.");
+      }
+
+      const generated: MediaItem = {
+        id: `scene-${activeScene.id}-${Date.now()}`,
+        url: data.url,
+        filename: data.filename || `${activeScene.id}.mp4`,
+        mimeType: "video/mp4",
+        size: 0,
+        type: "VIDEO",
+      };
+
+      setMedia((current) => [generated, ...current]);
+
+      setScenes((current) =>
+        current.map((scene) =>
+          scene.id === activeScene.id
+            ? {
+                ...scene,
+                generatedUrl: data.url,
+              }
+            : scene,
+        ),
+      );
+
+      addToTimeline(generated);
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Scene generation failed.",
+      );
+    } finally {
+      setGeneratingScene(false);
+    }
   }
 
   function generateScript() {
@@ -332,14 +433,15 @@ export default function CreatorStudioPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-zinc-300 transition hover:bg-white/[0.05]"
+            <label
+              htmlFor="creator-studio-file-upload"
+              className={`flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-zinc-300 transition hover:bg-white/[0.05] ${
+                uploading ? "pointer-events-none opacity-50" : ""
+              }`}
             >
               <Upload className="size-3.5" />
               {uploading ? "Uploading..." : "Import"}
-            </button>
+            </label>
 
             <button
               type="button"
@@ -350,6 +452,7 @@ export default function CreatorStudioPage() {
             </button>
 
             <input
+              id="creator-studio-file-upload"
               ref={fileInputRef}
               type="file"
               accept="image/*,video/*"
@@ -714,6 +817,25 @@ export default function CreatorStudioPage() {
                   Generate Video
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={generateActiveScene}
+                disabled={generatingScene}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-violet-400/25 bg-violet-500/10 py-2.5 text-[10px] font-semibold text-violet-200 transition hover:border-violet-400/40 hover:bg-violet-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {generatingScene ? (
+                  <>
+                    <Loader2 className="size-3 animate-spin" />
+                    Generating Scene...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="size-3" />
+                    Generate Active Scene
+                  </>
+                )}
+              </button>
             </div>
 
             {script && (

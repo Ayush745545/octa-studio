@@ -43,72 +43,27 @@ export class ComfyUIClient {
 
   async submitWorkflow(workflow: ComfyUIWorkflow): Promise<string> {
     const controller = new AbortController();
-
-    // Never allow workflow submission to hang for the full generation timeout.
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
-      const clientId =
-        globalThis.crypto?.randomUUID?.() ??
-        `octa-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
       const response = await fetch(`${this.baseUrl}/prompt`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          prompt: workflow,
-          client_id: clientId,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: workflow }),
         signal: controller.signal,
       });
 
-      const text = await response.text();
-
-      let data: ComfyUIResponse & {
-        error?: string;
-        node_errors?: Record<string, unknown>;
-      };
-
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new Error(
-          `ComfyUI returned invalid JSON (${response.status}): ${text.slice(0, 1000)}`,
-        );
-      }
-
       if (!response.ok) {
-        throw new Error(
-          `ComfyUI rejected workflow (${response.status}): ${JSON.stringify(data)}`,
-        );
+        const text = await response.text();
+        throw new Error(`ComfyUI rejected workflow: ${response.status} ${text}`);
       }
 
-      if (data.error) {
-        throw new Error(
-          `ComfyUI workflow error: ${data.error} ${JSON.stringify(data.node_errors ?? {})}`,
-        );
-      }
-
+      const data = (await response.json()) as ComfyUIResponse;
       if (!data.prompt_id) {
-        throw new Error(
-          `ComfyUI did not return prompt_id: ${JSON.stringify(data)}`,
-        );
+        throw new Error("ComfyUI did not return a prompt_id.");
       }
-
-      console.log("[ComfyUI] Workflow queued:", data.prompt_id);
 
       return data.prompt_id;
-    } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") {
-        throw new Error(
-          `ComfyUI /prompt timed out after 15s. Check the ComfyUI terminal for validation errors.`,
-        );
-      }
-
-      throw error;
     } finally {
       clearTimeout(timeoutId);
     }

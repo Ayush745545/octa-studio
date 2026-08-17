@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, unlink, writeFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 import { prisma } from "@/lib/prisma";
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const execFileAsync = promisify(execFile);
+
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
@@ -43,8 +47,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // contentId is optional — uploads without one go into the media library
     let resolvedContentId: string | null = null;
+
     if (typeof contentId === "string" && contentId) {
       const content = await prisma.content.findUnique({
         where: { id: contentId },
@@ -57,6 +61,7 @@ export async function POST(request: Request) {
           { status: 404 },
         );
       }
+
       resolvedContentId = content.id;
     }
 
@@ -69,24 +74,70 @@ export async function POST(request: Request) {
 
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: "File must be smaller than 50 MB." },
+        { error: "File must be smaller than 500 MB." },
         { status: 400 },
       );
     }
 
     const extension = path.extname(file.name) || "";
     const filename = `${randomUUID()}${extension}`;
-
     const uploadDir = path.join(process.cwd(), "public", "uploads");
 
     await mkdir(uploadDir, { recursive: true });
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    const uploadedPath = path.join(uploadDir, filename);
 
-    await writeFile(
-      path.join(uploadDir, filename),
-      buffer,
-    );
+    await writeFile(uploadedPath, buffer);
+
+    let finalFilename = filename;
+    let finalMimeType = file.type;
+    let finalSize = file.size;
+
+    /*
+     * Normalize video uploads with FFmpeg.
+     *
+     * This makes phone rotation metadata permanent in the rendered
+     * pixels so portrait videos display upright in the browser.
+     */
+    if (file.type.startsWith("video/")) {
+      const normalizedFilename = `${randomUUID()}.mp4`;
+      const normalizedPath = path.join(uploadDir, normalizedFilename);
+
+      try {
+        await execFileAsync("ffmpeg", [
+          "-y",
+          "-i",
+          uploadedPath,
+          "-map_metadata",
+          "-1",
+          "-c:v",
+          "libx264",
+          "-preset",
+          "veryfast",
+          "-crf",
+          "18",
+          "-c:a",
+          "aac",
+          "-movflags",
+          "+faststart",
+          normalizedPath,
+        ]);
+
+        await unlink(uploadedPath);
+
+        const normalizedStats = await stat(normalizedPath);
+
+        finalFilename = normalizedFilename;
+        finalMimeType = "video/mp4";
+        finalSize = normalizedStats.size;
+      } catch (ffmpegError) {
+        console.warn(
+          "FFmpeg normalization failed; keeping original upload:",
+          ffmpegError,
+        );
+      }
+    }
 
     const type = file.type.startsWith("video/")
       ? "VIDEO"
@@ -95,10 +146,10 @@ export async function POST(request: Request) {
     const media = await prisma.media.create({
       data: {
         contentId: resolvedContentId,
-        url: `/uploads/${filename}`,
+        url: `/uploads/${finalFilename}`,
         filename: file.name,
-        mimeType: file.type,
-        size: file.size,
+        mimeType: finalMimeType,
+        size: finalSize,
         type,
       },
     });

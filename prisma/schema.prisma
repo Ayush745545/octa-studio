@@ -19,131 +19,112 @@ model Idea {
 }
 
 model Content {
-  id          String    @id @default(cuid())
-  title       String
-  body        String?
-  status      String    @default("DRAFT")
-  platform    String?
-  scheduledAt DateTime?
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  ideaId String?
-  idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
-
+  id           String        @id @default(cuid())
+  title        String
+  body         String?
+  status       String        @default("DRAFT")
+  platform     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  ideaId       String?
+  scheduledAt  DateTime?
+  publishedAt  DateTime?
+  idea         Idea?         @relation(fields: [ideaId], references: [id])
+  media        Media[]
   publications Publication[]
-
-  media Media[]
 }
 
 model Media {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   contentId String?
-
-  url      String
-  filename String
-  mimeType String
-  size     Int
-  type     String
-
+  url       String
+  filename  String
+  mimeType  String
+  size      Int
+  type      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  content Content? @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  content   Content? @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
   @@index([contentId])
 }
 
 model PublishingChannel {
-  id          String  @id @default(cuid())
-  userId      String
-  platform    String
-  connected   Boolean @default(false)
-  accountName String?
-
+  id           String        @id @default(cuid())
+  userId       String
+  platform     String
+  connected    Boolean       @default(false)
+  accountName  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   accessToken  String?
   refreshToken String?
   expiresAt    DateTime?
   externalId   String?
   authorUrn    String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   publications Publication[]
 
   @@unique([userId, platform])
-  @@index([userId])
 }
 
 model Publication {
-  id        String @id @default(cuid())
-  contentId String
-  channelId String
-
-  status          String    @default("QUEUED")
+  id              String            @id @default(cuid())
+  contentId       String
+  channelId       String
+  status          String            @default("QUEUED")
   scheduledAt     DateTime?
   publishedAt     DateTime?
   externalId      String?
   error           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
   executionTimeMs Int?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  content Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  channel PublishingChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channel         PublishingChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  content         Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
   @@unique([contentId, channelId])
 }
 
 model User {
-  id           String  @id @default(cuid())
-  email        String  @unique
-  passwordHash String?
-  name         String?
-  avatarUrl    String?
-  provider     String  @default("credentials")
-  plan         String  @default("FREE")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  generations        Generation[]
-  payments           Payment[]
+  id             String              @id @default(cuid())
+  email          String              @unique
+  passwordHash   String?
+  name           String?
+  avatarUrl      String?
+  provider       String              @default("credentials")
+  plan           String              @default("FREE")
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  generations    Generation[]
+  payments       Payment[]
   publishingChannels PublishingChannel[]
 }
 
 model Generation {
-  id       String  @id @default(cuid())
-  userId   String?
-  type     String
-  tool     String?
-  platform String?
-  prompt   String
-  result   String?
-
+  id        String   @id @default(cuid())
+  userId    String?
+  type      String
+  tool      String?
+  platform  String?
+  prompt    String
+  result    String?
   createdAt DateTime @default(now())
-
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user      User?    @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
 }
 
 model Payment {
-  id                String  @id @default(cuid())
+  id                String   @id @default(cuid())
   userId            String?
   plan              String
   amount            Int
-  currency          String  @default("INR")
-  status            String  @default("PENDING")
+  currency          String   @default("INR")
+  status            String   @default("PENDING")
   razorpayOrderId   String?
   razorpayPaymentId String?
-  mode              String  @default("razorpay")
-
-  createdAt DateTime @default(now())
-
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  mode              String   @default("razorpay")
+  createdAt         DateTime @default(now())
+  user              User?    @relation(fields: [userId], references: [id])
 }

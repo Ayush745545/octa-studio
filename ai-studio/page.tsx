@@ -120,12 +120,6 @@ async function safeJson(response: Response): Promise<Record<string, any>> {
   }
 }
 
-declare global {
-  interface Window {
-    Razorpay?: any;
-  }
-}
-
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
@@ -949,7 +943,7 @@ let context = "";
         <main className={`flex-1 overflow-y-auto transition-all duration-300 ${showPreview ? 'mr-0' : ''}`}>
           <div className={`mx-auto px-4 py-8 sm:px-6 lg:px-7 ${showPreview ? 'max-w-4xl' : 'max-w-6xl'}`}>
             {/* Cinematic hero */}
-            <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/10">
+            <div className="relative mb-10 overflow-hidden rounded-3xl border border-white/30">
               <video
                 autoPlay
                 muted
@@ -959,12 +953,8 @@ let context = "";
               >
                 <source src="/ai/page9-new.mp4" type="video/mp4" />
               </video>
-              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-[#0a0a0c]" />
-              <div className="relative px-6 pb-20 pt-16 text-center sm:px-10">
-                <h1 className="headline text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl animate-fade-up">
-                  YOURS TO CREATE
-                </h1>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/5 to-[#0a0a0c]/70" />
+              <div className="relative px-8 pb-28 pt-24 text-center sm:px-12 sm:pb-36 sm:pt-28" />
             </div>
 
             {/* Leonardo-style floating command bar */}

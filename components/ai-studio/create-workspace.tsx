@@ -179,7 +179,7 @@ function openRazorpayCheckout(options: {
       name: options.name,
       description: options.description,
       theme: { color: "#7C3AED" },
-      handler: (res) => resolve(res),
+      handler: (res: any) => resolve(res),
       modal: { ondismiss: () => resolve(null) },
     });
     checkout.open();

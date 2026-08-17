@@ -717,7 +717,7 @@ export function LandingClient({
               alt="octa-studio"
               width={132}
               height={32}
-              className="h-auto w-[132px] object-contain"
+              className="w-[132px] h-[32px] object-contain"
               priority
             />
           </Link>
@@ -927,7 +927,7 @@ export function LandingClient({
               alt="octa-studio"
               width={116}
               height={28}
-              className="h-auto w-[116px] object-contain"
+              className="w-[116px] h-[28px] object-contain"
             />
           </Link>
           <div className="flex items-center gap-4">

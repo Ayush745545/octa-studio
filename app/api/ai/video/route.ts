@@ -17,9 +17,9 @@ export async function POST(request: NextRequest) {
       typeof body.negativePrompt === "string" ? body.negativePrompt.trim() : "";
     const width = Number(body.width) || 832;
     const height = Number(body.height) || 480;
-    const frames = Number(body.frames) || 49;
+    const frames = Number(body.frames) || 41;
     const fps = Number(body.fps) || 16;
-    const steps = Number(body.steps) || 20;
+    const steps = Number(body.steps) || 12;
     const cfg = Number(body.cfg) || 6;
 
     if (!prompt) {
@@ -65,9 +65,13 @@ export async function POST(request: NextRequest) {
 
         const promptId = await client.submitWorkflow(workflow);
         const entry = await client.pollUntilComplete(promptId);
-        const filename = await client.getOutputFilename(entry);
+        const output = await client.getOutputFile(entry);
 
-        if (filename) {
+        if (output) {
+          const filename = output.subfolder
+            ? `${output.subfolder}/${output.filename}`
+            : output.filename;
+
           const uploadDir = process.env.AI_UPLOAD_DIR ?? "public/uploads";
           const localPath = await client.downloadFile(filename, uploadDir);
           const urlPath = localPath.startsWith("public/")
@@ -79,7 +83,7 @@ export async function POST(request: NextRequest) {
             type: "video",
             engine: "comfyui",
             url: urlPath,
-            filename,
+            filename: output.filename,
             prompt,
           });
         }

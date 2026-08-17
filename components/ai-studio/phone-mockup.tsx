@@ -249,7 +249,7 @@ export function PhoneMockup({
                   />
                 ) : (
                   <Image
-                    src={imageUrl}
+                    src={imageUrl ?? ""}
                     alt="Generated image"
                     fill
                     className="object-cover"

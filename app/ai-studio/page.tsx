@@ -54,9 +54,9 @@ const TEMPLATES: Template[] = [
     key: "ai-background",
     name: "AI Background",
     tagline: "Swap scenes with styled backdrops",
-    tool: "Video",
-    prompt: "Replace the background with a premium studio scene using soft purple lighting and realistic shadows.",
-    img: "/ai/templates/thumbnail-ae4cc4 (1).webm",
+    tool: "Image",
+    prompt: "Replace the background with a premium styled backdrop while keeping the subject realistic, clean, and naturally integrated with matching lighting and shadows.",
+    img: "/ai/templates/ai-background.png",
   },
   {
     key: "image-upscaler",
@@ -133,12 +133,6 @@ async function safeJson(response: Response): Promise<Record<string, any>> {
     return {
       error: `The server returned an unexpected response (${response.status}). Please try again.`,
     };
-  }
-}
-
-declare global {
-  interface Window {
-    Razorpay?: any;
   }
 }
 
@@ -513,7 +507,7 @@ if (contentType in ['image', 'video']) {
           router.push(`/content/${content.id}`);
         } else {
           // Update UI with text content
-          setResult(content.body);
+          setResult(content.body ?? "");
         }
     } catch (err) {
       console.error(err);
@@ -1038,7 +1032,7 @@ if (contentType in ['image', 'video']) {
         <main className={`flex-1 overflow-y-auto transition-all duration-300 ${showPreview ? 'mr-0' : ''}`}>
           <div className={`mx-auto px-4 py-8 sm:px-6 lg:px-7 ${showPreview ? 'max-w-4xl' : 'max-w-6xl'}`}>
             {/* Cinematic hero */}
-            <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/10">
+            <div className="relative mb-10 overflow-hidden rounded-3xl border border-white/30">
               <video
                 autoPlay
                 muted
@@ -1048,18 +1042,42 @@ if (contentType in ['image', 'video']) {
               >
                 <source src="/logo/Octa%20ai.mp4" type="video/mp4" />
               </video>
-              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-[#0a0a0c]" />
-              <div className="relative px-6 pb-20 pt-16 text-center sm:px-10">
-                <h1 className="headline text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl animate-fade-up">
-                  YOURS TO CREATE
-                </h1>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/5 to-[#0a0a0c]/70" />
+              <div className="relative px-8 pb-28 pt-24 text-center sm:px-12 sm:pb-36 sm:pt-28" />
             </div>
 
             {/* Leonardo-style floating command bar */}
             <div className="animate-fade-up-delay mx-auto -mt-16 relative z-10 max-w-4xl">
               <div className="rounded-3xl border border-white/[0.14] bg-black/70 p-2.5 shadow-[0_30px_90px_-20px_rgba(124,58,237,0.35),0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
-                {/* Row 1: attach / prompt / example / generate */}
+                {/* OCTA AI header */}
+                <div className="flex items-center gap-2 px-2 pb-2">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-white text-black shadow-lg">
+                    <svg
+                      className="size-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z" />
+                      <path d="M19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z" />
+                    </svg>
+                  </div>
+
+                  <span className="text-sm font-semibold tracking-tight text-white">
+                    OCTA AI
+                  </span>
+
+                  <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white/40">
+                    AI EDITOR
+                  </span>
+
+                  <span className="ml-auto hidden text-[11px] text-white/30 sm:block">
+                    Describe what you want to create
+                  </span>
+                </div>
+
+                {/* Prompt / upload / generate */}
                 <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 transition-colors focus-within:border-white/25">
                   <input
                     ref={fileInputRef}
@@ -1098,7 +1116,7 @@ if (contentType in ['image', 'video']) {
                   <textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder={primaryPlaceholder}
+                    placeholder="Tell OCTA AI what you want to create or change..."
                     rows={1}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
@@ -1126,6 +1144,30 @@ if (contentType in ['image', 'video']) {
                     )}
                     {primaryLabel}
                   </button>
+                </div>
+
+                {/* OCTA AI quick actions */}
+                <div className="mt-2 flex gap-2 overflow-x-auto px-1 pb-0.5">
+                  {[
+                    ["Auto edit", "write"],
+                    ["Generate video", "video"],
+                    ["Generate image", "image"],
+                    ["Add captions", "write"],
+                    ["Smart cut", "pipeline"],
+                  ].map(([label, mode]) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(mode as typeof activeTab);
+                        setPrompt(label);
+                      }}
+                      className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/7 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-white/45 transition hover:border-white/15 hover:bg-white/[0.06] hover:text-white/80"
+                    >
+                      <span className="size-1.5 rounded-full bg-violet-400" />
+                      {label}
+                    </button>
+                  ))}
                 </div>
 
                 {/* Row 2: mode pills (left) + setting chips (right) */}
@@ -1228,7 +1270,6 @@ if (contentType in ['image', 'video']) {
                     {tpl.tool === "Video" && (tpl.img.endsWith(".webm") || tpl.img.endsWith(".mp4")) ? (
                       <video
                         src={tpl.img}
-                        alt={tpl.name}
                         muted
                         loop
                         playsInline
@@ -1238,7 +1279,6 @@ if (contentType in ['image', 'video']) {
                     ) : (
                       <img
                         src={tpl.img}
-                        alt={tpl.name}
                         loading="lazy"
                         className="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
@@ -1527,8 +1567,8 @@ if (contentType in ['image', 'video']) {
 
 {showPhoneMockup && activeTab !== "write" && (
         <PhoneMockup
-          imageUrl={activeTab === "image" ? generatedImage : undefined}
-          videoUrl={activeTab === "video" ? generatedVideo : undefined}
+          imageUrl={activeTab === "image" ? (generatedImage ?? undefined) : undefined}
+          videoUrl={activeTab === "video" ? (generatedVideo ?? undefined) : undefined}
           isGenerating={isGeneratingImage || isGeneratingVideo}
           content={pipelineMediaPrompt || prompt}
           onClick={() => {
@@ -1589,7 +1629,6 @@ if (contentType in ['image', 'video']) {
                     ) : (
                       <img
                         src={tpl.img}
-                        alt={tpl.name}
                         className="aspect-square w-full object-cover"
                       />
                     );
