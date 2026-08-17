@@ -6,7 +6,7 @@ import { WorkspaceTopBar } from './workspace-top-bar';
 
 interface WorkspaceLayoutProps {
   children: ReactNode;
-  activeItem: 'overview' | 'ideas' | 'content' | 'ai-studio' | 'calendar' | 'publishing' | 'analytics' | 'custom-analytics' | 'settings';
+  activeItem: 'overview' | 'ideas' | 'content' | 'ai-studio' | 'creator-studio' | 'calendar' | 'publishing' | 'analytics' | 'custom-analytics' | 'settings';
   connectedChannels?: Array<{ platform: string; accountName: string | null; externalId: string | null }>;
 }
 

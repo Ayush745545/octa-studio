@@ -7,6 +7,7 @@ import {
   Lightbulb,
   FileText,
   Zap,
+  Clapperboard,
   CalendarDays,
   Inbox,
   BarChart3,
@@ -17,7 +18,7 @@ import { AnimateIcon } from '@/components/animate-ui/icons/animate-icon';
 
 
 interface WorkspaceSidebarProps {
-  activeItem: 'overview' | 'ideas' | 'content' | 'ai-studio' | 'calendar' | 'publishing' | 'analytics' | 'custom-analytics' | 'settings';
+  activeItem: 'overview' | 'ideas' | 'content' | 'ai-studio' | 'creator-studio' | 'calendar' | 'publishing' | 'analytics' | 'custom-analytics' | 'settings';
   onToggle?: () => void;
   collapsed?: boolean;
 }
@@ -51,6 +52,12 @@ const NAV_ITEMS: Array<{
     href: '/ai-studio',
     label: 'AI Studio',
     icon: <Zap className="h-5 w-5" />,
+  },
+  {
+    key: 'creator-studio',
+    href: '/creator-studio',
+    label: 'Creator Studio',
+    icon: <Clapperboard className="h-5 w-5" />,
   },
   {
     key: 'calendar',
