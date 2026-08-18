@@ -127,12 +127,12 @@ export default function CalendarMonthView({
               onDragLeave={() => setDragOverDay(null)}
               onDrop={(e) => handleDrop(e, day)}
               className={`flex min-h-0 flex-col gap-1 border-b border-r border-zinc-900/50 p-1.5 transition-colors ${
-                dragOverDay === key ? "bg-[#7C3AED]/10" : "hover:bg-zinc-900/30"
+                dragOverDay === key ? "bg-[#7FFB50]/10" : "hover:bg-zinc-900/30"
               } ${inMonth ? "" : "opacity-40"}`}
             >
               <span
                 className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-medium ${
-                  isToday ? "bg-[#7C3AED] text-white" : "text-zinc-500"
+                  isToday ? "bg-[#7FFB50] text-white" : "text-zinc-500"
                 }`}
               >
                 {day.getDate()}
@@ -159,7 +159,7 @@ export default function CalendarMonthView({
                       e.stopPropagation();
                       onPostClick(post);
                     }}
-                    className="flex cursor-grab items-center gap-1 truncate rounded border border-zinc-800 bg-[#0a0a0c] px-1.5 py-1 transition hover:border-[#7C3AED] active:cursor-grabbing"
+                    className="flex cursor-grab items-center gap-1 truncate rounded border border-zinc-800 bg-[#0a0a0c] px-1.5 py-1 transition hover:border-[#7FFB50] active:cursor-grabbing"
                   >
                     <span className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${platformColor}`} />
                     <span className="truncate text-[9px] font-medium text-white">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import VideoWithFallback from "@/components/video-with-fallback";
 
 interface MediaItem {
   id: string;
@@ -340,13 +341,16 @@ export default function MediaPickerModal({
                           onClick={() => handleSelectExisting(item)}
                           className={`relative overflow-hidden rounded-xl border text-left transition ${
                             selected?.id === item.id
-                              ? "border-fuchsia-500 ring-2 ring-fuchsia-500/40"
+                              ? "border-[#7FFB50] ring-2 ring-[#7FFB50]/40"
                               : "border-zinc-800 hover:border-zinc-700"
                           }`}
                         >
                           <div className="aspect-video bg-zinc-800">
                             {item.type === "VIDEO" ? (
-                              <video src={item.url} controls preload="metadata" className="h-full w-full object-cover" />
+                              <VideoWithFallback
+                                src={item.url}
+                                className="h-full w-full object-cover"
+                              />
                             ) : (
                               <img src={item.url} alt={item.filename} className="h-full w-full object-cover" />
                             )}
@@ -391,10 +395,10 @@ export default function MediaPickerModal({
                         value={stockInput}
                         onChange={(e) => setStockInput(e.target.value)}
                         placeholder="Search stock photos..."
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-800/60 py-2 pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-fuchsia-500"
+                        className="w-full rounded-lg border border-zinc-800 bg-zinc-800/60 py-2 pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-[#7FFB50]"
                       />
                     </div>
-                    <button type="submit" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-500 transition-colors">
+                    <button type="submit" className="rounded-lg bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white hover:bg-[#7FFB50] transition-colors">
                       Search
                     </button>
                   </div>
@@ -420,7 +424,7 @@ export default function MediaPickerModal({
                           onClick={() => handleSelectStock(item)}
                           className={`group relative overflow-hidden rounded-xl border text-left transition ${
                             stockSelected?.id === item.id
-                              ? "border-fuchsia-500 ring-2 ring-fuchsia-500/40"
+                              ? "border-[#7FFB50] ring-2 ring-[#7FFB50]/40"
                               : "border-zinc-800 hover:border-zinc-700"
                           }`}
                         >
@@ -468,10 +472,10 @@ export default function MediaPickerModal({
                         value={stockInput}
                         onChange={(e) => setStockInput(e.target.value)}
                         placeholder="Search elements (icons, graphics)..."
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-800/60 py-2 pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-fuchsia-500"
+                        className="w-full rounded-lg border border-zinc-800 bg-zinc-800/60 py-2 pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-[#7FFB50]"
                       />
                     </div>
-                    <button type="submit" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-500 transition-colors">
+                    <button type="submit" className="rounded-lg bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white hover:bg-[#7FFB50] transition-colors">
                       Search
                     </button>
                   </div>
@@ -491,7 +495,7 @@ export default function MediaPickerModal({
                           onClick={() => handleSelectStock(item)}
                           className={`group relative overflow-hidden rounded-xl border text-left transition ${
                             stockSelected?.id === item.id
-                              ? "border-fuchsia-500 ring-2 ring-fuchsia-500/40"
+                              ? "border-[#7FFB50] ring-2 ring-[#7FFB50]/40"
                               : "border-zinc-800 hover:border-zinc-700"
                           }`}
                         >
@@ -531,10 +535,10 @@ export default function MediaPickerModal({
                         value={stockInput}
                         onChange={(e) => setStockInput(e.target.value)}
                         placeholder="Search backgrounds..."
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-800/60 py-2 pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-fuchsia-500"
+                        className="w-full rounded-lg border border-zinc-800 bg-zinc-800/60 py-2 pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-[#7FFB50]"
                       />
                     </div>
-                    <button type="submit" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-500 transition-colors">
+                    <button type="submit" className="rounded-lg bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white hover:bg-[#7FFB50] transition-colors">
                       Search
                     </button>
                   </div>
@@ -554,7 +558,7 @@ export default function MediaPickerModal({
                           onClick={() => handleSelectStock(item)}
                           className={`group relative overflow-hidden rounded-xl border text-left transition ${
                             stockSelected?.id === item.id
-                              ? "border-fuchsia-500 ring-2 ring-fuchsia-500/40"
+                              ? "border-[#7FFB50] ring-2 ring-[#7FFB50]/40"
                               : "border-zinc-800 hover:border-zinc-700"
                           }`}
                         >
@@ -586,8 +590,8 @@ export default function MediaPickerModal({
                 <div className="flex-1 flex flex-col items-center justify-center p-6">
                   <div className="w-full max-w-md space-y-4">
                     <div className="text-center mb-6">
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-fuchsia-600/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#7FFB50]/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7FFB50]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                         </svg>
                       </div>
@@ -599,7 +603,7 @@ export default function MediaPickerModal({
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       placeholder="A serene mountain landscape at sunset with golden light..."
-                      className="w-full min-h-24 resize-none rounded-xl border border-zinc-800 bg-zinc-800/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-fuchsia-500"
+                      className="w-full min-h-24 resize-none rounded-xl border border-zinc-800 bg-zinc-800/60 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-[#7FFB50]"
                     />
 
                     <div className="flex flex-wrap gap-2">
@@ -608,7 +612,7 @@ export default function MediaPickerModal({
                           key={suggestion}
                           type="button"
                           onClick={() => setAiPrompt(suggestion)}
-                          className="rounded-full border border-zinc-800 px-3 py-1 text-xs text-zinc-400 hover:border-fuchsia-500 hover:text-fuchsia-400 transition-colors"
+                          className="rounded-full border border-zinc-800 px-3 py-1 text-xs text-zinc-400 hover:border-[#7FFB50] hover:text-[#7FFB50] transition-colors"
                         >
                           {suggestion}
                         </button>
@@ -619,7 +623,7 @@ export default function MediaPickerModal({
                       type="button"
                       onClick={handleAiGenerate}
                       disabled={!aiPrompt.trim() || aiGenerating}
-                      className="w-full rounded-xl bg-fuchsia-600 py-2.5 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full rounded-xl bg-[#7FFB50] py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {aiGenerating ? (
                         <span className="flex items-center justify-center gap-2">
@@ -657,7 +661,7 @@ export default function MediaPickerModal({
               type="button"
               onClick={handleUseMedia}
               disabled={!selected && !stockSelected}
-              className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Use this media
             </button>

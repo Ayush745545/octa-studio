@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import VideoWithFallback from "@/components/video-with-fallback";
 
 interface PhoneMockupProps {
   onClick?: () => void;
@@ -204,7 +205,7 @@ export function PhoneMockup({
           shadow-[0_20px_60px_rgba(0,0,0,0.5)]
           overflow-hidden
           cursor-pointer
-          hover:shadow-[0_25px_80px_rgba(124,58,237,0.4)]
+          hover:shadow-[0_25px_80px_rgba(199,227,79,0.4)]
           transition-shadow duration-300
           ${animationClass}
         `}
@@ -222,8 +223,8 @@ export function PhoneMockup({
           {/* Header */}
           <div className="px-4 py-3 border-b border-zinc-800">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7C3AED] to-violet-600 flex items-center justify-center">
-                <span className="text-xs font-bold text-white">AI</span>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#C7E34F] to-[#C7E34F] flex items-center justify-center">
+                <span className="text-xs font-bold text-zinc-900">AI</span>
               </div>
               <div>
                 <p className="text-xs font-semibold text-white">AI Studio</p>
@@ -239,7 +240,7 @@ export function PhoneMockup({
             {(imageUrl || videoUrl) && !isGenerating ? (
               <div className="flex-1 rounded-xl bg-zinc-900/50 border border-zinc-800 overflow-hidden relative">
                 {videoUrl ? (
-                  <video
+                  <VideoWithFallback
                     src={videoUrl}
                     autoPlay
                     loop
@@ -262,13 +263,13 @@ export function PhoneMockup({
                 <div className="rounded-xl bg-zinc-900/50 border border-zinc-800 p-4 flex-1 flex items-center justify-center">
                   {isGenerating ? (
                     <div className="flex flex-col items-center gap-3 text-center">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#7C3AED] border-t-transparent" />
+                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#C7E34F] border-t-transparent" />
                       <p className="text-xs text-zinc-500">Generating...</p>
                     </div>
                   ) : (
                     <p className={`text-sm leading-6 ${textTheme} whitespace-pre-wrap text-center`}>
                       {displayedText}
-                      {isTyping && <span className="inline-block w-2 h-4 ml-1 bg-[#7C3AED] animate-pulse" />}
+                      {isTyping && <span className="inline-block w-2 h-4 ml-1 bg-[#C7E34F] animate-pulse" />}
                     </p>
                   )}
                 </div>
@@ -276,7 +277,7 @@ export function PhoneMockup({
                 {/* Action buttons */}
                 {!isGenerating && !imageUrl && !videoUrl && (
                   <div className="mt-4 flex gap-2">
-                    <button className="flex-1 rounded-lg bg-[#7C3AED] px-3 py-2 text-xs font-medium text-white">
+                    <button className="flex-1 rounded-lg bg-[#C7E34F] px-3 py-2 text-xs font-medium text-zinc-900">
                       Create Content
                     </button>
                     <button className="flex-1 rounded-lg border border-zinc-800 px-3 py-2 text-xs font-medium text-zinc-300">
@@ -290,7 +291,7 @@ export function PhoneMockup({
                   <div className="mt-4">
                     <div className="h-1 w-full rounded-full bg-zinc-900">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#7C3AED] to-violet-600 transition-all duration-300"
+                        className="h-full rounded-full bg-gradient-to-r from-[#C7E34F] to-[#C7E34F] transition-all duration-300"
                         style={{ width: content ? `${(textIndex / content.length) * 100}%` : "0%" }}
                       />
                     </div>

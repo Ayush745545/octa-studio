@@ -300,7 +300,7 @@ export default function LandingPage() {
       <nav className="landing-nav fixed top-0 z-50 w-full border-b border-zinc-800 bg-[#0a0a0c]/80 opacity-0 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-lg shadow-purple-500/20">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-lg shadow-[#7FFB50]/20">
               <Image src="/images/logo.png" alt="octa-studio" width={32} height={32} className="object-cover" />
             </span>
             <span className="text-base font-semibold tracking-tight text-white">octa-studio</span>
@@ -323,7 +323,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/calendar"
-              className="rounded-xl bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-fuchsia-500"
+              className="rounded-xl bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
             >
               Get Started
             </Link>
@@ -336,14 +336,14 @@ export default function LandingPage() {
         <div className="absolute inset-0">
           <Image src="/images/bg.png" alt="" fill className="object-cover opacity-30" priority />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#7FFB50]/10 via-transparent to-transparent" />
         <div className="relative mx-auto max-w-5xl px-4 py-24 text-center sm:px-6 lg:px-8">
           <div className="landing-eyebrow mx-auto inline-flex rounded-full border border-zinc-800 bg-zinc-900/60 px-4 py-1.5 text-xs font-medium text-zinc-400">
             Content Operating System
           </div>
           <h1 className="landing-headline mx-auto mt-8 max-w-4xl text-4xl sm:text-5xl lg:text-6xl" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
             <span className="block text-zinc-100 font-medium tracking-tight">Plan, create, and publish</span>
-            <span className="block bg-gradient-to-r from-blue-400 via-violet-400 to-green-400 bg-clip-text text-transparent font-medium tracking-tight">from one workspace</span>
+            <span className="block bg-gradient-to-r from-blue-400 via-[#7FFB50] to-green-400 bg-clip-text text-transparent font-medium tracking-tight">from one workspace</span>
           </h1>
           <p className="landing-subhead mx-auto mt-6 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
             octa-studio brings your calendar, AI composer, publishing queue, and analytics into a single dark command center built for modern social teams.
@@ -351,7 +351,7 @@ export default function LandingPage() {
           <div className="landing-ctas mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href="/calendar"
-                className="inline-flex items-center gap-2 rounded-xl bg-fuchsia-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-fuchsia-500"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#7FFB50] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
               >
                 Open calendar
                 <span>→</span>
@@ -376,7 +376,7 @@ export default function LandingPage() {
                   <div className="h-8 w-full rounded-lg bg-zinc-800" />
                   <div className="h-8 w-full rounded-lg bg-zinc-800" />
                   <div className="h-8 w-full rounded-lg bg-zinc-800" />
-                  <div className="h-8 w-full rounded-lg bg-fuchsia-600/20" />
+                  <div className="h-8 w-full rounded-lg bg-[#7FFB50]/20" />
                 </div>
                 <div className="space-y-3">
                   <div className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60" />
@@ -404,7 +404,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="grid items-center gap-16 lg:grid-cols-2">
             <div>
-              <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">AI Studio</p>
+              <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#7FFB50]">AI Studio</p>
               <h2 className="mt-3 text-[clamp(2rem,4vw,3rem)] font-semibold tracking-tight text-white">
                 Your OLED Creative Workspace.
               </h2>
@@ -419,7 +419,7 @@ export default function LandingPage() {
                   "Brand tone enforcement",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm text-zinc-300">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-fuchsia-500/10 text-fuchsia-400">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7FFB50]/10 text-[#7FFB50]">
                       <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                     {item}
@@ -428,7 +428,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <div className="mx-auto w-[300px]"><div className="rounded-[2rem] border-[3px] border-zinc-800 bg-black p-2.5 shadow-2xl shadow-black/80"><div className="relative overflow-hidden rounded-[1.75rem] bg-zinc-900"><Image src="/images/how.png" alt="octa-studio post" width={300} height={600} className="w-full h-auto object-cover" /><div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" /><div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-3 pb-6"><div className="flex items-center gap-2.5"><span className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-lg shadow-purple-500/20"><Image src="/images/logo.png" alt="octa-studio" width={32} height={32} className="object-cover" /></span><span className="text-[15px] font-semibold tracking-tight text-white">Today,</span></div></div></div></div></div>
+              <div className="mx-auto w-[300px]"><div className="rounded-[2rem] border-[3px] border-zinc-800 bg-black p-2.5 shadow-2xl shadow-black/80"><div className="relative overflow-hidden rounded-[1.75rem] bg-zinc-900"><Image src="/images/how.png" alt="octa-studio post" width={300} height={600} className="w-full h-auto object-cover" /><div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" /><div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-3 pb-6"><div className="flex items-center gap-2.5"><span className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-lg shadow-[#7FFB50]/20"><Image src="/images/logo.png" alt="octa-studio" width={32} height={32} className="object-cover" /></span><span className="text-[15px] font-semibold tracking-tight text-white">Today,</span></div></div></div></div></div>
             </div>
           </div>
         </div>
@@ -451,7 +451,7 @@ export default function LandingPage() {
                 className="grid items-center gap-10 lg:grid-cols-2"
               >
                 <div className={`landing-feature-card ${index % 2 === 1 ? "lg:order-2" : ""}`}>
-                  <span className="text-xs font-medium text-fuchsia-400">{feature.tag}</span>
+                  <span className="text-xs font-medium text-[#7FFB50]">{feature.tag}</span>
                   <h3 className="mt-2 text-2xl font-semibold text-white">{feature.title}</h3>
                   <p className="mt-3 text-sm leading-6 text-zinc-400">{feature.description}</p>
                 </div>
@@ -476,7 +476,7 @@ export default function LandingPage() {
       <section ref={calendarRef} id="calendar" className="landing-section border-t border-zinc-800 bg-[#0a0a0c]">
         <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <span className="text-xs font-medium text-fuchsia-400">Calendar Showcase</span>
+            <span className="text-xs font-medium text-[#7FFB50]">Calendar Showcase</span>
             <h3 className="mt-2 text-2xl font-semibold text-white">Plan your content</h3>
             <p className="mt-2 text-sm text-zinc-400">See everything you&apos;re publishing, before it goes live.</p>
           </div>
@@ -503,7 +503,7 @@ export default function LandingPage() {
                   key={i}
                   className={`calendar-card h-10 rounded-lg border p-1 ${
                     i === 3 || i === 7
-                      ? "border-fuchsia-500/40 bg-fuchsia-500/10"
+                      ? "border-[#7FFB50]/40 bg-[#7FFB50]/10"
                       : "border-zinc-800 bg-zinc-900/60"
                   }`}
                 >
@@ -520,7 +520,7 @@ export default function LandingPage() {
       <section ref={aiRef} id="ai" className="landing-section border-t border-zinc-800 bg-[#0a0a0c]">
         <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <span className="text-xs font-medium text-fuchsia-400">AI Creative</span>
+            <span className="text-xs font-medium text-[#7FFB50]">AI Creative</span>
             <h3 className="mt-2 text-2xl font-semibold text-white">Create more than words</h3>
             <p className="mt-2 text-sm text-zinc-400">Turn an idea into complete social content with AI-generated copy, images and video.</p>
           </div>
@@ -528,17 +528,17 @@ export default function LandingPage() {
             <div className="ai-prompt opacity-0 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
               <p className="text-sm font-medium text-zinc-400">Text</p>
               <p className="mt-2 text-sm text-zinc-300">Write a LinkedIn post about building octa-studio.</p>
-              <button className="mt-4 rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-medium text-white">Generate</button>
+              <button className="mt-4 rounded-lg bg-[#7FFB50] px-4 py-2 text-xs font-medium text-white">Generate</button>
             </div>
             <div className="ai-result opacity-0 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
               <p className="text-sm font-medium text-zinc-400">Image</p>
               <p className="mt-2 text-sm text-zinc-300">Cinematic workspace with futuristic content dashboard, premium SaaS aesthetic...</p>
-              <button className="mt-4 rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-medium text-white">Generate</button>
+              <button className="mt-4 rounded-lg bg-[#7FFB50] px-4 py-2 text-xs font-medium text-white">Generate</button>
             </div>
             <div className="ai-actions opacity-0 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
               <p className="text-sm font-medium text-zinc-400">Video</p>
               <p className="mt-2 text-sm text-zinc-300">Cinematic product launch for a new AI content platform...</p>
-              <button className="mt-4 rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-medium text-white">Generate</button>
+              <button className="mt-4 rounded-lg bg-[#7FFB50] px-4 py-2 text-xs font-medium text-white">Generate</button>
             </div>
           </div>
         </div>
@@ -548,7 +548,7 @@ export default function LandingPage() {
       <section ref={publishingRef} id="publishing" className="landing-section border-t border-zinc-800 bg-[#0a0a0c]">
         <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <span className="text-xs font-medium text-fuchsia-400">Publishing Showcase</span>
+            <span className="text-xs font-medium text-[#7FFB50]">Publishing Showcase</span>
             <h3 className="mt-2 text-2xl font-semibold text-white">Publish everywhere</h3>
             <p className="mt-2 text-sm text-zinc-400">One publishing workflow for every platform.</p>
           </div>
@@ -570,7 +570,7 @@ export default function LandingPage() {
       <section ref={analyticsRef} id="analytics" className="landing-section border-t border-zinc-800 bg-[#0a0a0c]">
         <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <span className="text-xs font-medium text-fuchsia-400">Analytics Showcase</span>
+            <span className="text-xs font-medium text-[#7FFB50]">Analytics Showcase</span>
             <h3 className="mt-2 text-2xl font-semibold text-white">Know what works</h3>
             <p className="mt-2 text-sm text-zinc-400">Track publishing rate, platform mix, and recent activity.</p>
           </div>
@@ -592,7 +592,7 @@ export default function LandingPage() {
               {[35, 55, 40, 70, 50, 85, 65, 90, 45, 75, 60, 80].map((h, i) => (
                 <div
                   key={i}
-                  className="flex-1 rounded-sm bg-fuchsia-600/60"
+                  className="flex-1 rounded-sm bg-[#7FFB50]/60"
                   style={{ height: `${h}%` }}
                 />
               ))}
@@ -619,7 +619,7 @@ export default function LandingPage() {
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/calendar"
-              className="inline-flex items-center gap-2 rounded-xl bg-fuchsia-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-fuchsia-500"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#7FFB50] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
             >
               Open octa-studio
               <span>→</span>

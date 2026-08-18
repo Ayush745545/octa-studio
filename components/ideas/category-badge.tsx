@@ -1,6 +1,6 @@
 const CATEGORY_COLORS: Record<string, string> = {
-  Creative: "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20",
-  Design: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+  Creative: "bg-[#7FFB50]/10 text-[#7FFB50] border-[#7FFB50]/20",
+  Design: "bg-[#7FFB50]/10 text-[#7FFB50] border-[#7FFB50]/20",
   Photography: "bg-sky-500/10 text-sky-400 border-sky-500/20",
   Video: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   Music: "bg-amber-500/10 text-amber-400 border-amber-500/20",

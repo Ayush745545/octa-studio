@@ -3,6 +3,12 @@
  * vercel.json which POSTs to /api/publishing/process every minute.
  * Vercel crons do not run in local development, so we start an in-process
  * scheduler here that mirrors the cron behavior.
+ *
+ * The creator (analysis → clips) pipeline is also driven by an in-process
+ * worker. It is normally started lazily when a job is created, but that means
+ * after a server restart — or for a job that was reset/left mid-flight — there
+ * would be no worker to process it, leaving it stuck at PROCESSING forever.
+ * We therefore also ensure the creator worker is running on boot.
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
@@ -14,6 +20,13 @@ export async function register() {
   };
   if (globalState.__localSchedulerStarted) return;
   globalState.__localSchedulerStarted = true;
+
+  // Start the creator pipeline worker so existing/reset jobs are always
+  // picked up, not just jobs created after this server booted.
+  const { ensureCreatorWorkerStarted } = await import(
+    "@/lib/creator/worker"
+  );
+  ensureCreatorWorkerStarted();
 
   const INTERVAL_MS = 30_000;
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import VideoWithFallback from "@/components/video-with-fallback";
 
 // Parses API responses without crashing on non-JSON bodies (dev overlay, HTML errors).
 async function safeJson(response: Response): Promise<Record<string, any>> {
@@ -280,7 +281,7 @@ export default function AIAssistantPanel({
               onClick={() => setMode("text")}
               className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
                 mode === "text"
-                  ? "border-fuchsia-500 bg-fuchsia-500/15 text-fuchsia-300"
+                  ? "border-[#7FFB50] bg-[#7FFB50]/15 text-[#7FFB50]"
                   : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700"
               }`}
             >
@@ -291,7 +292,7 @@ export default function AIAssistantPanel({
               onClick={() => setMode("image")}
               className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
                 mode === "image"
-                  ? "border-fuchsia-500 bg-fuchsia-500/15 text-fuchsia-300"
+                  ? "border-[#7FFB50] bg-[#7FFB50]/15 text-[#7FFB50]"
                   : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700"
               }`}
             >
@@ -302,7 +303,7 @@ export default function AIAssistantPanel({
               onClick={() => setMode("video")}
               className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
                 mode === "video"
-                  ? "border-fuchsia-500 bg-fuchsia-500/15 text-fuchsia-300"
+                  ? "border-[#7FFB50] bg-[#7FFB50]/15 text-[#7FFB50]"
                   : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700"
               }`}
             >
@@ -338,7 +339,7 @@ export default function AIAssistantPanel({
                   type="button"
                   onClick={handleTextGenerate}
                   disabled={!prompt.trim() || isGenerating}
-                  className="rounded-xl bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isGenerating ? "Generating..." : "Generate Text"}
                 </button>
@@ -351,7 +352,7 @@ export default function AIAssistantPanel({
                   type="button"
                   onClick={handleImageGenerate}
                   disabled={!prompt.trim() || isGenerating}
-                  className="rounded-xl bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isGenerating ? "Generating..." : "Generate Image"}
                 </button>
@@ -364,7 +365,7 @@ export default function AIAssistantPanel({
                   type="button"
                   onClick={handleVideoGenerate}
                   disabled={!prompt.trim() || isGenerating}
-                  className="rounded-xl bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isGenerating ? "Generating..." : "Generate Video"}
                 </button>
@@ -375,14 +376,14 @@ export default function AIAssistantPanel({
           {isGenerating && (
             <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
               <div className="flex flex-col items-center justify-center gap-3">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-fuchsia-600 border-t-transparent" />
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#7FFB50] border-t-transparent" />
                 <p className="text-xs text-zinc-400">
                   {mode === "video" ? "Generating video..." : "Generating..."}
                 </p>
                 {mode === "video" && videoProgress > 0 && (
                   <div className="h-1 w-32 overflow-hidden rounded-full bg-zinc-800">
                     <div
-                      className="h-full rounded-full bg-fuchsia-600 transition-all"
+                      className="h-full rounded-full bg-[#7FFB50] transition-all"
                       style={{ width: `${videoProgress}%` }}
                     />
                   </div>
@@ -408,7 +409,7 @@ export default function AIAssistantPanel({
                 <button
                   type="button"
                   onClick={handleUseImage}
-                  className="rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-fuchsia-500"
+                  className="rounded-lg bg-[#7FFB50] px-3 py-2 text-xs font-medium text-white transition hover:bg-[#7FFB50]"
                 >
                   Use Image
                 </button>
@@ -420,7 +421,14 @@ export default function AIAssistantPanel({
             <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
               <p className="text-xs font-medium text-zinc-400">Generated Video</p>
               <div className="mt-2 overflow-hidden rounded-lg border border-zinc-800 bg-[#0a0a0c]">
-                <video src={generatedVideo} controls autoPlay loop playsInline muted className="w-full" />
+                <VideoWithFallback
+                  src={generatedVideo}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full"
+                />
               </div>
               <div className="mt-3 flex justify-end gap-2">
                 <button
@@ -433,7 +441,7 @@ export default function AIAssistantPanel({
                 <button
                   type="button"
                   onClick={handleUseVideo}
-                  className="rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-fuchsia-500"
+                  className="rounded-lg bg-[#7FFB50] px-3 py-2 text-xs font-medium text-white transition hover:bg-[#7FFB50]"
                 >
                   Use Video
                 </button>
@@ -455,7 +463,7 @@ export default function AIAssistantPanel({
                     key={option.label}
                     type="button"
                     onClick={() => handleEnhance(option.instruction)}
-                    className="rounded-full border border-fuchsia-500/30 bg-black/40 px-3 py-1.5 text-xs font-medium text-fuchsia-300 transition hover:border-fuchsia-400 hover:bg-fuchsia-500/10"
+                    className="rounded-full border border-[#7FFB50]/30 bg-black/40 px-3 py-1.5 text-xs font-medium text-[#7FFB50] transition hover:border-[#7FFB50] hover:bg-[#7FFB50]/10"
                   >
                     {option.label}
                   </button>
@@ -474,7 +482,7 @@ export default function AIAssistantPanel({
                 <button
                   type="button"
                   onClick={() => onUseResult(result)}
-                  className="rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-fuchsia-500"
+                  className="rounded-lg bg-[#7FFB50] px-3 py-2 text-xs font-medium text-white transition hover:bg-[#7FFB50]"
                 >
                   Use this
                 </button>

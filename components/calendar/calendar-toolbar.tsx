@@ -53,12 +53,15 @@ export function CalendarToolbar({
     setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone.replace('_', ' '));
   }, []);
 
+  const VIEWS = ['week', 'month', 'list'] as const;
+  const activeIndex = VIEWS.indexOf(activeView);
+
   return (
     <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-[#0a0a0c]">
       <div className="flex items-center gap-4">
         <button 
           onClick={onToday}
-          className="text-[#7C3AED] font-semibold text-sm hover:text-[#6D28D9] transition-colors"
+          className="text-[#7FFB50] font-semibold text-sm hover:text-[#7FFB50] transition-colors"
         >
           Today
         </button>
@@ -94,15 +97,17 @@ export function CalendarToolbar({
           </span>
         )}
 
-        <div className="flex items-center border border-zinc-800 rounded-lg p-0.5">
-          {(['week', 'month', 'list'] as const).map((view) => (
+        <div className="relative flex items-center rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_8px_30px_-12px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+          <span
+            className="absolute inset-y-1 left-1 rounded-full bg-gradient-to-b from-[#C7E34F]/30 to-[#C7E34F]/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)] ring-1 ring-[#C7E34F]/30 backdrop-blur-md transition-transform duration-300 ease-out"
+            style={{ width: "calc((100% - 0.5rem)/3)", transform: `translateX(${activeIndex * 100}%)` }}
+          />
+          {VIEWS.map((view) => (
             <button
               key={view}
               onClick={() => onViewChange(view)}
-              className={`px-3 py-1 text-sm rounded-md capitalize transition-colors ${
-                activeView === view 
-                  ? 'bg-zinc-800 font-medium text-white' 
-                  : 'text-zinc-500 hover:text-white'
+              className={`relative z-10 flex-1 rounded-full px-3 py-1.5 text-center text-sm font-medium capitalize transition-colors ${
+                activeView === view ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
               {view}

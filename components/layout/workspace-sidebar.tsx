@@ -101,7 +101,7 @@ export function WorkspaceSidebar({ activeItem, collapsed = false }: WorkspaceSid
       <Link
         href="/"
         title="Go to homepage"
-        className={`mb-4 flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#7C3AED] to-[#a78bfa] font-bold text-white transition hover:opacity-85 ${
+        className={`mb-4 flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#7FFB50] to-[#a78bfa] font-bold text-white transition hover:opacity-85 ${
           collapsed ? 'h-8 w-8 text-sm' : 'h-10 w-10 text-lg'
         }`}
       >

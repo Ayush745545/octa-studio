@@ -72,7 +72,7 @@ export const instagramProvider: PublishingProvider = {
       const containerBody = new URLSearchParams({ caption });
 
       if (videoMedia) {
-        containerBody.set("media_type", "REEL");
+        containerBody.set("media_type", "REELS");
         containerBody.set("video_url", toPublicUrl(videoMedia.url));
       } else if (imageMedia) {
         containerBody.set("image_url", toPublicUrl(imageMedia.url));

@@ -1,0 +1,327 @@
+{
+  "projects": {
+    "b7371955-bf22-41f9-bea7-68a026869f34": {
+      "id": "b7371955-bf22-41f9-bea7-68a026869f34",
+      "filename": "270540D7-4023-4D71-BCA4-5198117829BB.MP4",
+      "url": "/uploads/e4368ff5-afe1-45f7-9039-5acf3a5029a5.mp4",
+      "durationSec": 38.003084,
+      "width": 720,
+      "height": 1280,
+      "sizeBytes": 36543304,
+      "thumbnailUrl": "/uploads/creator-studio/thumbs/e4368ff5-afe1-45f7-9039-5acf3a5029a5.jpg",
+      "sourceMediaId": "cmsxpdr6b00003vs4bsw0u28y",
+      "createdAt": "2026-08-17T20:45:31.593Z",
+      "status": "analyzed",
+      "jobId": "3a018e8f-bb67-43e4-bb12-8142b6a18f72",
+      "schedulePlan": {
+        "projectId": "b7371955-bf22-41f9-bea7-68a026869f34",
+        "totalClips": 1,
+        "days": 5,
+        "postsPerDay": 1,
+        "slots": [
+          {
+            "clipId": "f8eb5580-5d38-4ead-88f4-894402489558",
+            "platform": "Instagram",
+            "scheduledAt": "2026-08-18T06:30:00.000Z"
+          }
+        ],
+        "generatedAt": "2026-08-17T20:46:10.811Z"
+      }
+    },
+    "8fceafce-6c42-4160-90d0-47fa0b222014": {
+      "id": "8fceafce-6c42-4160-90d0-47fa0b222014",
+      "filename": "270540D7-4023-4D71-BCA4-5198117829BB.MP4",
+      "url": "/uploads/bbd19df5-5dcc-4c15-bf24-5d21de88a370.mp4",
+      "durationSec": 38.003084,
+      "width": 720,
+      "height": 1280,
+      "sizeBytes": 36543304,
+      "thumbnailUrl": "/uploads/creator-studio/thumbs/bbd19df5-5dcc-4c15-bf24-5d21de88a370.jpg",
+      "sourceMediaId": "cmsxpdxlr00013vs4sc7kchj1",
+      "createdAt": "2026-08-17T20:45:39.914Z",
+      "status": "analyzed",
+      "jobId": "b54dbdee-b2ba-4b92-b0d1-d8da61e14cf5",
+      "schedulePlan": {
+        "projectId": "8fceafce-6c42-4160-90d0-47fa0b222014",
+        "totalClips": 1,
+        "days": 5,
+        "postsPerDay": 1,
+        "slots": [
+          {
+            "clipId": "4f3fe696-7fee-44ce-a765-3ab02046be90",
+            "platform": "Instagram",
+            "scheduledAt": "2026-08-18T06:30:00.000Z"
+          }
+        ],
+        "generatedAt": "2026-08-17T20:46:22.733Z"
+      },
+      "scheduledCount": 1
+    }
+  },
+  "jobs": {
+    "3a018e8f-bb67-43e4-bb12-8142b6a18f72": {
+      "id": "3a018e8f-bb67-43e4-bb12-8142b6a18f72",
+      "projectId": "b7371955-bf22-41f9-bea7-68a026869f34",
+      "stage": "ready",
+      "progress": 100,
+      "currentTask": "Done",
+      "steps": [
+        {
+          "key": "upload-processing",
+          "label": "Upload processing",
+          "status": "done",
+          "detail": "Reading source file"
+        },
+        {
+          "key": "extract-audio",
+          "label": "Extracting audio",
+          "status": "done",
+          "detail": "Extracting audio track"
+        },
+        {
+          "key": "transcribe",
+          "label": "Transcribing speech",
+          "status": "done",
+          "detail": "Transcribing speech into timestamped segments"
+        },
+        {
+          "key": "understand-video",
+          "label": "Understanding video",
+          "status": "done",
+          "detail": "Understanding video structure"
+        },
+        {
+          "key": "detect-moments",
+          "label": "Detecting important moments",
+          "status": "done",
+          "detail": "Detecting important moments (1 candidates)"
+        },
+        {
+          "key": "detect-hooks",
+          "label": "Detecting hooks",
+          "status": "done",
+          "detail": "Detecting hooks in each moment"
+        },
+        {
+          "key": "score-clips",
+          "label": "Scoring clips",
+          "status": "done",
+          "detail": "Scoring clips for virality"
+        },
+        {
+          "key": "build-plan",
+          "label": "Building content plan",
+          "status": "done",
+          "detail": "Building the content plan"
+        },
+        {
+          "key": "render",
+          "label": "Rendering short videos",
+          "status": "done",
+          "detail": "Rendering 1 short-form videos"
+        },
+        {
+          "key": "captions",
+          "label": "Generating captions",
+          "status": "done",
+          "detail": "Generating styled captions"
+        },
+        {
+          "key": "bundle",
+          "label": "Assembling content bundles",
+          "status": "done",
+          "detail": "Assembling content bundles"
+        },
+        {
+          "key": "quality-check",
+          "label": "Running quality checks",
+          "status": "done",
+          "detail": "Running quality checks"
+        },
+        {
+          "key": "ready",
+          "label": "Ready",
+          "status": "running",
+          "detail": "Content is ready for review"
+        }
+      ],
+      "startedAt": "2026-08-17T20:45:37.352Z",
+      "updatedAt": "2026-08-17T20:46:10.812Z",
+      "completedAt": "2026-08-17T20:46:10.812Z"
+    },
+    "b54dbdee-b2ba-4b92-b0d1-d8da61e14cf5": {
+      "id": "b54dbdee-b2ba-4b92-b0d1-d8da61e14cf5",
+      "projectId": "8fceafce-6c42-4160-90d0-47fa0b222014",
+      "stage": "ready",
+      "progress": 100,
+      "currentTask": "Done",
+      "steps": [
+        {
+          "key": "upload-processing",
+          "label": "Upload processing",
+          "status": "done",
+          "detail": "Reading source file"
+        },
+        {
+          "key": "extract-audio",
+          "label": "Extracting audio",
+          "status": "done",
+          "detail": "Extracting audio track"
+        },
+        {
+          "key": "transcribe",
+          "label": "Transcribing speech",
+          "status": "done",
+          "detail": "Transcribing speech into timestamped segments"
+        },
+        {
+          "key": "understand-video",
+          "label": "Understanding video",
+          "status": "done",
+          "detail": "Understanding video structure"
+        },
+        {
+          "key": "detect-moments",
+          "label": "Detecting important moments",
+          "status": "done",
+          "detail": "Detecting important moments (1 candidates)"
+        },
+        {
+          "key": "detect-hooks",
+          "label": "Detecting hooks",
+          "status": "done",
+          "detail": "Detecting hooks in each moment"
+        },
+        {
+          "key": "score-clips",
+          "label": "Scoring clips",
+          "status": "done",
+          "detail": "Scoring clips for virality"
+        },
+        {
+          "key": "build-plan",
+          "label": "Building content plan",
+          "status": "done",
+          "detail": "Building the content plan"
+        },
+        {
+          "key": "render",
+          "label": "Rendering short videos",
+          "status": "done",
+          "detail": "Rendering 1 short-form videos"
+        },
+        {
+          "key": "captions",
+          "label": "Generating captions",
+          "status": "done",
+          "detail": "Generating styled captions"
+        },
+        {
+          "key": "bundle",
+          "label": "Assembling content bundles",
+          "status": "done",
+          "detail": "Assembling content bundles"
+        },
+        {
+          "key": "quality-check",
+          "label": "Running quality checks",
+          "status": "done",
+          "detail": "Running quality checks"
+        },
+        {
+          "key": "ready",
+          "label": "Ready",
+          "status": "running",
+          "detail": "Content is ready for review"
+        }
+      ],
+      "startedAt": "2026-08-17T20:45:41.407Z",
+      "updatedAt": "2026-08-17T20:46:22.733Z",
+      "completedAt": "2026-08-17T20:46:22.733Z"
+    }
+  },
+  "clips": {
+    "f8eb5580-5d38-4ead-88f4-894402489558": {
+      "id": "f8eb5580-5d38-4ead-88f4-894402489558",
+      "projectId": "b7371955-bf22-41f9-bea7-68a026869f34",
+      "index": 1,
+      "startSec": 0,
+      "endSec": 38.003084,
+      "durationSec": 38.003084,
+      "category": "Surprising",
+      "title": "The moment about a surprising result",
+      "transcript": "This is the part where everything connects around a surprising result. It's the kind of moment people rewind and share because it makes the whole video click into place.",
+      "hookOriginal": "So when it came to a surprising result...",
+      "hookAi": "I almost lost everything because of a surprising result.",
+      "useAiHook": true,
+      "caption": "The biggest lessons show up right before you realize they were lessons. Here's what happened with a surprising result.",
+      "captionStyle": "Clean",
+      "hashtags": [
+        "fyp",
+        "content",
+        "storytime",
+        "learnontiktok",
+        "viralfyp"
+      ],
+      "platforms": [
+        "Instagram",
+        "YouTube",
+        "TikTok"
+      ],
+      "scores": {
+        "hook": 80,
+        "engagement": 80,
+        "story": 81,
+        "educational": 79,
+        "viral": 83,
+        "overall": 81
+      },
+      "recommendedTime": "12:00 PM",
+      "status": "ready",
+      "videoUrl": "/uploads/creator-studio/b7371955-bf22-41f9-bea7-68a026869f34/clip-01.mp4",
+      "thumbnailUrl": "/uploads/creator-studio/b7371955-bf22-41f9-bea7-68a026869f34/clip-01.jpg"
+    },
+    "4f3fe696-7fee-44ce-a765-3ab02046be90": {
+      "id": "4f3fe696-7fee-44ce-a765-3ab02046be90",
+      "projectId": "8fceafce-6c42-4160-90d0-47fa0b222014",
+      "index": 1,
+      "startSec": 0,
+      "endSec": 38.003084,
+      "durationSec": 38.003084,
+      "category": "Surprising",
+      "title": "The moment about a surprising result",
+      "transcript": "This is the part where everything connects around a surprising result. It's the kind of moment people rewind and share because it makes the whole video click into place.",
+      "hookOriginal": "So when it came to a surprising result...",
+      "hookAi": "I almost lost everything because of a surprising result.",
+      "useAiHook": true,
+      "caption": "The biggest lessons show up right before you realize they were lessons. Here's what happened with a surprising result.",
+      "captionStyle": "Clean",
+      "hashtags": [
+        "fyp",
+        "content",
+        "storytime",
+        "learnontiktok",
+        "viralfyp"
+      ],
+      "platforms": [
+        "Instagram",
+        "YouTube",
+        "TikTok"
+      ],
+      "scores": {
+        "hook": 80,
+        "engagement": 80,
+        "story": 81,
+        "educational": 79,
+        "viral": 83,
+        "overall": 81
+      },
+      "recommendedTime": "12:00 PM",
+      "status": "scheduled",
+      "videoUrl": "/uploads/creator-studio/8fceafce-6c42-4160-90d0-47fa0b222014/clip-01.mp4",
+      "thumbnailUrl": "/uploads/creator-studio/8fceafce-6c42-4160-90d0-47fa0b222014/clip-01.jpg",
+      "contentId": "cmsxpf5w700033vs4a7itwssw",
+      "publicationIds": []
+    }
+  }
+}

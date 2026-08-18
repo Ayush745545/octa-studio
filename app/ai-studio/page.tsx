@@ -8,6 +8,7 @@ import { createContent } from "@/app/content/actions/create-content";
 import { scheduleContent } from "@/app/content/actions/schedule-content";
 import { PostPreviewPanel } from "@/components/ai-studio/post-preview-panel";
 import { PhoneMockup } from "@/components/ai-studio/phone-mockup";
+import VideoWithFallback from "@/components/video-with-fallback";
 
 const tools = [
   {
@@ -160,7 +161,7 @@ function openRazorpayCheckout(options: {
       order_id: options.orderId,
       name: options.name,
       description: options.description,
-      theme: { color: "#7C3AED" },
+      theme: { color: "#C7E34F" },
       handler: (res: any) => resolve(res),
       modal: { ondismiss: () => resolve(null) },
     });
@@ -972,14 +973,14 @@ if (contentType in ['image', 'video']) {
             </Link>
           )}
           {user?.plan === "PRO" ? (
-            <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2.5 py-1 text-[10px] font-semibold text-violet-300">PRO</span>
+            <span className="rounded-full border border-[#C7E34F]/40 bg-[#C7E34F]/10 px-2.5 py-1 text-[10px] font-semibold text-[#C7E34F]">PRO</span>
           ) : (
             <>
               <span className="hidden text-[10px] text-zinc-500 sm:block">{usage.used}/{usage.limit} free generations</span>
               <button
                 type="button"
                 onClick={() => setShowPurchase(true)}
-                className="rounded-full bg-[#7C3AED] px-3 py-1 text-[10px] font-semibold text-white transition hover:bg-[#6D28D9]"
+                className="rounded-full bg-[#C7E34F] px-3 py-1 text-[10px] font-semibold text-zinc-900 transition hover:bg-[#C7E34F]"
               >
                 Upgrade
               </button>
@@ -1010,7 +1011,7 @@ if (contentType in ['image', 'video']) {
                     onClick={() => loadGeneration(gen)}
                     className={`w-full text-left p-3 rounded-xl transition ${
                       activeGenerationId === gen.id
-                        ? 'bg-[#7C3AED]/15 border border-[#7C3AED]/40'
+                        ? 'bg-[#C7E34F]/15 border border-[#C7E34F]/40'
                         : 'bg-zinc-900/30 border border-transparent hover:bg-zinc-900/60 hover:border-zinc-800'
                     }`}
                   >
@@ -1048,7 +1049,7 @@ if (contentType in ['image', 'video']) {
 
             {/* Leonardo-style floating command bar */}
             <div className="animate-fade-up-delay mx-auto -mt-16 relative z-10 max-w-4xl">
-              <div className="rounded-3xl border border-white/[0.14] bg-black/70 p-2.5 shadow-[0_30px_90px_-20px_rgba(124,58,237,0.35),0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
+              <div className="rounded-3xl border border-white/[0.14] bg-black/70 p-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
                 {/* OCTA AI header */}
                 <div className="flex items-center gap-2 px-2 pb-2">
                   <div className="flex size-7 items-center justify-center rounded-lg bg-white text-black shadow-lg">
@@ -1130,14 +1131,14 @@ if (contentType in ['image', 'video']) {
                     type="button"
                     onClick={insertExample}
                     title="Try an example prompt"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-violet-300"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-[#C7E34F]"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
                   </button>
                   <button
                     type="button"
                     onClick={handlePrimaryAction}
-                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
+                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7E34F] px-4 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F] disabled:opacity-50"
                   >
                     {primaryBusy && (
                       <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
@@ -1164,7 +1165,7 @@ if (contentType in ['image', 'video']) {
                       }}
                       className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/7 bg-white/[0.025] px-2.5 py-1.5 text-[11px] text-white/45 transition hover:border-white/15 hover:bg-white/[0.06] hover:text-white/80"
                     >
-                      <span className="size-1.5 rounded-full bg-violet-400" />
+                      <span className="size-1.5 rounded-full bg-[#C7E34F]" />
                       {label}
                     </button>
                   ))}
@@ -1180,7 +1181,7 @@ if (contentType in ['image', 'video']) {
                         onClick={() => setActiveTab(tab)}
                         className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition ${
                           activeTab === tab
-                            ? "bg-[#7C3AED] text-white shadow-lg shadow-[#7C3AED]/30"
+                            ? "bg-[#C7E34F] text-zinc-900 shadow-lg shadow-[#C7E34F]/30"
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                       >
@@ -1237,7 +1238,7 @@ if (contentType in ['image', 'video']) {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-sm font-semibold text-white">Image Templates</h2>
-                    <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">
+                    <span className="rounded-full border border-[#C7E34F]/40 bg-[#C7E34F]/10 px-2 py-0.5 text-[10px] font-medium text-[#C7E34F]">
                       {TEMPLATES.length} templates
                     </span>
                   </div>
@@ -1263,8 +1264,8 @@ if (contentType in ['image', 'video']) {
                     onClick={() => handleTemplateSelect(tpl)}
                     className={`group relative shrink-0 w-36 overflow-hidden rounded-2xl border text-left transition ${
                       selectedTemplate === tpl.key
-                        ? "border-[#7C3AED] ring-2 ring-[#7C3AED]/40"
-                        : "border-zinc-800 hover:border-[#7C3AED]/60"
+                        ? "border-[#C7E34F] ring-2 ring-[#C7E34F]/40"
+                        : "border-zinc-800 hover:border-[#C7E34F]/60"
                     }`}
                   >
                     {tpl.tool === "Video" && (tpl.img.endsWith(".webm") || tpl.img.endsWith(".mp4")) ? (
@@ -1288,7 +1289,7 @@ if (contentType in ['image', 'video']) {
                       <p className="mt-1 text-[11px] leading-tight text-zinc-300">{tpl.tagline}</p>
                     </div>
                     {selectedTemplate === tpl.key && (
-                      <span className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
+                      <span className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#C7E34F] text-zinc-900">
                         <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                       </span>
                     )}
@@ -1299,7 +1300,7 @@ if (contentType in ['image', 'video']) {
               {selectedTemplate && (
                 <p className="mt-3 text-xs text-zinc-500">
                   Template loaded{" "}
-                  <span className="font-medium text-violet-300">
+                  <span className="font-medium text-[#C7E34F]">
                     {TEMPLATES.find((template) => template.key === selectedTemplate)?.name}
                   </span>
                   . Update the prompt if needed, then press Generate Image.
@@ -1325,16 +1326,16 @@ if (contentType in ['image', 'video']) {
                         {index < pipelineSteps.length - 1 && (
                           <span
                             className={`absolute left-[13px] top-8 h-[calc(100%-2rem)] w-px ${
-                              step.status === "done" ? "bg-[#7C3AED]" : "bg-zinc-800"
+                              step.status === "done" ? "bg-[#C7E34F]" : "bg-zinc-800"
                             }`}
                           />
                         )}
                         <span
                           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
                             step.status === "done"
-                              ? "border-[#7C3AED] bg-[#7C3AED]/15 text-violet-300"
+                              ? "border-[#C7E34F] bg-[#C7E34F]/15 text-[#C7E34F]"
                               : step.status === "running"
-                              ? "border-[#7C3AED] bg-[#7C3AED]/10 text-violet-300"
+                              ? "border-[#C7E34F] bg-[#C7E34F]/10 text-[#C7E34F]"
                               : step.status === "error"
                               ? "border-red-500/50 bg-red-500/10 text-red-400"
                               : "border-zinc-800 bg-zinc-900 text-zinc-500"
@@ -1354,7 +1355,7 @@ if (contentType in ['image', 'video']) {
                           <div className="flex flex-wrap items-baseline gap-x-2">
                             <p className="text-sm font-medium text-white">{step.title}</p>
                             <p className="text-xs text-zinc-500">{step.description}</p>
-                            {step.status === "running" && <p className="text-xs text-violet-400 animate-pulse">working…</p>}
+                            {step.status === "running" && <p className="text-xs text-[#C7E34F] animate-pulse">working…</p>}
                           </div>
                           {step.error && <p className="mt-1 text-xs text-red-400">{step.error}</p>}
                           {step.status === "done" && step.result && (
@@ -1369,9 +1370,9 @@ if (contentType in ['image', 'video']) {
                 )}
 
                 {pipelineDone && result && !isPipelineRunning && (
-                  <div className="rounded-2xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-6">
+                  <div className="rounded-2xl border border-[#C7E34F]/40 bg-[#C7E34F]/10 p-6">
                     <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-violet-300" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" /></svg>
+                      <svg className="w-5 h-5 text-[#C7E34F]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" /></svg>
                       <p className="text-sm font-semibold text-white">Your post is ready</p>
                     </div>
                     <div className="mt-3 max-h-56 overflow-y-auto rounded-xl border border-zinc-800 bg-[#0c0c0e] p-4">
@@ -1382,14 +1383,21 @@ if (contentType in ['image', 'video']) {
                     <div className="mt-4">
                       {isGeneratingImage && (
                         <div className="flex items-center gap-2.5 rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                          <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#7C3AED] border-t-transparent" />
+                          <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#C7E34F] border-t-transparent" />
                           <p className="text-xs text-zinc-400">Generating a matching image for your post…</p>
                         </div>
                       )}
 {!isGeneratingImage && (generatedImage || generatedVideo) && (
   <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
     {generatedVideo ? (
-      <video src={generatedVideo} controls autoPlay loop playsInline muted className="w-full" />
+      <VideoWithFallback
+        src={generatedVideo}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-full"
+      />
     ) : (
       <img src={generatedImage ?? undefined} alt="Generated for this post" className="w-full object-cover" />
     )}
@@ -1397,15 +1405,15 @@ if (contentType in ['image', 'video']) {
 )}
 
 {!isGeneratingImage && generatedImage && (
-  <div className="mt-3 rounded-xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-3">
+  <div className="mt-3 rounded-xl border border-[#C7E34F]/40 bg-[#C7E34F]/10 p-3">
     <div className="flex items-center justify-between">
-      <span className="text-xs font-medium text-violet-300">Last Generated Image</span>
+      <span className="text-xs font-medium text-[#C7E34F]">Last Generated Image</span>
       <button
         onClick={() => {
           setPreviewImage(generatedImage);
           // Scroll to preview panel or show success message
         }}
-        className="rounded-lg bg-[#7C3AED] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#6D28D9]"
+        className="rounded-lg bg-[#C7E34F] px-3 py-1.5 text-xs font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
       >
         Use This
       </button>
@@ -1441,7 +1449,7 @@ if (contentType in ['image', 'video']) {
                     <div className="mt-4 flex flex-wrap items-center gap-2">
                       <button
                         onClick={openScheduler}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9]"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         Schedule
@@ -1471,7 +1479,7 @@ if (contentType in ['image', 'video']) {
                           value={scheduleAt}
                           min={toLocalInputValue(new Date(Date.now() + 5 * 60 * 1000))}
                           onChange={(e) => setScheduleAt(e.target.value)}
-                          className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7C3AED]/60"
+                          className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#C7E34F]/60"
                         />
                         <button
                           onClick={handleSchedule}
@@ -1502,7 +1510,7 @@ if (contentType in ['image', 'video']) {
 
                 {activeTab === "image" && isGeneratingImage && (
                   <div className="flex flex-col items-center gap-3 py-10">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#7C3AED] border-t-transparent" />
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#C7E34F] border-t-transparent" />
                     <p className="text-xs text-zinc-500">Generating your image…</p>
                   </div>
                 )}
@@ -1521,14 +1529,20 @@ if (contentType in ['image', 'video']) {
 
                 {activeTab === "video" && generatedVideo && !isGeneratingVideo && (
                   <div className="rounded-xl border border-zinc-800 overflow-hidden">
-                    <video src={generatedVideo} controls autoPlay loop playsInline className="w-full" />
+                    <VideoWithFallback
+                      src={generatedVideo}
+                      autoPlay
+                      loop
+                      playsInline
+                      className="w-full"
+                    />
                   </div>
                 )}
 
                 {activeTab === "video" && isGeneratingVideo && (
                   <div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
-                      <div className="h-full rounded-full bg-[#7C3AED] transition-all duration-300" style={{ width: `${videoProgress}%` }} />
+                      <div className="h-full rounded-full bg-[#C7E34F] transition-all duration-300" style={{ width: `${videoProgress}%` }} />
                     </div>
                     <p className="mt-2 text-xs text-zinc-500 text-center">{videoProgress}% complete</p>
                   </div>
@@ -1599,7 +1613,7 @@ if (contentType in ['image', 'video']) {
             <div className="hidden w-[32%] border-r border-zinc-800 bg-[#0c0c0f] p-5 md:block">
               <div className="flex h-full flex-col">
                 <div>
-                  <span className="inline-flex rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-violet-300">
+                  <span className="inline-flex rounded-full border border-[#C7E34F]/30 bg-[#C7E34F]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#C7E34F]">
                     AI Template
                   </span>
 
@@ -1642,7 +1656,7 @@ if (contentType in ['image', 'video']) {
                         key={step}
                         className={`h-1 flex-1 rounded-full ${
                           templateStep >= step
-                            ? "bg-violet-500"
+                            ? "bg-[#C7E34F]"
                             : "bg-zinc-800"
                         }`}
                       />
@@ -1660,7 +1674,7 @@ if (contentType in ['image', 'video']) {
               {templateStep === 1 && (
                 <>
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wider text-violet-400">
+                    <p className="text-xs font-medium uppercase tracking-wider text-[#C7E34F]">
                       Step 1
                     </p>
                     <h3 className="mt-2 text-2xl font-semibold text-white">
@@ -1673,7 +1687,7 @@ if (contentType in ['image', 'video']) {
 
                   <label
                     htmlFor="template-image-upload"
-                    className="mt-8 flex min-h-[300px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-700 bg-zinc-950/70 p-8 text-center transition hover:border-violet-500/60 hover:bg-violet-500/[0.03]"
+                    className="mt-8 flex min-h-[300px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-700 bg-zinc-950/70 p-8 text-center transition hover:border-[#C7E34F]/60 hover:bg-[#C7E34F]/[0.03]"
                   >
                     {templatePreview ? (
                       <img
@@ -1683,7 +1697,7 @@ if (contentType in ['image', 'video']) {
                       />
                     ) : (
                       <>
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-violet-400">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-[#C7E34F]">
                           <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
                           </svg>
@@ -1740,7 +1754,7 @@ if (contentType in ['image', 'video']) {
                       type="button"
                       disabled={!templateFile}
                       onClick={() => void handleTemplateProcess()}
-                      className="rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-xl bg-[#C7E34F] px-6 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-[#C7E34F] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Next →
                     </button>
@@ -1750,8 +1764,8 @@ if (contentType in ['image', 'video']) {
 
               {templateStep === 2 && (
                 <div className="flex flex-1 flex-col items-center justify-center text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/10">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#C7E34F]/30 bg-[#C7E34F]/10">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#C7E34F] border-t-transparent" />
                   </div>
 
                   <h3 className="mt-6 text-2xl font-semibold text-white">
@@ -1764,7 +1778,7 @@ if (contentType in ['image', 'video']) {
                   </p>
 
                   <div className="mt-8 w-full max-w-md overflow-hidden rounded-full bg-zinc-900">
-                    <div className="h-1.5 w-2/3 animate-pulse rounded-full bg-violet-500" />
+                    <div className="h-1.5 w-2/3 animate-pulse rounded-full bg-[#C7E34F]" />
                   </div>
                 </div>
               )}
@@ -1839,7 +1853,7 @@ if (contentType in ['image', 'video']) {
                               setIsCreating(false);
                             }
                           }}
-                          className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-xl bg-[#C7E34F] px-5 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-[#C7E34F] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {isCreating ? "Opening..." : "Use this image → Post"}
                         </button>
@@ -1880,10 +1894,10 @@ if (contentType in ['image', 'video']) {
               </button>
             </div>
 
-            <div className="mt-5 rounded-xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-4">
+            <div className="mt-5 rounded-xl border border-[#C7E34F]/40 bg-[#C7E34F]/10 p-4">
               <div className="flex items-baseline justify-between">
                 <p className="text-sm font-semibold text-white">octa-studio PRO</p>
-                <p className="text-sm font-semibold text-violet-300">₹999<span className="text-[10px] text-zinc-500">/month</span></p>
+                <p className="text-sm font-semibold text-[#C7E34F]">₹999<span className="text-[10px] text-zinc-500">/month</span></p>
               </div>
               <ul className="mt-3 space-y-1.5 text-xs text-zinc-300">
                 <li>· Unlimited AI text, image & video generations</li>
@@ -1904,13 +1918,13 @@ if (contentType in ['image', 'video']) {
                 type="button"
                 onClick={() => void handlePurchase()}
                 disabled={purchaseBusy}
-                className="mt-5 w-full rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-60"
+                className="mt-5 w-full rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F] disabled:opacity-60"
               >
                 {purchaseBusy ? "Processing..." : "Buy with Razorpay"}
               </button>
             ) : (
               <div className="mt-5 grid gap-2">
-                <Link href="/signup?next=/ai-studio" className="rounded-xl bg-[#7C3AED] px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-[#6D28D9]">
+                <Link href="/signup?next=/ai-studio" className="rounded-xl bg-[#C7E34F] px-4 py-2.5 text-center text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]">
                   Sign up to buy PRO
                 </Link>
                 <Link href="/login?next=/ai-studio" className="rounded-xl border border-zinc-800 px-4 py-2.5 text-center text-sm font-medium text-zinc-300 transition hover:border-zinc-700 hover:text-white">

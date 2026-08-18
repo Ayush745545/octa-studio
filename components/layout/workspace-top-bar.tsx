@@ -66,7 +66,7 @@ export function WorkspaceTopBar({ connectedChannels, onUploadMedia, onToggleSide
                   channel.platform === 'Facebook' ? '#1877F2' :
                   channel.platform === 'TikTok' ? '#000' :
                   channel.platform === 'YouTube' ? '#FF0000' :
-                  channel.platform === 'X' ? '#000' : '#7C3AED'
+                  channel.platform === 'X' ? '#000' : '#7FFB50'
               }}
               title={channel.accountName || channel.platform}
             >

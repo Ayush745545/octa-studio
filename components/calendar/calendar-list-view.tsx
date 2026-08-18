@@ -60,9 +60,9 @@ export default function CalendarListView({ posts, onPostClick }: CalendarListVie
 
         return (
           <div key={key} className="mb-6">
-            <p className={`mb-2 text-[11px] font-semibold uppercase tracking-wider ${isToday ? "text-[#7C3AED]" : "text-zinc-500"}`}>
+            <p className={`mb-2 text-[11px] font-semibold uppercase tracking-wider ${isToday ? "text-[#7FFB50]" : "text-zinc-500"}`}>
               {label}
-              {isToday && <span className="ml-2 rounded-full bg-[#7C3AED]/15 px-2 py-0.5 text-[9px] font-bold text-[#7C3AED]">Today</span>}
+              {isToday && <span className="ml-2 rounded-full bg-[#7FFB50]/15 px-2 py-0.5 text-[9px] font-bold text-[#7FFB50]">Today</span>}
             </p>
 
             <div className="flex flex-col gap-1.5">
@@ -80,7 +80,7 @@ export default function CalendarListView({ posts, onPostClick }: CalendarListVie
                     key={post.id}
                     type="button"
                     onClick={() => onPostClick(post)}
-                    className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-[#0a0a0c] px-3 py-2.5 text-left transition hover:border-[#7C3AED]"
+                    className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-[#0a0a0c] px-3 py-2.5 text-left transition hover:border-[#7FFB50]"
                   >
                     <span className="w-16 flex-shrink-0 text-[11px] font-medium text-zinc-400">{time}</span>
                     <span className={`h-2 w-2 flex-shrink-0 rounded-full ${platformColor}`} />

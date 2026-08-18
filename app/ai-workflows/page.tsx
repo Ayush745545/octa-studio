@@ -35,9 +35,9 @@ const steps = [
 
 const colorClasses: Record<string, { bg: string; text: string; border: string }> = {
   fuchsia: {
-    bg: 'bg-fuchsia-500/10',
-    text: 'text-fuchsia-400',
-    border: 'border-fuchsia-500/20',
+    bg: 'bg-[#7FFB50]/10',
+    text: 'text-[#7FFB50]',
+    border: 'border-[#7FFB50]/20',
   },
   emerald: {
     bg: 'bg-emerald-500/10',
@@ -56,7 +56,7 @@ export default function AIWorkflowsPage() {
     <div className="min-h-screen bg-[#0a0a0c] text-white">
       <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8">
         <div className="text-center mb-20">
-          <p className="text-[12px] font-medium uppercase tracking-[0.2em] bg-gradient-to-r from-blue-400 via-violet-400 to-green-400 bg-clip-text text-transparent mb-4">
+          <p className="text-[12px] font-medium uppercase tracking-[0.2em] bg-gradient-to-r from-blue-400 via-[#7FFB50] to-green-400 bg-clip-text text-transparent mb-4">
             AI-Powered Workflows
           </p>
           <h1 className="text-[clamp(2.5rem,5vw,4rem)] font-medium tracking-tight mb-6" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
@@ -110,7 +110,7 @@ export default function AIWorkflowsPage() {
 
         <div className="mt-24 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-sm text-zinc-400">
-            <span className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
+            <span className="h-2 w-2 rounded-full bg-[#7FFB50] animate-pulse" />
             Ready to build your pipeline?
           </div>
         </div>

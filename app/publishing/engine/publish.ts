@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { getPublishingProvider } from "./providers";
 
 export async function publishPublication(publicationId: string) {
+  // The calendar id may be a content id (Creator Studio schedules content
+  // directly with no Publication when no channel is connected yet).
   const publication = await prisma.publication.findUnique({
     where: {
       id: publicationId,
@@ -21,6 +23,15 @@ export async function publishPublication(publicationId: string) {
   });
 
   if (!publication) {
+    const content = await prisma.content.findUnique({
+      where: { id: publicationId },
+      select: { id: true },
+    });
+    if (content) {
+      throw new Error(
+        "This post has no connected channel yet. Connect a channel in Publishing to publish.",
+      );
+    }
     throw new Error("Publication not found.");
   }
 

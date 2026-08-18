@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useLayoutEffect } from "react";
+import React, { useRef, useLayoutEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
@@ -49,12 +49,12 @@ function BulkScheduleVisual() {
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3">
         <div className="flex items-center gap-3">
-          <input type="checkbox" checked readOnly className="h-4 w-4 accent-fuchsia-500 rounded" />
+          <input type="checkbox" checked readOnly className="h-4 w-4 accent-[#7FFB50] rounded" />
           <span className="text-[12px] font-semibold text-white">4 posts selected</span>
         </div>
         <div className="flex gap-2">
           <button className="rounded-lg bg-zinc-800 px-3 py-1.5 text-[11px] font-medium text-zinc-300">Reschedule All</button>
-          <button className="rounded-lg bg-fuchsia-600 px-3 py-1.5 text-[11px] font-medium text-white">Bulk Publish</button>
+          <button className="rounded-lg bg-[#7FFB50] px-3 py-1.5 text-[11px] font-medium text-white">Bulk Publish</button>
         </div>
       </div>
       {/* Post Rows */}
@@ -65,13 +65,13 @@ function BulkScheduleVisual() {
         { title: 'SaaS Growth Playbook', platform: 'YouTube', date: 'Aug 16, 2:00 PM', status: 'Draft' },
       ].map((post, i) => (
         <div key={i} className="flex items-center gap-4 border-b border-zinc-900 px-5 py-3.5 transition hover:bg-zinc-900/30">
-          <input type="checkbox" checked readOnly className="h-4 w-4 accent-fuchsia-500 rounded" />
+          <input type="checkbox" checked readOnly className="h-4 w-4 accent-[#7FFB50] rounded" />
           <div className="flex-1 min-w-0">
             <p className="truncate text-[13px] font-medium text-white">{post.title}</p>
             <p className="text-[11px] text-zinc-600">{post.platform} · {post.date}</p>
           </div>
           <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-            post.status === 'Scheduled' ? 'bg-fuchsia-600/20 text-fuchsia-400' :
+            post.status === 'Scheduled' ? 'bg-[#7FFB50]/20 text-[#7FFB50]' :
             post.status === 'Ready' ? 'bg-blue-600/20 text-blue-400' :
             'bg-zinc-800 text-zinc-500'
           }`}>{post.status}</span>
@@ -99,7 +99,7 @@ function PostPreviewCard() {
       {/* Post Body */}
       <div className="px-5 pb-4">
         <p className="text-[13px] leading-relaxed text-zinc-300">🚀 AI is reshaping content creation. Here are 5 tools every developer should try in 2026…</p>
-        <p className="mt-2 text-[12px] text-fuchsia-400">#AI #DevTools #SaaS #FutureOfWork</p>
+        <p className="mt-2 text-[12px] text-[#7FFB50]">#AI #DevTools #SaaS #FutureOfWork</p>
       </div>
       {/* Image */}
       <div className="aspect-[16/9] bg-zinc-900">
@@ -265,8 +265,8 @@ function GsapCalendarShowcase() {
 
       {/* Progress Steps */}
       <div className="flex items-center justify-center gap-8 mb-4">
-        <div ref={step1Ref} className="flex items-center gap-2 text-[12px] font-medium text-fuchsia-400 opacity-30 transition-opacity">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-fuchsia-500/20 text-[10px]">1</span>
+        <div ref={step1Ref} className="flex items-center gap-2 text-[12px] font-medium text-[#7FFB50] opacity-30 transition-opacity">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7FFB50]/20 text-[10px]">1</span>
           Schedule
         </div>
         <div ref={step2Ref} className="flex items-center gap-2 text-[12px] font-medium text-emerald-400 opacity-30 transition-opacity">
@@ -281,7 +281,7 @@ function GsapCalendarShowcase() {
 
       {/* Progress Bar */}
       <div className="mx-auto w-64 h-1 rounded-full bg-zinc-800 mb-10 overflow-hidden">
-        <div ref={progressRef} className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-purple-500" style={{ width: '0%' }} />
+        <div ref={progressRef} className="h-full rounded-full bg-gradient-to-r from-[#7FFB50] to-[#7FFB50]" style={{ width: '0%' }} />
       </div>
 
       {/* Text Stack — smooth crossfade */}
@@ -290,7 +290,7 @@ function GsapCalendarShowcase() {
           <p className="text-[15px] leading-[1.6] text-zinc-400">Write your content in the editor, then drop it into the visual calendar. See your entire pipeline at a glance across the week.</p>
         </div>
         <div ref={text2Ref} className="absolute inset-0 w-full flex items-center justify-center">
-          <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-fuchsia-400">Scheduled.</strong> Your LinkedIn post is locked into Thursday at 10 AM. It&apos;s queued and ready to publish automatically.</p>
+          <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-[#7FFB50]">Scheduled.</strong> Your LinkedIn post is locked into Thursday at 10 AM. It&apos;s queued and ready to publish automatically.</p>
         </div>
         <div ref={text3Ref} className="absolute inset-0 w-full flex items-center justify-center">
           <p className="text-[15px] leading-[1.6] text-zinc-300"><strong className="text-emerald-400">Rescheduled.</strong> Dragged to Saturday. octa-studio updates the queue instantly — no extra clicks needed.</p>
@@ -308,7 +308,7 @@ function GsapCalendarShowcase() {
           {/* Calendar Top Bar */}
           <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2.5">
             <div className="flex items-center gap-3">
-              <button className="rounded-lg bg-fuchsia-500/10 px-3 py-1 text-[11px] font-semibold text-fuchsia-400">Today</button>
+              <button className="rounded-lg bg-[#7FFB50]/10 px-3 py-1 text-[11px] font-semibold text-[#7FFB50]">Today</button>
               <div className="flex gap-1">
                 <button className="flex h-6 w-6 items-center justify-center rounded text-zinc-500 hover:bg-zinc-800"><svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg></button>
                 <button className="flex h-6 w-6 items-center justify-center rounded text-zinc-500 hover:bg-zinc-800"><svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg></button>
@@ -337,8 +337,8 @@ function GsapCalendarShowcase() {
               {days.map((day, i) => (
                 <div key={day} className="border-r border-zinc-900/50 relative">
                   {/* Day Header */}
-                  <div className={`text-center border-b border-zinc-900 py-1.5 ${i === 3 ? 'bg-fuchsia-500/5' : ''}`}>
-                    <p className={`text-[10px] font-medium ${i === 3 ? 'text-fuchsia-400' : 'text-zinc-500'}`}>{day}</p>
+                  <div className={`text-center border-b border-zinc-900 py-1.5 ${i === 3 ? 'bg-[#7FFB50]/5' : ''}`}>
+                    <p className={`text-[10px] font-medium ${i === 3 ? 'text-[#7FFB50]' : 'text-zinc-500'}`}>{day}</p>
                   </div>
                   {/* Time slots */}
                   <div className="relative">
@@ -367,13 +367,13 @@ function GsapCalendarShowcase() {
                   )}
                   {/* Animated Post — lands on Thursday 10AM */}
                   {i === 3 && (
-                    <div ref={postRef} className="absolute top-[68px] left-1 right-1 z-10 rounded-md bg-gradient-to-r from-fuchsia-600 to-fuchsia-500 border border-fuchsia-400/60 p-1.5 shadow-lg shadow-fuchsia-900/40 cursor-grab">
+                    <div ref={postRef} className="absolute top-[68px] left-1 right-1 z-10 rounded-md bg-gradient-to-r from-[#7FFB50] to-[#7FFB50] border border-[#7FFB50]/60 p-1.5 shadow-lg shadow-black/30 cursor-grab">
                       <div className="flex items-center gap-1 mb-0.5">
                         <span className="w-2.5 h-2.5 rounded-sm bg-blue-500 flex items-center justify-center text-[6px] font-bold text-white">in</span>
-                        <span className="text-[8px] font-bold text-white">LinkedIn</span>
+                        <span className="text-[8px] font-bold text-zinc-900">LinkedIn</span>
                       </div>
-                      <p className="text-[7px] text-fuchsia-100">5 AI Tools for Devs</p>
-                      <p className="text-[6px] text-fuchsia-200/50 mt-0.5">10:00 AM</p>
+                      <p className="text-[7px] font-bold text-zinc-900">5 AI Tools for Devs</p>
+                      <p className="text-[6px] text-zinc-700 mt-0.5">10:00 AM</p>
                     </div>
                   )}
                 </div>
@@ -409,13 +409,13 @@ function GsapCalendarShowcase() {
               <div className="px-3 py-2">
                 <div className="rounded-lg bg-zinc-900 p-2">
                   <p className="text-[8px] text-zinc-300 leading-relaxed">🚀 AI is reshaping how devs build products. Here are 5 tools every developer should try...</p>
-                  <p className="text-[7px] text-fuchsia-400 mt-1">#AI #DevTools #SaaS</p>
+                  <p className="text-[7px] text-[#7FFB50] mt-1">#AI #DevTools #SaaS</p>
                 </div>
               </div>
               {/* Action Buttons */}
               <div className="px-3 pb-3 flex gap-1.5">
                 <button className="flex-1 rounded-lg bg-zinc-800 py-1.5 text-[7px] font-semibold text-zinc-300">Draft</button>
-                <button className="flex-1 rounded-lg bg-fuchsia-600 py-1.5 text-[7px] font-semibold text-white">Schedule</button>
+                <button className="flex-1 rounded-lg bg-[#7FFB50] py-1.5 text-[7px] font-semibold text-white">Schedule</button>
               </div>
             </div>
           </div>
@@ -437,15 +437,15 @@ function GsapCalendarShowcase() {
             <div className="bg-[#111113] p-2">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[8px] font-semibold text-white">Aug 2026</span>
-                <span className="rounded bg-fuchsia-500/20 px-1.5 py-0.5 text-[6px] font-bold text-fuchsia-400">Week View</span>
+                <span className="rounded bg-[#7FFB50]/20 px-1.5 py-0.5 text-[6px] font-bold text-[#7FFB50]">Week View</span>
               </div>
               {/* Mini week grid */}
               <div className="grid grid-cols-7 gap-0.5">
                 {days.map((d, i) => (
                   <div key={d} className="text-center">
-                    <p className={`text-[6px] mb-0.5 ${i === 3 ? 'text-fuchsia-400 font-bold' : 'text-zinc-600'}`}>{d.split(' ')[0]}</p>
-                    <div className={`h-12 rounded border ${i === 3 ? 'border-fuchsia-500/30 bg-fuchsia-500/5' : 'border-zinc-900 bg-zinc-950'}`}>
-                      {i === 3 && <div className="m-0.5 rounded bg-fuchsia-600 h-3 flex items-center px-0.5"><span className="text-[4px] text-white font-bold">AI Tools</span></div>}
+                    <p className={`text-[6px] mb-0.5 ${i === 3 ? 'text-[#7FFB50] font-bold' : 'text-zinc-600'}`}>{d.split(' ')[0]}</p>
+                    <div className={`h-12 rounded border ${i === 3 ? 'border-[#7FFB50]/30 bg-[#7FFB50]/5' : 'border-zinc-900 bg-zinc-950'}`}>
+                      {i === 3 && <div className="m-0.5 rounded bg-[#7FFB50] h-3 flex items-center px-0.5"><span className="text-[4px] text-white font-bold">AI Tools</span></div>}
                       {i === 1 && <div className="m-0.5 rounded bg-blue-600 h-3" />}
                       {i === 5 && <div className="m-0.5 rounded bg-pink-600 h-3" />}
                     </div>
@@ -463,53 +463,189 @@ function GsapCalendarShowcase() {
   );
 }
 
+type PricingTier = {
+  name: string;
+  monthly: number;
+  target: string;
+  popular?: boolean;
+  customPrice?: boolean;
+  cta: string;
+  limits: string[];
+};
+
+const PRICING_TIERS: PricingTier[] = [
+  {
+    name: "Free",
+    monthly: 0,
+    target: "Try Octa AI",
+    cta: "Get Started",
+    limits: [
+      "3 AI generations / month",
+      "1 social profile",
+      "720p export",
+      "Octa watermark",
+      "5 scheduled posts",
+    ],
+  },
+  {
+    name: "Creator",
+    monthly: 499,
+    target: "Individual creators",
+    cta: "Start Free Trial",
+    limits: [
+      "50 AI image generations",
+      "10 video generations",
+      "5 social profiles",
+      "100 scheduled posts",
+      "AI captions & hashtags",
+      "1080p export",
+    ],
+  },
+  {
+    name: "Pro",
+    monthly: 999,
+    target: "Serious YouTubers",
+    popular: true,
+    cta: "Start Free Trial",
+    limits: [
+      "150 image generations",
+      "30 video generations",
+      "15 social profiles",
+      "Unlimited scheduling",
+      "4K export",
+      "AI B-roll & voiceover",
+      "Analytics & no watermark",
+    ],
+  },
+  {
+    name: "Studio",
+    monthly: 2499,
+    target: "Agencies",
+    cta: "Start Free Trial",
+    limits: [
+      "Multiple brands",
+      "Team members",
+      "Approval workflow",
+      "Client workspaces",
+      "Brand kits",
+      "Higher generation limits",
+      "Advanced analytics",
+    ],
+  },
+  {
+    name: "Business",
+    monthly: 5999,
+    target: "Teams",
+    customPrice: true,
+    cta: "Contact Sales",
+    limits: [
+      "Everything in Studio",
+      "Unlimited team seats",
+      "SSO / SAML & API access",
+      "Custom generation limits",
+      "Priority support",
+      "Dedicated account manager",
+    ],
+  },
+];
+
 function PricingSection() {
+  const [annual, setAnnual] = useState(false);
+
+  const priceFor = (monthly: number) => {
+    if (monthly === 0) return "₹0";
+    if (annual) return `₹${Math.round(monthly * 0.8).toLocaleString("en-IN")}`;
+    return `₹${monthly.toLocaleString("en-IN")}`;
+  };
+
   return (
     <section className="border-t border-zinc-900 bg-zinc-950/20 py-24 lg:py-32">
-      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div data-reveal className="text-center">
           <h2 className="text-[clamp(3rem,6vw,5.5rem)] font-medium tracking-tight" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
             <span className="text-zinc-100">Simple,</span>{" "}
-            <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-green-400 bg-clip-text text-transparent">transparent</span>{" "}
+            <span className="bg-gradient-to-r from-blue-400 via-[#7FFB50] to-green-400 bg-clip-text text-transparent">transparent</span>{" "}
             <span className="text-zinc-100">pricing</span>
           </h2>
-          <p className="mt-4 text-[15px] text-zinc-400">Start for free, upgrade when you need more power.</p>
-          
+          <p className="mt-4 text-[15px] text-zinc-400">Start free, then pay only for the usage you need. Pricing is built around limits, not lock-in.</p>
+
           <div className="mt-8 flex justify-center">
-            <div className="flex items-center rounded-full border border-zinc-800 bg-zinc-950 p-1">
-              <button className="rounded-full bg-zinc-800 px-6 py-1.5 text-sm font-medium text-white">Monthly</button>
-              <button className="rounded-full px-6 py-1.5 text-sm font-medium text-zinc-400">Annually (Save 20%)</button>
+            <div className="relative flex items-center rounded-full border border-white/15 bg-white/[0.04] p-1 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_8px_30px_-12px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+              <span
+                className="absolute inset-y-1 left-1 rounded-full bg-gradient-to-b from-white/25 to-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.35)] ring-1 ring-white/20 backdrop-blur-md transition-transform duration-300 ease-out"
+                style={{ width: "calc(50% - 0.25rem)", transform: annual ? "translateX(100%)" : "translateX(0)" }}
+              />
+              <button
+                onClick={() => setAnnual(false)}
+                className={`relative z-10 flex-1 rounded-full px-6 py-1.5 text-center text-sm font-medium transition-colors ${!annual ? "text-white" : "text-zinc-400"}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setAnnual(true)}
+                className={`relative z-10 flex-1 rounded-full px-6 py-1.5 text-center text-sm font-medium transition-colors ${annual ? "text-white" : "text-zinc-400"}`}
+              >
+                Annually (Save 20%)
+              </button>
             </div>
           </div>
         </div>
 
-        <div data-reveal className="mt-16 grid gap-8 md:grid-cols-3">
-          {[
-            { name: "Starter", price: "$0", desc: "Perfect for individuals just getting started.", btn: "Get Started", features: ["1 Social Profile per platform", "10 AI Generations / mo", "Basic Analytics"] },
-            { name: "Pro", price: "$29", desc: "For professional creators and solopreneurs.", btn: "Start 14-Day Trial", features: ["Unlimited Social Profiles", "Unlimited AI Generations", "Advanced AI Video Mesh", "Custom Analytics"], popular: true },
-            { name: "Agency", price: "$99", desc: "For teams managing multiple brands.", btn: "Contact Sales", features: ["Everything in Pro", "Unlimited Workspaces", "Team Collaboration", "API Access"] }
-          ].map((tier) => (
-            <div key={tier.name} className={`relative flex flex-col rounded-2xl border ${tier.popular ? "border-fuchsia-500 bg-zinc-900/50 shadow-[0_0_40px_-15px_rgba(168,85,247,0.3)]" : "border-zinc-800 bg-zinc-950"} p-8`}>
-              {tier.popular && <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-fuchsia-500 px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">Most Popular</span>}
-              <h3 className="text-xl font-semibold text-white">{tier.name}</h3>
-              <p className="mt-2 text-[13px] text-zinc-400">{tier.desc}</p>
-              <p className="mt-6 text-4xl font-semibold text-white">{tier.price}<span className="text-sm font-normal text-zinc-500">/mo</span></p>
-              
-              <button className={`mt-8 w-full rounded-xl py-2.5 text-[13px] font-semibold transition ${tier.popular ? "bg-fuchsia-600 text-white hover:bg-fuchsia-500" : "bg-white text-black hover:bg-zinc-200"}`}>
-                {tier.btn}
+        <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          {PRICING_TIERS.map((tier) => (
+            <div
+              key={tier.name}
+              data-reveal
+              className={`tier-card relative flex flex-col rounded-2xl border p-6 font-[family-name:var(--font-inter)] transition-transform duration-300 hover:-translate-y-1 ${
+                tier.popular
+                  ? "border-zinc-900 bg-[#7FFB50] shadow-[0_0_40px_-15px_rgba(127,251,80,0.6)]"
+                  : "border-zinc-900/30 bg-[#7FFB50]"
+              }`}
+            >
+              {tier.popular && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-zinc-900 px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                  Most Popular
+                </span>
+              )}
+              <h3 className="text-xl font-bold tracking-tight text-zinc-900">{tier.name}</h3>
+              <p className="mt-1 text-[13px] text-zinc-700">{tier.target}</p>
+              <p className="mt-5 text-5xl font-extrabold tracking-tight text-zinc-900">
+                <span key={annual ? "a" : "m"} className="price-pop inline-block text-zinc-900">
+                  {priceFor(tier.monthly)}
+                </span>
+                {!tier.customPrice && tier.monthly !== 0 && (
+                  <span className="text-base font-medium text-zinc-600">/mo{annual ? " billed yearly" : ""}</span>
+                )}
+                {tier.customPrice && <span className="text-base font-medium text-zinc-600">+/mo</span>}
+              </p>
+
+              <button
+                className={`mt-7 w-full rounded-xl py-3 text-sm font-semibold transition ${
+                  tier.popular ? "bg-zinc-900 text-white hover:bg-zinc-800" : "bg-zinc-900 text-white hover:bg-zinc-800"
+                }`}
+              >
+                {tier.cta}
               </button>
 
-              <ul className="mt-8 flex-1 space-y-4">
-                {tier.features.map(f => (
-                  <li key={f} className="flex items-center gap-3 text-[13px] text-zinc-300">
-                    <svg className={`h-4 w-4 shrink-0 ${tier.popular ? "text-fuchsia-500" : "text-zinc-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                    {f}
+              <p className="mt-7 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-800">Usage limits</p>
+              <ul className="flex-1 space-y-3">
+                {tier.limits.map((limit) => (
+                  <li key={limit} className="flex items-start gap-2.5 text-[13px] leading-snug text-zinc-800">
+                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {limit}
                   </li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
+
+        <p data-reveal className="mt-10 text-center text-[13px] text-zinc-500">
+          All plans include the Octa AI workspace — idea inbox, AI Studio, visual calendar, and publishing. Need a custom plan?{" "}
+          <span className="text-[#7FFB50]">Talk to us.</span>
+        </p>
       </div>
     </section>
   );
@@ -525,7 +661,7 @@ function FAQSection() {
           {[
             { q: "Which social platforms are supported?", a: "We currently support LinkedIn, X (Twitter), Instagram, Facebook, TikTok, and YouTube. We're constantly adding more." },
             { q: "How does the AI Video Mesh work?", a: "Our AI processes your video in the browser to map facial expressions to 3D meshes, allowing you to swap styles and avatars seamlessly without rendering delays." },
-            { q: "Can I manage multiple clients?", a: "Yes, the Agency plan allows you to create separate isolated Workspaces for each of your clients." }
+            { q: "Can I manage multiple clients?", a: "Yes, the Studio plan lets you create separate client workspaces, brand kits, and an approval workflow for each of your clients. Business adds unlimited seats and SSO." }
           ].map((faq, i) => (
             <details key={i} className="group rounded-2xl border border-zinc-800 bg-zinc-950 p-6 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between font-medium text-white">
@@ -548,7 +684,7 @@ function CreativeAdBanner() {
     <section className="border-t border-zinc-900 bg-black py-12 lg:py-24">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-8 lg:p-16">
-          <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-fuchsia-600/20 blur-[120px]" />
+          <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-[#7FFB50]/20 blur-[120px]" />
           
           <div data-reveal className="relative z-10 max-w-2xl">
             <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-tight font-semibold tracking-[-0.02em] text-white">
@@ -623,7 +759,7 @@ export function LandingClient({
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
+      gsap.utils.toArray<HTMLElement>("[data-reveal]:not(.tier-card)").forEach((el) => {
         gsap.fromTo(
           el,
           { opacity: 0, y: 44 },
@@ -636,6 +772,23 @@ export function LandingClient({
           },
         );
       });
+
+      // Staggered entrance for pricing cards
+      const tierCards = gsap.utils.toArray<HTMLElement>(".tier-card");
+      if (tierCards.length) {
+        gsap.fromTo(
+          tierCards,
+          { opacity: 0, y: 44 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power3.out",
+            stagger: 0.08,
+            scrollTrigger: { trigger: tierCards[0], start: "top 88%", once: true },
+          },
+        );
+      }
 
       // Fade the fixed nav in on load
       const nav = document.querySelector("nav");
@@ -683,7 +836,7 @@ export function LandingClient({
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-fuchsia-500/30">
+    <div className="min-h-screen bg-black text-white selection:bg-[#7FFB50]/30">
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes shimmer {
           100% { transform: translateX(100%); }
@@ -706,6 +859,12 @@ export function LandingClient({
         }
         .chart-bar { transform: scaleY(0); }
         .chart-play .chart-bar { animation: scaleUp 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+        @keyframes pricePop {
+          0% { opacity: 0; transform: translateY(8px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .price-pop { animation: pricePop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
       `}} />
 
       {/* ━━━ Navigation ━━━ */}
@@ -797,7 +956,7 @@ export function LandingClient({
 
           {/* ── Post Status Cards ── */}
           <div data-reveal className="mt-32">
-            <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400 text-center mb-6">Content Pipeline</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#7FFB50] text-center mb-6">Content Pipeline</p>
             <h3 className="headline-apple mt-3 text-center text-[clamp(2.25rem,4.5vw,4rem)]">
               <DockText text="See how your posts look at every stage" />
             </h3>
@@ -811,13 +970,13 @@ export function LandingClient({
            <div data-reveal className="mt-32">
              <div className="grid items-start gap-12 lg:grid-cols-[0.8fr_1.2fr]">
                <div className="lg:sticky lg:top-32">
-                 <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Create with AI</p>
+                 <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#7FFB50]">Create with AI</p>
                  <h3 className="headline-apple mt-3 text-[clamp(2rem,3.5vw,3rem)]">Your OLED Creative Workspace.</h3>
                  <p className="mt-4 text-[14px] leading-[1.7] text-zinc-500">Write text, build pipelines, generate images, and create videos in dark mode. Configure the platform, tone, and content type, and watch the AI build a ready-to-publish post.</p>
                  <ul className="mt-6 space-y-3">
                    {["Real-time post preview", "Text, Image & Video generation", "Context-aware models", "Brand tone enforcement"].map((item) => (
                      <li key={item} className="flex items-center gap-3 text-[13px] text-zinc-400">
-                       <svg className="h-4 w-4 shrink-0 text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                       <svg className="h-4 w-4 shrink-0 text-[#7FFB50]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                        {item}
                      </li>
                    ))}
@@ -832,13 +991,13 @@ export function LandingClient({
           {/* ── Bulk Scheduling + Post Preview ── */}
           <div data-reveal className="mt-32 grid items-start gap-12 lg:grid-cols-2">
             <div>
-              <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Bulk Operations</p>
+              <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#7FFB50]">Bulk Operations</p>
               <h3 className="mt-3 text-[clamp(1.3rem,2vw,1.75rem)] font-semibold tracking-[-0.02em]">Reschedule & publish in bulk</h3>
               <p className="mt-4 text-[14px] leading-[1.7] text-zinc-500 mb-8">Select multiple posts and reschedule or publish them all at once. No more clicking through posts one by one.</p>
               <BulkScheduleVisual />
             </div>
             <div>
-              <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-fuchsia-400">Post Preview</p>
+              <p className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#7FFB50]">Post Preview</p>
               <h3 className="mt-3 text-[clamp(1.3rem,2vw,1.75rem)] font-medium tracking-[-0.02em]" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>See how your posts look at every stage</h3>
               <p className="mt-4 text-[14px] leading-[1.7] text-zinc-500 mb-8">Preview your content as it will appear on each platform before you publish. No surprises.</p>
               <PostPreviewCard />

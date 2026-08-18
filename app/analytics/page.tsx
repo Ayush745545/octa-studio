@@ -255,7 +255,7 @@ export default async function AnalyticsPage() {
           <div className="mx-auto max-w-6xl">
             <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
               <div>
-                <p className="text-sm font-medium text-zinc-500">Workspace intelligence</p>
+                <p className="text-sm font-medium text-[#7FFB50]">Workspace intelligence</p>
 
                 <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Analytics</h1>
 
@@ -267,7 +267,7 @@ export default async function AnalyticsPage() {
 
               <Link
                 href="/ai-studio"
-                className="inline-flex w-fit items-center rounded-xl bg-fuchsia-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-fuchsia-500"
+                className="inline-flex w-fit items-center rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
               >
                 Create content
                 <span className="ml-2">→</span>
@@ -280,7 +280,7 @@ export default async function AnalyticsPage() {
                   key={stat.label}
                   className={`rounded-2xl border bg-zinc-950 p-5 ${
                     index === 4
-                      ? "border-fuchsia-500/50"
+                      ? "border-[#7FFB50]/50"
                       : "border-zinc-800"
                   }`}
                 >
@@ -311,7 +311,7 @@ export default async function AnalyticsPage() {
 
                 <div className="mt-6 flex items-center gap-5 text-xs text-zinc-500">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-sm bg-fuchsia-500" />
+                    <span className="h-2.5 w-2.5 rounded-sm bg-[#7FFB50]" />
                     Created
                   </div>
 
@@ -329,7 +329,7 @@ export default async function AnalyticsPage() {
                     >
                       <div className="flex h-44 w-full items-end justify-center gap-1">
                         <div
-                          className="w-full max-w-6 rounded-t-md bg-fuchsia-600 transition-all"
+                          className="w-full max-w-6 rounded-t-md bg-[#7FFB50] transition-all"
                           style={{
                             height: `${
                               day.created > 0
@@ -406,7 +406,7 @@ export default async function AnalyticsPage() {
 
                           <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
                             <div
-                              className="h-full rounded-full bg-fuchsia-600 transition-all"
+                              className="h-full rounded-full bg-[#7FFB50] transition-all"
                               style={{
                                 width: `${
                                   (count /
@@ -442,7 +442,7 @@ export default async function AnalyticsPage() {
                       <div
                         className={`flex h-20 flex-col justify-between rounded-xl p-3 ${
                           index === 3
-                            ? "bg-fuchsia-600 text-white"
+                            ? "bg-[#7FFB50] text-white"
                             : "bg-zinc-950"
                         }`}
                       >
@@ -468,7 +468,7 @@ export default async function AnalyticsPage() {
 
                 <div className="mt-8 h-3 overflow-hidden rounded-full bg-zinc-100">
                   <div
-                    className="h-full rounded-full bg-fuchsia-600 transition-all"
+                    className="h-full rounded-full bg-[#7FFB50] transition-all"
                     style={{
                       width: `${publishingRate}%`,
                     }}
@@ -600,7 +600,7 @@ export default async function AnalyticsPage() {
                         <span
                           className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${
                             content.status === "PUBLISHED"
-                              ? "bg-fuchsia-600/20 text-fuchsia-300"
+                              ? "bg-[#7FFB50]/20 text-[#7FFB50]"
                               : "bg-zinc-100 text-zinc-500"
                           }`}
                         >

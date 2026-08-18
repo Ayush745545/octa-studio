@@ -144,7 +144,7 @@ function openRazorpayCheckout(options: {
       order_id: options.orderId,
       name: options.name,
       description: options.description,
-      theme: { color: "#7C3AED" },
+      theme: { color: "#7FFB50" },
       handler: (res: any) => resolve(res),
       modal: { ondismiss: () => resolve(null) },
     });
@@ -883,14 +883,14 @@ let context = "";
             </Link>
           )}
           {user?.plan === "PRO" ? (
-            <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2.5 py-1 text-[10px] font-semibold text-violet-300">PRO</span>
+            <span className="rounded-full border border-[#7FFB50]/40 bg-[#7FFB50]/10 px-2.5 py-1 text-[10px] font-semibold text-[#7FFB50]">PRO</span>
           ) : (
             <>
               <span className="hidden text-[10px] text-zinc-500 sm:block">{usage.used}/{usage.limit} free generations</span>
               <button
                 type="button"
                 onClick={() => setShowPurchase(true)}
-                className="rounded-full bg-[#7C3AED] px-3 py-1 text-[10px] font-semibold text-white transition hover:bg-[#6D28D9]"
+                className="rounded-full bg-[#7FFB50] px-3 py-1 text-[10px] font-semibold text-white transition hover:bg-[#7FFB50]"
               >
                 Upgrade
               </button>
@@ -921,7 +921,7 @@ let context = "";
                     onClick={() => loadGeneration(gen)}
                     className={`w-full text-left p-3 rounded-xl transition ${
                       activeGenerationId === gen.id
-                        ? 'bg-[#7C3AED]/15 border border-[#7C3AED]/40'
+                        ? 'bg-[#7FFB50]/15 border border-[#7FFB50]/40'
                         : 'bg-zinc-900/30 border border-transparent hover:bg-zinc-900/60 hover:border-zinc-800'
                     }`}
                   >
@@ -1013,7 +1013,7 @@ let context = "";
                     type="button"
                     onClick={insertExample}
                     title="Try an example prompt"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-violet-300"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-[#7FFB50]"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
                   </button>
@@ -1021,7 +1021,7 @@ let context = "";
                     type="button"
                     onClick={handlePrimaryAction}
                     disabled={!prompt.trim() || primaryBusy}
-                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
+                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7FFB50] px-4 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:opacity-50"
                   >
                     {primaryBusy && (
                       <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
@@ -1040,7 +1040,7 @@ let context = "";
                         onClick={() => setActiveTab(tab)}
                         className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition ${
                           activeTab === tab
-                            ? "bg-[#7C3AED] text-white shadow-lg shadow-[#7C3AED]/30"
+                            ? "bg-[#7FFB50] text-white shadow-lg shadow-[#7FFB50]/30"
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                       >
@@ -1103,7 +1103,7 @@ let context = "";
                   <div className="p-5 min-h-[280px]">
                     {prompt && (isGenerating || Boolean(result)) && (
                       <div className="flex justify-end mb-4">
-                        <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-[#7C3AED]/15 border border-[#7C3AED]/25 px-4 py-3">
+                        <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-[#7FFB50]/15 border border-[#7FFB50]/25 px-4 py-3">
                           <p className="text-sm text-zinc-100 whitespace-pre-wrap">{prompt}</p>
                         </div>
                       </div>
@@ -1111,13 +1111,13 @@ let context = "";
 
                     {(isGenerating || streamingText) && (
                       <div className="flex gap-3 mb-4">
-                        <div className="w-8 h-8 rounded-full bg-[#7C3AED] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[#7FFB50] flex items-center justify-center shrink-0">
                           <span className="text-xs font-bold text-white">AI</span>
                         </div>
-                        <div className="flex-1 bg-zinc-900/50 rounded-2xl rounded-tl-sm px-4 py-3 border border-[#7C3AED]/40">
+                        <div className="flex-1 bg-zinc-900/50 rounded-2xl rounded-tl-sm px-4 py-3 border border-[#7FFB50]/40">
                           <p className="text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">{streamingText}</p>
                           {isGenerating && (
-                            <span className="inline-block w-2 h-4 ml-1 bg-[#7C3AED] animate-pulse" />
+                            <span className="inline-block w-2 h-4 ml-1 bg-[#7FFB50] animate-pulse" />
                           )}
                         </div>
                       </div>
@@ -1142,9 +1142,9 @@ let context = "";
 
 
                 {/* AI Assistant */}
-                <section className="mt-5 rounded-2xl border border-[#7C3AED]/30 bg-gradient-to-br from-[#7C3AED]/10 via-zinc-950 to-zinc-950 p-5">
+                <section className="mt-5 rounded-2xl border border-[#7FFB50]/30 bg-gradient-to-br from-[#7FFB50]/10 via-zinc-950 to-zinc-950 p-5">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#7C3AED] to-violet-600">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#7FFB50] to-[#7FFB50]">
                       <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
                     </div>
                     <div className="flex-1">
@@ -1164,7 +1164,7 @@ let context = "";
                               key={s.label}
                               type="button"
                               onClick={() => handleSuggestion(s)}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-[#7C3AED]/40 bg-black/40 px-3 py-1.5 text-xs font-medium text-violet-300 transition hover:border-[#8B5CF6] hover:bg-[#6D28D9]/10"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-[#7FFB50]/40 bg-black/40 px-3 py-1.5 text-xs font-medium text-[#7FFB50] transition hover:border-[#8B5CF6] hover:bg-[#7FFB50]/10"
                             >
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 1l2.2 5.3L18 8l-5.8 1.7L10 15l-2.2-5.3L2 8l5.8-1.7L10 1z" /></svg>
                               {s.label}
@@ -1190,7 +1190,7 @@ let context = "";
                         </button>
                         <button
                           onClick={openScheduler}
-                          className="inline-flex items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9]"
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                           Schedule
@@ -1222,7 +1222,7 @@ let context = "";
                           value={scheduleAt}
                           min={toLocalInputValue(new Date(Date.now() + 5 * 60 * 1000))}
                           onChange={(e) => setScheduleAt(e.target.value)}
-                          className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7C3AED]/60"
+                          className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7FFB50]/60"
                         />
                         <button
                           onClick={handleSchedule}
@@ -1263,16 +1263,16 @@ let context = "";
                         {index < pipelineSteps.length - 1 && (
                           <span
                             className={`absolute left-[13px] top-8 h-[calc(100%-2rem)] w-px ${
-                              step.status === "done" ? "bg-[#7C3AED]" : "bg-zinc-800"
+                              step.status === "done" ? "bg-[#7FFB50]" : "bg-zinc-800"
                             }`}
                           />
                         )}
                         <span
                           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
                             step.status === "done"
-                              ? "border-[#7C3AED] bg-[#7C3AED]/15 text-violet-300"
+                              ? "border-[#7FFB50] bg-[#7FFB50]/15 text-[#7FFB50]"
                               : step.status === "running"
-                              ? "border-[#7C3AED] bg-[#7C3AED]/10 text-violet-300"
+                              ? "border-[#7FFB50] bg-[#7FFB50]/10 text-[#7FFB50]"
                               : step.status === "error"
                               ? "border-red-500/50 bg-red-500/10 text-red-400"
                               : "border-zinc-800 bg-zinc-900 text-zinc-500"
@@ -1292,7 +1292,7 @@ let context = "";
                           <div className="flex flex-wrap items-baseline gap-x-2">
                             <p className="text-sm font-medium text-white">{step.title}</p>
                             <p className="text-xs text-zinc-500">{step.description}</p>
-                            {step.status === "running" && <p className="text-xs text-violet-400 animate-pulse">working…</p>}
+                            {step.status === "running" && <p className="text-xs text-[#7FFB50] animate-pulse">working…</p>}
                           </div>
                           {step.error && <p className="mt-1 text-xs text-red-400">{step.error}</p>}
                           {step.status === "done" && step.result && (
@@ -1307,9 +1307,9 @@ let context = "";
                 )}
 
                 {pipelineDone && result && !isPipelineRunning && (
-                  <div className="rounded-2xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-6">
+                  <div className="rounded-2xl border border-[#7FFB50]/40 bg-[#7FFB50]/10 p-6">
                     <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-violet-300" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" /></svg>
+                      <svg className="w-5 h-5 text-[#7FFB50]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" /></svg>
                       <p className="text-sm font-semibold text-white">Your post is ready</p>
                     </div>
                     <div className="mt-3 max-h-56 overflow-y-auto rounded-xl border border-zinc-800 bg-[#0c0c0e] p-4">
@@ -1320,7 +1320,7 @@ let context = "";
                     <div className="mt-4">
                       {isGeneratingImage && (
                         <div className="flex items-center gap-2.5 rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                          <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#7C3AED] border-t-transparent" />
+                          <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#7FFB50] border-t-transparent" />
                           <p className="text-xs text-zinc-400">Generating a matching image for your post…</p>
                         </div>
                       )}
@@ -1362,7 +1362,7 @@ let context = "";
                     <div className="mt-4 flex flex-wrap items-center gap-2">
                       <button
                         onClick={openScheduler}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9]"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         Schedule
@@ -1392,7 +1392,7 @@ let context = "";
                           value={scheduleAt}
                           min={toLocalInputValue(new Date(Date.now() + 5 * 60 * 1000))}
                           onChange={(e) => setScheduleAt(e.target.value)}
-                          className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7C3AED]/60"
+                          className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7FFB50]/60"
                         />
                         <button
                           onClick={handleSchedule}
@@ -1423,7 +1423,7 @@ let context = "";
 
                 {activeTab === "image" && isGeneratingImage && (
                   <div className="flex flex-col items-center gap-3 py-10">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#7C3AED] border-t-transparent" />
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#7FFB50] border-t-transparent" />
                     <p className="text-xs text-zinc-500">Generating your image…</p>
                   </div>
                 )}
@@ -1449,7 +1449,7 @@ let context = "";
                 {activeTab === "video" && isGeneratingVideo && (
                   <div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
-                      <div className="h-full rounded-full bg-[#7C3AED] transition-all duration-300" style={{ width: `${videoProgress}%` }} />
+                      <div className="h-full rounded-full bg-[#7FFB50] transition-all duration-300" style={{ width: `${videoProgress}%` }} />
                     </div>
                     <p className="mt-2 text-xs text-zinc-500 text-center">{videoProgress}% complete</p>
                   </div>
@@ -1505,10 +1505,10 @@ let context = "";
               </button>
             </div>
 
-            <div className="mt-5 rounded-xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-4">
+            <div className="mt-5 rounded-xl border border-[#7FFB50]/40 bg-[#7FFB50]/10 p-4">
               <div className="flex items-baseline justify-between">
                 <p className="text-sm font-semibold text-white">octa-studio PRO</p>
-                <p className="text-sm font-semibold text-violet-300">₹999<span className="text-[10px] text-zinc-500">/month</span></p>
+                <p className="text-sm font-semibold text-[#7FFB50]">₹999<span className="text-[10px] text-zinc-500">/month</span></p>
               </div>
               <ul className="mt-3 space-y-1.5 text-xs text-zinc-300">
                 <li>· Unlimited AI text, image & video generations</li>
@@ -1529,13 +1529,13 @@ let context = "";
                 type="button"
                 onClick={() => void handlePurchase()}
                 disabled={purchaseBusy}
-                className="mt-5 w-full rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-60"
+                className="mt-5 w-full rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:opacity-60"
               >
                 {purchaseBusy ? "Processing..." : "Buy with Razorpay"}
               </button>
             ) : (
               <div className="mt-5 grid gap-2">
-                <Link href="/signup?next=/ai-studio" className="rounded-xl bg-[#7C3AED] px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-[#6D28D9]">
+                <Link href="/signup?next=/ai-studio" className="rounded-xl bg-[#7FFB50] px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-[#7FFB50]">
                   Sign up to buy PRO
                 </Link>
                 <Link href="/login?next=/ai-studio" className="rounded-xl border border-zinc-800 px-4 py-2.5 text-center text-sm font-medium text-zinc-300 transition hover:border-zinc-700 hover:text-white">

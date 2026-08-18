@@ -82,7 +82,7 @@ function SignupForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Name (optional)"
-            className="w-full rounded-xl border border-zinc-800 bg-[#0c0c0e] px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-[#7C3AED]"
+            className="w-full rounded-xl border border-zinc-800 bg-[#0c0c0e] px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-[#7FFB50]"
           />
           <input
             type="email"
@@ -90,7 +90,7 @@ function SignupForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            className="w-full rounded-xl border border-zinc-800 bg-[#0c0c0e] px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-[#7C3AED]"
+            className="w-full rounded-xl border border-zinc-800 bg-[#0c0c0e] px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-[#7FFB50]"
           />
           <input
             type="password"
@@ -99,12 +99,12 @@ function SignupForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password (6+ characters)"
-            className="w-full rounded-xl border border-zinc-800 bg-[#0c0c0e] px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-[#7C3AED]"
+            className="w-full rounded-xl border border-zinc-800 bg-[#0c0c0e] px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-[#7FFB50]"
           />
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-60"
+            className="w-full rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:opacity-60"
           >
             {busy ? "Creating account..." : "Sign up free"}
           </button>
@@ -112,7 +112,7 @@ function SignupForm() {
 
         <p className="mt-5 text-center text-xs text-zinc-500">
           Already have an account?{" "}
-          <Link href={`/login${params.get("next") ? `?next=${encodeURIComponent(params.get("next")!)}` : ""}`} className="font-medium text-violet-400 transition hover:text-violet-300">
+          <Link href={`/login${params.get("next") ? `?next=${encodeURIComponent(params.get("next")!)}` : ""}`} className="font-medium text-[#7FFB50] transition hover:text-[#7FFB50]">
             Sign in
           </Link>
         </p>
@@ -130,7 +130,7 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a0c] px-4 py-10">
-      <Link href="/" className="mb-6 flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#7C3AED] to-[#a78bfa] text-lg font-bold text-white">
+      <Link href="/" className="mb-6 flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#7FFB50] to-[#a78bfa] text-lg font-bold text-white">
         C
       </Link>
       <Suspense fallback={null}>

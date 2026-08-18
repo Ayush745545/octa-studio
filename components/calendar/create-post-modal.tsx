@@ -6,6 +6,7 @@ import { createContent } from "@/app/content/actions/create-content";
 import { createScheduledPost } from "@/app/calendar/actions/create-scheduled-post";
 import MediaPickerModal from "./media-picker-modal";
 import AIAssistantPanel from "./ai-assistant-panel";
+import VideoWithFallback from "@/components/video-with-fallback";
 
 interface ConnectedChannel {
   platform: string;
@@ -315,14 +316,14 @@ export default function CreatePostModal({
         {/* AI Chat Bubble Area */}
         <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/40 flex flex-col gap-3">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#7C3AED] text-white flex items-center justify-center font-bold text-sm">AI</div>
+            <div className="w-8 h-8 rounded-full bg-[#C7E34F] text-zinc-900 flex items-center justify-center font-bold text-sm">AI</div>
             <div className="bg-[#0a0a0c] border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white shadow-sm">
               Tell me what you want to post about.
             </div>
           </div>
           <div className="flex gap-2 ml-11 overflow-x-auto pb-1 no-scrollbar">
             {["Generate", "Regenerate", "Make shorter", "Make longer", "Professional", "Casual", "Engaging"].map(pill => (
-              <button key={pill} onClick={() => setShowAiPanel(true)} className="whitespace-nowrap rounded-full border border-zinc-800 bg-[#0a0a0c] px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-[#7C3AED] hover:text-[#7C3AED] transition-colors">
+              <button key={pill} onClick={() => setShowAiPanel(true)} className="whitespace-nowrap rounded-full border border-zinc-800 bg-[#0a0a0c] px-3 py-1.5 text-xs font-medium text-zinc-400 hover:border-[#C7E34F] hover:text-[#C7E34F] transition-colors">
                 {pill}
               </button>
             ))}
@@ -334,7 +335,7 @@ export default function CreatePostModal({
           {/* Profile Selection */}
           <div className="mb-5">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-zinc-700">Select Profiles</label>
+              <label className="text-sm font-medium text-zinc-300">Select Profiles</label>
             </div>
             <div className="flex flex-wrap gap-2">
               {ALL_PLATFORMS.map((platform) => {
@@ -351,8 +352,8 @@ export default function CreatePostModal({
                       onClick={() => toggleChannel(platform)}
                       className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition ${
                         isSelected
-                          ? "border-[#7C3AED] bg-[#F3E8FF] text-[#7C3AED]"
-                          : "border-zinc-800 bg-[#0a0a0c] text-zinc-700 hover:border-zinc-300"
+                          ? "border-[#C7E34F] bg-[#C7E34F]/15 text-[#C7E34F]"
+                          : "border-zinc-800 bg-[#0a0a0c] text-zinc-400 hover:border-zinc-600"
                       }`}
                     >
                       <span className="inline-flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-white" style={{ backgroundColor: icon.color }}>
@@ -370,7 +371,7 @@ export default function CreatePostModal({
                     >
                       <span className="relative inline-flex h-5 w-5 items-center justify-center rounded-md bg-zinc-300 text-[10px] font-bold text-white">
                         {icon.icon}
-                        <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#7C3AED] text-[8px] text-white">
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#C7E34F] text-[8px] text-zinc-900">
                           +
                         </span>
                       </span>
@@ -383,16 +384,16 @@ export default function CreatePostModal({
           </div>
 
           {/* Editor */}
-          <div className="mb-5 rounded-xl border border-zinc-800 overflow-hidden focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED] transition-all">
+          <div className="mb-5 rounded-xl border border-zinc-800 overflow-hidden focus-within:border-[#C7E34F] focus-within:ring-1 focus-within:ring-[#C7E34F] transition-all">
             <div className="flex items-center gap-1 border-b border-zinc-800 bg-zinc-900/40 px-3 py-2">
               {['B', 'I', 'U'].map(btn => (
-                <button key={btn} type="button" className="w-7 h-7 rounded hover:bg-zinc-200 flex items-center justify-center text-sm font-bold text-zinc-700">{btn}</button>
+                <button key={btn} type="button" className="w-7 h-7 rounded hover:bg-zinc-700 flex items-center justify-center text-sm font-bold text-zinc-300">{btn}</button>
               ))}
               <div className="w-px h-4 bg-zinc-300 mx-1"></div>
-              <button type="button" className="w-7 h-7 rounded hover:bg-zinc-200 flex items-center justify-center text-zinc-700" title="Link">🔗</button>
-              <button type="button" className="w-7 h-7 rounded hover:bg-zinc-200 flex items-center justify-center text-zinc-700 font-bold" title="Mention">@</button>
-              <button type="button" className="w-7 h-7 rounded hover:bg-zinc-200 flex items-center justify-center text-zinc-700 font-bold" title="Hashtag">#</button>
-              <button type="button" className="w-7 h-7 rounded hover:bg-zinc-200 flex items-center justify-center text-zinc-700" title="Emoji">😊</button>
+              <button type="button" className="w-7 h-7 rounded hover:bg-zinc-700 flex items-center justify-center text-zinc-300" title="Link">🔗</button>
+              <button type="button" className="w-7 h-7 rounded hover:bg-zinc-700 flex items-center justify-center text-zinc-300 font-bold" title="Mention">@</button>
+              <button type="button" className="w-7 h-7 rounded hover:bg-zinc-700 flex items-center justify-center text-zinc-300 font-bold" title="Hashtag">#</button>
+              <button type="button" className="w-7 h-7 rounded hover:bg-zinc-700 flex items-center justify-center text-zinc-300" title="Emoji">😊</button>
             </div>
             <textarea
               value={body}
@@ -412,21 +413,21 @@ export default function CreatePostModal({
             <button
               type="button"
               onClick={() => setShowMediaPicker(true)}
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-[#0a0a0c] px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-[#7C3AED] hover:text-[#7C3AED]"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-[#0a0a0c] px-4 py-2 text-sm font-medium text-zinc-400 transition-all duration-200 hover:border-[#C7E34F] hover:text-[#C7E34F] hover:shadow-[0_0_0_1px_rgba(199,227,79,0.35)] active:scale-95 active:border-[#C7E34F] active:text-[#C7E34F]"
             >
               Insert Media
             </button>
             <button
               type="button"
               onClick={() => setShowMediaPicker(true)}
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-[#0a0a0c] px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-[#7C3AED] hover:text-[#7C3AED]"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-[#0a0a0c] px-4 py-2 text-sm font-medium text-zinc-400 transition-all duration-200 hover:border-[#C7E34F] hover:text-[#C7E34F] hover:shadow-[0_0_0_1px_rgba(199,227,79,0.35)] active:scale-95 active:border-[#C7E34F] active:text-[#C7E34F]"
             >
               Design Media
             </button>
             <button
               type="button"
               onClick={() => setShowAiPanel(true)}
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-[#0a0a0c] px-4 py-2 text-sm font-medium text-[#7C3AED] transition hover:bg-purple-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#C7E34F]/40 bg-[#C7E34F]/10 px-4 py-2 text-sm font-medium text-[#C7E34F] transition-all duration-200 hover:bg-[#C7E34F]/20 hover:shadow-[0_0_14px_rgba(199,227,79,0.35)] active:scale-95 active:bg-[#C7E34F]/25"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                 <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
@@ -450,7 +451,7 @@ export default function CreatePostModal({
                   className="relative h-24 w-32 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40 group"
                 >
                   {item.type === "VIDEO" ? (
-                    <video
+                    <VideoWithFallback
                       src={item.url}
                       className="h-full w-full object-cover"
                     />
@@ -476,21 +477,21 @@ export default function CreatePostModal({
           {/* Schedule Controls */}
           <div className="mb-2 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 flex flex-wrap items-center gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-zinc-600">Schedule Date</label>
+              <label className="text-xs font-semibold text-zinc-400">Schedule Date</label>
               <input 
                 type="date" 
                 value={scheduleDate}
                 onChange={(e) => setScheduleDate(e.target.value)}
-                className="rounded-lg border border-zinc-800 px-3 py-1.5 text-sm text-white outline-none focus:border-[#7C3AED]"
+                className="rounded-lg border border-zinc-800 px-3 py-1.5 text-sm text-white outline-none focus:border-[#C7E34F]"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-zinc-600">Schedule Time</label>
+              <label className="text-xs font-semibold text-zinc-400">Schedule Time</label>
               <input 
                 type="time" 
                 value={scheduleTime}
                 onChange={(e) => setScheduleTime(e.target.value)}
-                className="rounded-lg border border-zinc-800 px-3 py-1.5 text-sm text-white outline-none focus:border-[#7C3AED]"
+                className="rounded-lg border border-zinc-800 px-3 py-1.5 text-sm text-white outline-none focus:border-[#C7E34F]"
               />
             </div>
             <div className="ml-auto flex flex-col gap-1 text-right">
@@ -513,7 +514,7 @@ export default function CreatePostModal({
             type="button"
             onClick={handleSaveDraft}
             disabled={isSaving || isScheduling}
-            className="rounded-xl border border-zinc-300 bg-[#0a0a0c] px-5 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-900/40 disabled:opacity-50"
+            className="rounded-xl border border-zinc-300 bg-[#0a0a0c] px-5 py-2 text-sm font-medium text-zinc-300 transition hover:bg-zinc-900/40 disabled:opacity-50"
           >
             {isSaving ? "Saving..." : "Save Draft"}
           </button>
@@ -522,7 +523,7 @@ export default function CreatePostModal({
             type="button"
             onClick={handleSchedule}
             disabled={isSaving || isScheduling}
-            className="rounded-xl bg-[#7C3AED] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50 shadow-sm"
+            className="rounded-xl bg-[#C7E34F] px-5 py-2 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F] disabled:opacity-50 shadow-sm"
           >
             {isScheduling ? "Scheduling..." : "Schedule Post"}
           </button>

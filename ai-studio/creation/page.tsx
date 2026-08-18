@@ -311,7 +311,7 @@ export default function AICreationPage() {
         <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 flex-col overflow-y-auto border-r border-zinc-900 bg-[#0a0a0c] p-4 lg:flex">
           <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2">
             <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-sm bg-[#7C3AED]" />
+              <span className="h-3 w-3 rounded-sm bg-[#7FFB50]" />
               <span className="text-xs font-medium text-white">{model}</span>
             </div>
             <svg className="h-3.5 w-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -346,7 +346,7 @@ export default function AICreationPage() {
                   onClick={() => setStyle(s)}
                   className={`rounded-md px-2 py-1 text-[10px] font-medium transition ${
                     style === s
-                      ? "border border-[#7C3AED] bg-[#7C3AED]/15 text-violet-300"
+                      ? "border border-[#7FFB50] bg-[#7FFB50]/15 text-[#7FFB50]"
                       : "border border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
                   }`}
                 >
@@ -373,7 +373,7 @@ export default function AICreationPage() {
                   onClick={() => setAspect(ratio)}
                   className={`flex h-10 w-10 items-center justify-center rounded-lg border transition ${
                     aspect === ratio
-                      ? "border-[#7C3AED] bg-[#7C3AED]/15 text-violet-300"
+                      ? "border-[#7FFB50] bg-[#7FFB50]/15 text-[#7FFB50]"
                       : "border-zinc-800 bg-zinc-900/60 text-zinc-500 hover:border-zinc-700"
                   }`}
                   title={ratio}
@@ -384,7 +384,7 @@ export default function AICreationPage() {
               <div className="flex h-10 items-center rounded-lg border border-dashed border-zinc-700 px-2 text-[10px] text-zinc-500">Custom</div>
             </div>
             <div className="mt-2 inline-flex items-center gap-1 rounded-md border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-[10px] text-zinc-400">
-              <span className="text-[#7C3AED]">{aspect}</span> 1024×1024
+              <span className="text-[#7FFB50]">{aspect}</span> 1024×1024
             </div>
           </div>
 
@@ -401,7 +401,7 @@ export default function AICreationPage() {
                   onClick={() => setNumGens(n)}
                   className={`flex h-8 w-8 items-center justify-center rounded-md text-xs transition ${
                     numGens === n
-                      ? "border border-[#7C3AED] bg-[#7C3AED]/15 text-violet-300"
+                      ? "border border-[#7FFB50] bg-[#7FFB50]/15 text-[#7FFB50]"
                       : "border border-zinc-800 text-zinc-500 hover:border-zinc-700"
                   }`}
                 >
@@ -475,7 +475,7 @@ export default function AICreationPage() {
                   type="button"
                   onClick={handleGenerate}
                   disabled={!prompt.trim() || busy}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#7C3AED] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#7FFB50] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#7FFB50] disabled:opacity-50"
                 >
                   {busy ? (
                     <>
@@ -507,7 +507,7 @@ export default function AICreationPage() {
                   onClick={() => setActiveTab(tab)}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                     activeTab === tab
-                      ? "border-[#7C3AED] bg-[#7C3AED]/15 text-violet-300"
+                      ? "border-[#7FFB50] bg-[#7FFB50]/15 text-[#7FFB50]"
                       : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-white"
                   }`}
                 >
@@ -538,8 +538,8 @@ export default function AICreationPage() {
               <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 backdrop-blur">
                 <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3.5">
                   <div className="flex items-center gap-2.5">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#7C3AED]/15">
-                      <svg className="h-4 w-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#7FFB50]/15">
+                      <svg className="h-4 w-4 text-[#7FFB50]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-white">AI Creation</p>
@@ -552,8 +552,8 @@ export default function AICreationPage() {
                     <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2 py-0.5 text-[10px] text-zinc-400">{initialPlatform}</span>
                     <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2 py-0.5 text-[10px] text-zinc-400">{initialTone}</span>
                     {busy && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#7C3AED]/50 bg-[#7C3AED]/15 px-2 py-0.5 text-[10px] font-medium text-violet-300">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-400" />
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#7FFB50]/50 bg-[#7FFB50]/15 px-2 py-0.5 text-[10px] font-medium text-[#7FFB50]">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#7FFB50]" />
                         {activeTab === "image" ? "Rendering" : activeTab === "video" ? "Rendering" : "Generating"}
                       </span>
                     )}
@@ -564,7 +564,7 @@ export default function AICreationPage() {
                   {/* Prompt chip */}
                   {prompt && (busy || hasOutput) && (
                     <div className="mb-4 flex justify-end">
-                      <div className="max-w-[85%] rounded-xl border border-[#7C3AED]/25 bg-[#7C3AED]/15 px-3.5 py-2">
+                      <div className="max-w-[85%] rounded-xl border border-[#7FFB50]/25 bg-[#7FFB50]/15 px-3.5 py-2">
                         <p className="text-sm font-medium text-zinc-100">{prompt}</p>
                       </div>
                     </div>
@@ -573,18 +573,18 @@ export default function AICreationPage() {
                   {/* Text stream / result */}
                   {(busy || streamingText) && activeTab === "write" && (
                     <div className="mb-4 flex gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#7C3AED]">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#7FFB50]">
                         <span className="text-[10px] font-bold text-white">AI</span>
                       </div>
                       <div className="flex-1 rounded-2xl rounded-tl-sm px-5 py-4">
                         <p className="whitespace-pre-wrap text-[15px] leading-[2] text-zinc-100">{streamingText}</p>
-                        {busy && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#7C3AED]" />}
+                        {busy && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#7FFB50]" />}
                       </div>
                     </div>
                   )}
                   {result && !busy && activeTab === "write" && (
                     <div className="flex gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#7C3AED]">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#7FFB50]">
                         <span className="text-[10px] font-bold text-white">AI</span>
                       </div>
                       <div className="max-h-[520px] flex-1 overflow-y-auto rounded-2xl rounded-tl-sm px-5 py-4">
@@ -598,7 +598,7 @@ export default function AICreationPage() {
                     <div className="flex justify-center">
                       {isGeneratingImage ? (
                         <div className="flex h-64 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/40">
-                          <span className="mb-3 h-10 w-10 animate-spin rounded-full border-2 border-[#7C3AED]/30 border-t-[#7C3AED]" />
+                          <span className="mb-3 h-10 w-10 animate-spin rounded-full border-2 border-[#7FFB50]/30 border-t-[#7FFB50]" />
                           <p className="text-sm text-zinc-400">Rendering image…</p>
                         </div>
                       ) : generatedImage ? (
@@ -612,7 +612,7 @@ export default function AICreationPage() {
                     <div className="flex justify-center">
                       {isGeneratingVideo ? (
                         <div className="flex h-64 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/40">
-                          <span className="mb-3 h-10 w-10 animate-spin rounded-full border-2 border-[#7C3AED]/30 border-t-[#7C3AED]" />
+                          <span className="mb-3 h-10 w-10 animate-spin rounded-full border-2 border-[#7FFB50]/30 border-t-[#7FFB50]" />
                           <p className="text-sm text-zinc-400">Rendering video…</p>
                         </div>
                       ) : generatedVideo ? (
@@ -640,7 +640,7 @@ export default function AICreationPage() {
                       </button>
                       <button
                         onClick={openScheduler}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#7C3AED] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#6D28D9]"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#7FFB50] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z" /></svg>
                         Schedule
@@ -675,7 +675,7 @@ export default function AICreationPage() {
                         value={scheduleAt}
                         min={toLocalInputValue(new Date(Date.now() + 5 * 60 * 1000))}
                         onChange={(e) => setScheduleAt(e.target.value)}
-                        className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7C3AED]/60"
+                        className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7FFB50]/60"
                       />
                       <button
                         onClick={() => void handleSchedule()}

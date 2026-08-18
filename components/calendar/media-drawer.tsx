@@ -75,7 +75,7 @@ export default function MediaDrawer({
           {media.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-sm text-zinc-500 mb-3">No media yet</p>
-              <button className="text-sm font-medium text-[#7C3AED] hover:text-[#6D28D9]">
+              <button className="text-sm font-medium text-[#7FFB50] hover:text-[#7FFB50]">
                 Upload Media
               </button>
             </div>
@@ -90,7 +90,7 @@ export default function MediaDrawer({
                     onDragStart(e, item);
                   }}
                   onClick={() => onMediaSelect(item)}
-                  className="relative aspect-square rounded-md overflow-hidden border border-zinc-800 cursor-pointer hover:ring-2 hover:ring-[#7C3AED]"
+                  className="relative aspect-square rounded-md overflow-hidden border border-zinc-800 cursor-pointer hover:ring-2 hover:ring-[#7FFB50]"
                 >
                   <img
                     src={item.url}
@@ -107,7 +107,7 @@ export default function MediaDrawer({
         <div className="mx-3 my-3">
           <Link
             href="/content"
-            className="flex items-center justify-center w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-full py-2.5 text-sm font-semibold transition-colors"
+            className="flex items-center justify-center w-full bg-[#7FFB50] hover:bg-[#7FFB50] text-white rounded-full py-2.5 text-sm font-semibold transition-colors"
           >
             Manage Your Media
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1.5" viewBox="0 0 20 20" fill="currentColor">

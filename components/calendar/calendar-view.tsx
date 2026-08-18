@@ -204,7 +204,7 @@ export default function CalendarView({
                   isToday ? "bg-zinc-900/40/60" : "bg-[#0a0a0c]"
                 }`}
               >
-                <div className={`text-xl font-medium ${isToday ? "text-[#7C3AED]" : "text-white"}`}>
+                <div className={`text-xl font-medium ${isToday ? "text-[#7FFB50]" : "text-white"}`}>
                   {day.getDate()}
                 </div>
                 <div className="text-[10px] font-semibold text-zinc-500 tracking-wider">
@@ -241,7 +241,7 @@ export default function CalendarView({
                       onDrop={(e) => handleDrop(e, day, hour)}
                       className={`h-[52px] border-b border-r border-zinc-800 p-1 relative transition-colors ${
                         isDragOver
-                          ? "bg-[#F3E8FF]/60 ring-1 ring-inset ring-[#7C3AED]/40"
+                          ? "bg-[#F3E8FF]/60 ring-1 ring-inset ring-[#7FFB50]/40"
                           : isToday 
                             ? "bg-zinc-900/40/60 hover:bg-zinc-800/60" 
                             : "hover:bg-zinc-900/40"
@@ -263,7 +263,7 @@ export default function CalendarView({
                                 e.stopPropagation();
                                 onPostClick(post);
                               }}
-                              className="group flex flex-col rounded-md border border-zinc-800 bg-[#0a0a0c] p-1.5 shadow-sm transition hover:border-[#7C3AED] hover:shadow-md cursor-grab active:cursor-grabbing"
+                              className="group flex flex-col rounded-md border border-zinc-800 bg-[#0a0a0c] p-1.5 shadow-sm transition hover:border-[#7FFB50] hover:shadow-md cursor-grab active:cursor-grabbing"
                             >
                               <div className="flex items-center gap-1.5 mb-1">
                                 <div className={`w-1.5 h-1.5 rounded-full ${platformColor}`} />
@@ -294,9 +294,9 @@ export default function CalendarView({
                 style={{ top: `${timeIndicator.top + 56}px` }} // +56 for header offset
               >
                 <div className="w-[50px] relative">
-                  <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#7C3AED]" />
+                  <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#7FFB50]" />
                 </div>
-                <div className="flex-1 h-[1px] bg-[#7C3AED]" />
+                <div className="flex-1 h-[1px] bg-[#7FFB50]" />
               </div>
             )}
           </div>

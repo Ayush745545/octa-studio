@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { publishNow } from "@/app/publishing/actions/publish-now";
 import { deleteScheduledPost } from "@/app/calendar/actions/delete-scheduled-post";
 import { reschedulePublication } from "@/app/publishing/actions/reschedule-publication";
+import VideoWithFallback from "@/components/video-with-fallback";
 
 interface PostDetailPanelProps {
   post: {
@@ -144,7 +145,7 @@ export default function PostDetailPanel({ post, onClose, onNotify }: PostDetailP
           <div className="flex items-center gap-3">
             <span
               className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white"
-              style={{ backgroundColor: platformColor[post.platform] ?? "#7C3AED" }}
+              style={{ backgroundColor: platformColor[post.platform] ?? "#7FFB50" }}
             >
               {post.platform[0]}
             </span>
@@ -186,7 +187,10 @@ export default function PostDetailPanel({ post, onClose, onNotify }: PostDetailP
                     className="h-16 w-24 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950"
                   >
                     {m.type === "VIDEO" ? (
-                      <video src={m.url} className="h-full w-full object-cover" />
+                      <VideoWithFallback
+                        src={m.url}
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       <img src={m.url} alt={m.filename} className="h-full w-full object-cover" />
                     )}
@@ -205,13 +209,13 @@ export default function PostDetailPanel({ post, onClose, onNotify }: PostDetailP
                   type="date"
                   value={rescheduleDate}
                   onChange={(e) => setRescheduleDate(e.target.value)}
-                  className="rounded-lg border border-zinc-800 bg-[#0a0a0c] px-3 py-1.5 text-sm text-white outline-none focus:border-[#7C3AED]"
+                  className="rounded-lg border border-zinc-800 bg-[#0a0a0c] px-3 py-1.5 text-sm text-white outline-none focus:border-[#7FFB50]"
                 />
                 <input
                   type="time"
                   value={rescheduleTime}
                   onChange={(e) => setRescheduleTime(e.target.value)}
-                  className="rounded-lg border border-zinc-800 bg-[#0a0a0c] px-3 py-1.5 text-sm text-white outline-none focus:border-[#7C3AED]"
+                  className="rounded-lg border border-zinc-800 bg-[#0a0a0c] px-3 py-1.5 text-sm text-white outline-none focus:border-[#7FFB50]"
                 />
               </div>
               <div className="flex justify-end gap-2">

@@ -16,17 +16,26 @@ export async function GET(request: NextRequest) {
 
   const url = new URL(request.url);
 
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
 
   if (error) {
-    return NextResponse.json(
-      {
-        error,
-        description: url.searchParams.get("error_description"),
-      },
-      { status: 400 },
-    );
+    const description =
+      url.searchParams.get("error_description") ||
+      "Instagram authorization was not completed.";
+
+    console.error("[Instagram] OAuth authorization failed:", {
+      error,
+      description,
+    });
+
+    const failureUrl = new URL("/publishing", appUrl);
+    failureUrl.searchParams.set("instagram", "error");
+    failureUrl.searchParams.set("message", description);
+
+    return NextResponse.redirect(failureUrl);
   }
 
   if (!code) {
@@ -38,7 +47,6 @@ export async function GET(request: NextRequest) {
 
   const clientId = process.env.INSTAGRAM_CLIENT_ID;
   const clientSecret = process.env.INSTAGRAM_CLIENT_SECRET;
-  const appUrl = process.env.APP_URL;
 
   if (!clientId || !clientSecret || !appUrl) {
     return NextResponse.json(

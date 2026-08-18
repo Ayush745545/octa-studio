@@ -1,7 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { COOKIE_NAME, parseSessionToken } from "@/lib/auth";
 
@@ -11,7 +12,23 @@ export async function togglePublishingChannel(platform: string) {
   const userId = parseSessionToken(token);
 
   if (!userId) {
-    throw new Error("You must be logged in.");
+    cookieStore.delete(COOKIE_NAME);
+    redirect("/login");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+    },
+  });
+
+  // Session points to a deleted/non-existent database user.
+  if (!user) {
+    cookieStore.delete(COOKIE_NAME);
+    redirect("/login");
   }
 
   const existing = await prisma.publishingChannel.findUnique({
@@ -24,27 +41,12 @@ export async function togglePublishingChannel(platform: string) {
   });
 
   if (existing) {
-    const nextConnected = !existing.connected;
-
     await prisma.publishingChannel.update({
       where: {
-        userId_platform: {
-          userId,
-          platform,
-        },
+        id: existing.id,
       },
       data: {
-        connected: nextConnected,
-        ...(nextConnected
-          ? {}
-          : {
-              accountName: null,
-              accessToken: null,
-              refreshToken: null,
-              expiresAt: null,
-              externalId: null,
-              authorUrn: null,
-            }),
+        connected: !existing.connected,
       },
     });
   } else {

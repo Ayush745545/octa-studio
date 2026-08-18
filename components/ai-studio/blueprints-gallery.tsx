@@ -245,7 +245,7 @@ export function CommunityGrid({ onUse }: { onUse: (prompt: string) => void }) {
               onClick={() => setCategory(c)}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                 category === c
-                  ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white"
+                  ? "border-[#C7E34F] bg-[#C7E34F]/15 text-white"
                   : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-white"
               }`}
             >

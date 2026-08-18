@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { updateContent } from "@/app/content/actions/update-content";
 import { PostPreviewPanel } from "@/components/ai-studio/post-preview-panel";
+import VideoWithFallback from "@/components/video-with-fallback";
 
 interface MediaItem {
   id: string;
@@ -542,10 +543,8 @@ ${promptText || body}`,
               >
                 <div className="relative aspect-video overflow-hidden bg-zinc-100">
                   {item.type === "VIDEO" ? (
-                    <video
+                    <VideoWithFallback
                       src={item.url}
-                      controls
-                      preload="metadata"
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -656,7 +655,7 @@ ${promptText || body}`,
       <div className="overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_400px]">
           <div className="p-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-fuchsia-400">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#7FFB50]">
               AI Studio
             </p>
 
@@ -678,7 +677,7 @@ ${promptText || body}`,
                   disabled={disabled}
                   className={`rounded-full border px-3.5 py-2 text-xs font-medium transition ${
                     studioTool === tool.title
-                      ? "border-fuchsia-500/60 bg-fuchsia-500/10 text-fuchsia-300"
+                      ? "border-[#7FFB50]/60 bg-[#7FFB50]/10 text-[#7FFB50]"
                       : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
                   } disabled:cursor-not-allowed disabled:opacity-40`}
                 >
@@ -695,7 +694,7 @@ ${promptText || body}`,
               }}
               disabled={disabled}
               placeholder="Tell AI what you want to create."
-              className="mt-4 min-h-[96px] w-full resize-y rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-600 focus:border-fuchsia-500/50"
+              className="mt-4 min-h-[96px] w-full resize-y rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-600 focus:border-[#7FFB50]/50"
             />
 
             <div className="mt-4 flex items-center gap-3">
@@ -703,7 +702,7 @@ ${promptText || body}`,
                 type="button"
                 onClick={handleStudioGenerate}
                 disabled={disabled || studioGenerating}
-                className="rounded-lg bg-fuchsia-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {studioGenerating ? "Generating..." : "Generate draft"}
               </button>

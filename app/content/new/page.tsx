@@ -97,7 +97,7 @@ function NewContentForm() {
               type="button"
               onClick={handleSave}
               disabled={isSaving || !title.trim()}
-              className="rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-[#7FFB50] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#7FFB50] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSaving ? "Saving..." : "Save Draft"}
             </button>

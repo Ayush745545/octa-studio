@@ -26,7 +26,7 @@ export default async function ContentPage() {
 
           <Link
             href="/ideas"
-            className="rounded-xl bg-fuchsia-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-fuchsia-500"
+            className="rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
           >
             + New from Idea
           </Link>
@@ -51,7 +51,7 @@ export default async function ContentPage() {
 
               <Link
                 href="/ideas"
-                className="mt-6 inline-flex rounded-xl bg-fuchsia-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-fuchsia-500"
+                className="mt-6 inline-flex rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
               >
                 Go to Ideas
               </Link>

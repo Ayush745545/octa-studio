@@ -7,6 +7,7 @@ import { createContent } from "@/app/content/actions/create-content";
 import { scheduleContent } from "@/app/content/actions/schedule-content";
 import { PostPreviewPanel } from "@/components/ai-studio/post-preview-panel";
 import { STUDIO_TOOLS, VOICES, type StudioMode, type Voice } from "@/lib/ai/studio-templates";
+import VideoWithFallback from "@/components/video-with-fallback";
 
 const tools = [
   {
@@ -178,7 +179,7 @@ function openRazorpayCheckout(options: {
       order_id: options.orderId,
       name: options.name,
       description: options.description,
-      theme: { color: "#7C3AED" },
+      theme: { color: "#C7E34F" },
       handler: (res: any) => resolve(res),
       modal: { ondismiss: () => resolve(null) },
     });
@@ -899,7 +900,12 @@ export function CreateWorkspace() {
           <img src={gen.mediaUrl} alt={gen.prompt} className="w-full object-cover" />
         )}
         {gen.type === "video" && gen.mediaUrl && (
-          <video src={gen.mediaUrl} controls loop playsInline className="w-full" />
+          <VideoWithFallback
+            src={gen.mediaUrl}
+            loop
+            playsInline
+            className="w-full"
+          />
         )}
         {gen.type === "voice" && gen.mediaUrl && (
           <div className="p-4">
@@ -972,7 +978,7 @@ export function CreateWorkspace() {
             </Link>
           )}
           {user?.plan === "PRO" ? (
-            <span className="rounded-full border border-[#7C3AED]/40 bg-[#7C3AED]/10 px-2.5 py-1 text-[10px] font-semibold text-violet-300">PRO</span>
+            <span className="rounded-full border border-[#C7E34F]/40 bg-[#C7E34F]/10 px-2.5 py-1 text-[10px] font-semibold text-[#C7E34F]">PRO</span>
           ) : (
             <>
               <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-zinc-400">
@@ -981,7 +987,7 @@ export function CreateWorkspace() {
               <button
                 type="button"
                 onClick={() => setShowPurchase(true)}
-                className="rounded-full bg-[#7C3AED] px-3 py-1 text-[10px] font-semibold text-white transition hover:bg-[#6D28D9]"
+                className="rounded-full bg-[#C7E34F] px-3 py-1 text-[10px] font-semibold text-zinc-900 transition hover:bg-[#C7E34F]"
               >
                 Upgrade
               </button>
@@ -1002,11 +1008,11 @@ export function CreateWorkspace() {
                 onClick={() => setActiveTab(tool.mode)}
                 className={`rounded-xl border px-3 py-2 text-left transition ${
                   activeTab === tool.mode
-                    ? "border-[#7C3AED]/60 bg-[#7C3AED]/15"
+                    ? "border-[#C7E34F]/60 bg-[#C7E34F]/15"
                     : "border-white/10 bg-white/[0.02] hover:border-white/20"
                 }`}
               >
-                <p className={`text-xs font-medium ${activeTab === tool.mode ? "text-violet-200" : "text-zinc-300"}`}>{tool.label}</p>
+                <p className={`text-xs font-medium ${activeTab === tool.mode ? "text-zinc-900" : "text-zinc-300"}`}>{tool.label}</p>
                 <p className="mt-0.5 text-[10px] leading-4 text-zinc-600">{tool.description}</p>
               </button>
             ))}
@@ -1023,7 +1029,7 @@ export function CreateWorkspace() {
                     onClick={() => setRatio(item)}
                     className={`rounded-lg border py-2 text-[11px] font-medium transition ${
                       ratio.label === item.label
-                        ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-200"
+                        ? "border-[#C7E34F]/60 bg-[#C7E34F]/15 text-zinc-900"
                         : "border-white/10 bg-white/[0.02] text-zinc-400 hover:border-white/20"
                     }`}
                   >
@@ -1044,7 +1050,7 @@ export function CreateWorkspace() {
                     onClick={() => setBatchSize(count)}
                     className={`rounded-lg border py-2 text-[11px] font-medium transition ${
                       batchSize === count
-                        ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-200"
+                        ? "border-[#C7E34F]/60 bg-[#C7E34F]/15 text-zinc-900"
                         : "border-white/10 bg-white/[0.02] text-zinc-400 hover:border-white/20"
                     }`}
                   >
@@ -1165,7 +1171,7 @@ export function CreateWorkspace() {
                 type="button"
                 onClick={insertExample}
                 title="Try an example prompt"
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-violet-300"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition hover:border-white/25 hover:text-[#C7E34F]"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
               </button>
@@ -1173,7 +1179,7 @@ export function CreateWorkspace() {
                 type="button"
                 onClick={handlePrimaryAction}
                 disabled={!prompt.trim() || primaryBusy}
-                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#7C3AED] px-4 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-50"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7E34F] px-4 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F] disabled:opacity-50"
               >
                 {primaryBusy && (
                   <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
@@ -1191,7 +1197,7 @@ export function CreateWorkspace() {
                   onClick={() => setActiveTab(tool.mode)}
                   className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
                     activeTab === tool.mode
-                      ? "border-[#7C3AED]/60 bg-[#7C3AED]/15 text-violet-300"
+                      ? "border-[#C7E34F]/60 bg-[#C7E34F]/15 text-[#C7E34F]"
                       : "border-white/10 bg-white/[0.02] text-zinc-500 hover:border-white/20 hover:text-zinc-200"
                   }`}
                 >
@@ -1230,7 +1236,7 @@ export function CreateWorkspace() {
             {isBusyMedia && (
               <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
                 <div className="flex items-center gap-3">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#7C3AED] border-t-transparent" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#C7E34F] border-t-transparent" />
                   <p className="text-xs text-zinc-400">
                     {isGeneratingImage
                       ? `Generating ${batchSize > 1 ? `${batchSize} images` : "your image"}…`
@@ -1242,7 +1248,7 @@ export function CreateWorkspace() {
                 {isGeneratingVideo && (
                   <div className="mt-3">
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-                      <div className="h-full rounded-full bg-[#7C3AED] transition-all duration-300" style={{ width: `${videoProgress}%` }} />
+                      <div className="h-full rounded-full bg-[#C7E34F] transition-all duration-300" style={{ width: `${videoProgress}%` }} />
                     </div>
                     <p className="mt-2 text-center text-[11px] text-zinc-500">{Math.round(videoProgress)}% complete</p>
                   </div>
@@ -1256,12 +1262,12 @@ export function CreateWorkspace() {
                 {(isGenerating || streamingText || result) && (
                   <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
                     <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-200">{displayResult}</p>
-                    {isGenerating && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#7C3AED]" />}
+                    {isGenerating && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#C7E34F]" />}
                   </div>
                 )}
 
                 {result && !isGenerating && (
-                  <div className="rounded-2xl border border-[#7C3AED]/30 bg-[#7C3AED]/5 p-5">
+                  <div className="rounded-2xl border border-[#C7E34F]/30 bg-[#C7E34F]/5 p-5">
                     <p className="text-sm font-semibold text-white">Improve this draft</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {getSmartSuggestions(result, platform).map((s) => (
@@ -1269,7 +1275,7 @@ export function CreateWorkspace() {
                           key={s.label}
                           type="button"
                           onClick={() => handleSuggestion(s)}
-                          className="rounded-full border border-[#7C3AED]/40 bg-black/40 px-3 py-1.5 text-xs font-medium text-violet-300 transition hover:border-[#8B5CF6]"
+                          className="rounded-full border border-[#C7E34F]/40 bg-black/40 px-3 py-1.5 text-xs font-medium text-[#C7E34F] transition hover:border-[#C7E34F]"
                         >
                           {s.label}
                         </button>
@@ -1285,7 +1291,7 @@ export function CreateWorkspace() {
                       </button>
                       <button
                         onClick={openScheduler}
-                        className="rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9]"
+                        className="rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
                       >
                         Schedule
                       </button>
@@ -1316,14 +1322,14 @@ export function CreateWorkspace() {
                     {index < pipelineSteps.length - 1 && (
                       <span
                         className={`absolute left-[13px] top-8 h-[calc(100%-2rem)] w-px ${
-                          step.status === "done" ? "bg-[#7C3AED]" : "bg-white/10"
+                          step.status === "done" ? "bg-[#C7E34F]" : "bg-white/10"
                         }`}
                       />
                     )}
                     <span
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
                         step.status === "done" || step.status === "running"
-                          ? "border-[#7C3AED] bg-[#7C3AED]/15 text-violet-300"
+                          ? "border-[#C7E34F] bg-[#C7E34F]/15 text-[#C7E34F]"
                           : step.status === "error"
                           ? "border-red-500/50 bg-red-500/10 text-red-400"
                           : "border-white/10 bg-white/[0.03] text-zinc-500"
@@ -1355,7 +1361,7 @@ export function CreateWorkspace() {
             )}
 
             {activeTab === "pipeline" && pipelineDone && result && !isPipelineRunning && (
-              <div className="mt-4 rounded-2xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-5">
+              <div className="mt-4 rounded-2xl border border-[#C7E34F]/40 bg-[#C7E34F]/10 p-5">
                 <p className="text-sm font-semibold text-white">Your post is ready</p>
                 <div className="mt-3 max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-4">
                   <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-200">{result}</p>
@@ -1363,7 +1369,7 @@ export function CreateWorkspace() {
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <button
                     onClick={openScheduler}
-                    className="rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9]"
+                    className="rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
                   >
                     Schedule
                   </button>
@@ -1403,7 +1409,7 @@ export function CreateWorkspace() {
                   value={scheduleAt}
                   min={toLocalInputValue(new Date(Date.now() + 5 * 60 * 1000))}
                   onChange={(e) => setScheduleAt(e.target.value)}
-                  className="rounded-lg border border-white/10 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#7C3AED]/60"
+                  className="rounded-lg border border-white/10 bg-black px-3 py-2 text-sm text-zinc-200 outline-none focus:border-[#C7E34F]/60"
                 />
                 <button
                   onClick={handleSchedule}
@@ -1485,10 +1491,10 @@ export function CreateWorkspace() {
               </button>
             </div>
 
-            <div className="mt-5 rounded-xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 p-4">
+            <div className="mt-5 rounded-xl border border-[#C7E34F]/40 bg-[#C7E34F]/10 p-4">
               <div className="flex items-baseline justify-between">
                 <p className="text-sm font-semibold text-white">octa-studio PRO</p>
-                <p className="text-sm font-semibold text-violet-300">₹999<span className="text-[10px] text-zinc-500">/month</span></p>
+                <p className="text-sm font-semibold text-[#C7E34F]">₹999<span className="text-[10px] text-zinc-500">/month</span></p>
               </div>
               <ul className="mt-3 space-y-1.5 text-xs text-zinc-300">
                 <li>· Unlimited AI text, image, video & voice generations</li>
@@ -1509,13 +1515,13 @@ export function CreateWorkspace() {
                 type="button"
                 onClick={() => void handlePurchase()}
                 disabled={purchaseBusy}
-                className="mt-5 w-full rounded-xl bg-[#7C3AED] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6D28D9] disabled:opacity-60"
+                className="mt-5 w-full rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F] disabled:opacity-60"
               >
                 {purchaseBusy ? "Processing..." : "Buy with Razorpay"}
               </button>
             ) : (
               <div className="mt-5 grid gap-2">
-                <Link href="/signup?next=/ai-studio" className="rounded-xl bg-[#7C3AED] px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-[#6D28D9]">
+                <Link href="/signup?next=/ai-studio" className="rounded-xl bg-[#C7E34F] px-4 py-2.5 text-center text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]">
                   Sign up to buy PRO
                 </Link>
                 <Link href="/login?next=/ai-studio" className="rounded-xl border border-white/10 px-4 py-2.5 text-center text-sm font-medium text-zinc-300 transition hover:border-white/25 hover:text-white">

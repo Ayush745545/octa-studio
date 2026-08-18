@@ -4,7 +4,7 @@ import { processScheduledPublications } from "@/app/publishing/engine/process-sc
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest) {
+async function handleProcess(request: NextRequest) {
   const authorization = request.headers.get("authorization");
   const expected = process.env.CRON_SECRET;
 
@@ -52,4 +52,18 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+/**
+ * Vercel Cron uses GET.
+ */
+export async function GET(request: NextRequest) {
+  return handleProcess(request);
+}
+
+/**
+ * Keep POST for local/manual testing.
+ */
+export async function POST(request: NextRequest) {
+  return handleProcess(request);
 }

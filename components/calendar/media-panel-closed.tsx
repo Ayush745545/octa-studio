@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { MediaItem } from './media-drawer';
+import VideoWithFallback from "@/components/video-with-fallback";
 
 interface StockItem {
   id: string;
@@ -196,10 +197,10 @@ export function MediaPanelClosed({
       if (textStyle === 'gradient') {
         const grad = ctx.createLinearGradient(0, 540 - fontSize, 0, 540 + fontSize);
         grad.addColorStop(0, '#ffffff');
-        grad.addColorStop(1, '#7C3AED');
+        grad.addColorStop(1, '#7FFB50');
         ctx.fillStyle = grad;
       } else if (textStyle === 'neon') {
-        ctx.shadowColor = '#7C3AED';
+        ctx.shadowColor = '#7FFB50';
         ctx.shadowBlur = 40;
         ctx.fillStyle = '#f5f3ff';
       } else if (textStyle === 'outline') {
@@ -315,10 +316,14 @@ export function MediaPanelClosed({
                     e.dataTransfer.effectAllowed = 'move';
                   }}
                   title={item.filename}
-                  className="relative aspect-square cursor-grab overflow-hidden rounded-md border border-zinc-800 transition hover:ring-2 hover:ring-[#7C3AED] active:cursor-grabbing"
+                  className="relative aspect-square cursor-grab overflow-hidden rounded-md border border-zinc-800 transition hover:ring-2 hover:ring-[#7FFB50] active:cursor-grabbing"
                 >
                   {item.mimeType?.startsWith('video/') ? (
-                    <video src={item.url} className="h-full w-full object-cover" muted />
+                    <VideoWithFallback
+                      src={item.url}
+                      muted
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <img src={item.url} alt={item.filename} className="h-full w-full object-cover" />
                   )}
@@ -327,7 +332,7 @@ export function MediaPanelClosed({
             </div>
           )}
 
-          <div className={`flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 text-center transition-colors ${dragOver ? 'border-[#7C3AED] bg-[#7C3AED]/10' : 'border-zinc-800 hover:border-zinc-300 hover:bg-zinc-900/40'}`}>
+          <div className={`flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 text-center transition-colors ${dragOver ? 'border-[#7FFB50] bg-[#7FFB50]/10' : 'border-zinc-800 hover:border-zinc-300 hover:bg-zinc-900/40'}`}>
             <div className="grid grid-cols-2 gap-2 mb-4">
               <div className="w-10 h-10 bg-zinc-800 rounded-md"></div>
               <div className="w-10 h-10 bg-zinc-800 rounded-md"></div>
@@ -352,7 +357,7 @@ export function MediaPanelClosed({
                 onClick={() => setCategory(c.id)}
                 className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-colors ${
                   category === c.id
-                    ? 'bg-[#7C3AED] text-white'
+                    ? 'bg-[#7FFB50] text-white'
                     : 'border border-zinc-800 text-zinc-400 hover:text-white'
                 }`}
               >
@@ -375,7 +380,7 @@ export function MediaPanelClosed({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={`Search ${category}…`}
-                className="min-w-0 flex-1 rounded-lg border border-zinc-800 bg-[#111113] px-2.5 py-1.5 text-xs text-white placeholder:text-zinc-600 focus:border-[#7C3AED] focus:outline-none"
+                className="min-w-0 flex-1 rounded-lg border border-zinc-800 bg-[#111113] px-2.5 py-1.5 text-xs text-white placeholder:text-zinc-600 focus:border-[#7FFB50] focus:outline-none"
               />
               <button
                 type="submit"
@@ -393,7 +398,7 @@ export function MediaPanelClosed({
                 value={textValue}
                 onChange={(e) => setTextValue(e.target.value)}
                 placeholder="Type your text…"
-                className="rounded-lg border border-zinc-800 bg-[#111113] px-2.5 py-1.5 text-xs text-white placeholder:text-zinc-600 focus:border-[#7C3AED] focus:outline-none"
+                className="rounded-lg border border-zinc-800 bg-[#111113] px-2.5 py-1.5 text-xs text-white placeholder:text-zinc-600 focus:border-[#7FFB50] focus:outline-none"
               />
               <div className="flex flex-wrap gap-1.5">
                 {TEXT_STYLES.map((s) => (
@@ -413,7 +418,7 @@ export function MediaPanelClosed({
               <button
                 onClick={addTextImage}
                 disabled={busyId === 'text'}
-                className="rounded-lg bg-[#7C3AED] py-1.5 text-xs font-semibold text-white hover:bg-[#6D28D9] transition-colors disabled:opacity-50"
+                className="rounded-lg bg-[#7FFB50] py-1.5 text-xs font-semibold text-white hover:bg-[#7FFB50] transition-colors disabled:opacity-50"
               >
                 {busyId === 'text' ? 'Creating…' : 'Add Text Image to Library'}
               </button>
@@ -428,7 +433,7 @@ export function MediaPanelClosed({
               </p>
               <button
                 onClick={onGetContentIdeas}
-                className="rounded-lg bg-[#7C3AED] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#6D28D9] transition-colors"
+                className="rounded-lg bg-[#7FFB50] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#7FFB50] transition-colors"
               >
                 Open AI Studio
               </button>

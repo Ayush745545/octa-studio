@@ -1,51 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const userId = getSessionUserId(request);
 
   if (!userId) {
-    return NextResponse.json(
-      { error: "You must be logged in to connect Instagram." },
-      { status: 401 },
+    return NextResponse.redirect(
+      new URL("/login", request.url),
     );
   }
 
-  const clientId = process.env.INSTAGRAM_CLIENT_ID;
   const appUrl = process.env.APP_URL;
+  const clientId = process.env.INSTAGRAM_CLIENT_ID;
 
-  if (!clientId || !appUrl) {
-    await prisma.publishingChannel.upsert({
-      where: {
-        userId_platform: {
-          userId,
-          platform: "Instagram",
-        },
-      },
-      create: {
-        userId,
-        platform: "Instagram",
-        connected: true,
-        accountName: "Instagram (test mode)",
-      },
-      update: {
-        connected: true,
-        accountName: "Instagram (test mode)",
-      },
+  if (!appUrl || !clientId) {
+    console.error("[Instagram] Missing OAuth configuration.", {
+      APP_URL: Boolean(appUrl),
+      INSTAGRAM_CLIENT_ID: Boolean(clientId),
     });
 
-    console.log("[Instagram] Test-mode connection saved.", { userId });
-
-    return NextResponse.redirect(
-      new URL(
-        "/publishing?instagram=connected",
-        appUrl ?? "http://localhost:3000",
-      ),
+    return NextResponse.json(
+      {
+        error:
+          "Instagram OAuth is not configured. Check APP_URL and INSTAGRAM_CLIENT_ID.",
+      },
+      { status: 500 },
     );
   }
 
-  const redirectUri = `${appUrl}/api/publishing/instagram/callback`;
+  const redirectUri =
+    `${appUrl}/api/publishing/instagram/callback`;
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -58,8 +42,9 @@ export async function GET(request: NextRequest) {
   const authorizationUrl =
     `https://www.instagram.com/oauth/authorize?${params.toString()}`;
 
-  console.log("[Instagram] OAuth authorization:", {
+  console.log("[Instagram] Starting OAuth", {
     userId,
+    clientId,
     redirectUri,
   });
 
