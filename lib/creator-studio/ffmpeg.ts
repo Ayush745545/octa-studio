@@ -242,18 +242,29 @@ export async function extractThumbnail(
 ): Promise<string> {
   await mkdir(path.dirname(outPath), { recursive: true });
 
-  await execFileAsync(FFMPEG, [
-    "-y",
-    "-ss",
-    String(seekSec),
-    "-i",
-    filePath,
-    "-frames:v",
-    "1",
-    "-vf",
-    "scale=540:-1",
-    outPath,
-  ]);
+  await execFileAsync(
+    FFMPEG,
+    [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-ss",
+      String(Math.max(0, seekSec)),
+      "-i",
+      filePath,
+      "-frames:v",
+      "1",
+      "-vf",
+      "scale=540:-2:flags=fast_bilinear",
+      "-q:v",
+      "5",
+      outPath,
+    ],
+    {
+      maxBuffer: 10 * 1024 * 1024,
+    },
+  );
 
   return outPath;
 }
@@ -271,33 +282,69 @@ export async function cutVerticalClip(
 ): Promise<string> {
   await mkdir(path.dirname(outPath), { recursive: true });
 
-  await execFileAsync(FFMPEG, [
-    "-y",
-    "-ss",
-    String(startSec),
-    "-i",
-    srcPath,
-    "-t",
-    String(durationSec),
-    "-vf",
+  // Apple Silicon hardware encoder.
+  await execFileAsync(
+    FFMPEG,
     [
-      "crop=ih*9/16:ih",
-      "scale=1080:1920:force_original_aspect_ratio=decrease",
-      "pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
-      "setsar=1",
-    ].join(","),
-    "-c:v",
-    "libx264",
-    "-preset",
-    "veryfast",
-    "-crf",
-    "20",
-    "-c:a",
-    "aac",
-    "-movflags",
-    "+faststart",
-    outPath,
-  ]);
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+
+      // Fast seek before opening the input.
+      "-ss",
+      String(Math.max(0, startSec)),
+      "-i",
+      srcPath,
+
+      "-t",
+      String(durationSec),
+
+      // 9:16 vertical crop + fast scale.
+      "-vf",
+      "crop=ih*9/16:ih,scale=1080:1920:flags=fast_bilinear,setsar=1",
+
+      // M4 VideoToolbox.
+      "-c:v",
+      "h264_videotoolbox",
+      "-b:v",
+      "5M",
+      "-maxrate",
+      "7M",
+      "-bufsize",
+      "10M",
+
+      // Audio.
+      "-c:a",
+      "aac",
+      "-b:a",
+      "128k",
+
+      // Make MP4 playable immediately.
+      "-movflags",
+      "+faststart",
+
+      outPath,
+    ],
+    {
+      maxBuffer: 10 * 1024 * 1024,
+    },
+  );
+
+  // IMPORTANT:
+  // Never return a file that FFmpeg created but which is actually broken.
+  const probe = await probeFull(outPath);
+
+  if (
+    !probe.hasVideo ||
+    probe.duration <= 0 ||
+    probe.width <= 0 ||
+    probe.height <= 0
+  ) {
+    throw new Error(
+      `FFmpeg produced an invalid video: ${outPath}`,
+    );
+  }
 
   return outPath;
 }

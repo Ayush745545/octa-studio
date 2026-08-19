@@ -35,6 +35,10 @@ export async function scheduleJob(
     throw new Error("Job not found.");
   }
 
+  if (!job.userId) {
+    throw new Error("Creator Studio job has no owner.");
+  }
+
   if (
     job.status !== "READY_FOR_REVIEW" &&
     job.status !== "APPROVED" &&

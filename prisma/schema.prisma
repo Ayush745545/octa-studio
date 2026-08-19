@@ -96,9 +96,10 @@ model User {
   plan           String              @default("FREE")
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
-  generations    Generation[]
-  payments       Payment[]
+  generations      Generation[]
+  payments         Payment[]
   publishingChannels PublishingChannel[]
+  contentJobs      ContentJob[]
 }
 
 model Generation {
@@ -164,6 +165,7 @@ enum ClipStatus {
 
 model ContentJob {
   id            String     @id @default(cuid())
+  userId        String?
   // References an existing Media row (the uploaded long-form video).
   sourceMediaId String?
   // Denormalized source metadata for fast reads (UI project shape).
@@ -189,12 +191,14 @@ model ContentJob {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  stages PipelineStage[]
-  clips  ContentClip[]
-  bundles ContentBundle[]
-  assets GeneratedAsset[]
+  user      User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  stages    PipelineStage[]
+  clips     ContentClip[]
+  bundles   ContentBundle[]
+  assets    GeneratedAsset[]
 
   @@index([status])
+  @@index([userId])
   @@index([sourceMediaId])
 }
 

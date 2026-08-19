@@ -3,7 +3,6 @@ import PublishingChannels from "@/components/publishing/publishing-channels";
 import PublicationScheduleControls from "@/components/publishing/publication-schedule-controls";
 import ContentScheduleControls from "@/components/publishing/content-schedule-controls";
 import { prisma } from "@/lib/prisma";
-import VideoWithFallback from "@/components/video-with-fallback";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +27,6 @@ type ReportRow = {
   executionTimeMs: number | null;
   error: string | null;
   isContentOnly: boolean;
-  mediaUrl?: string | null;
 };
 
 const STATUS_BADGE: Record<string, string> = {
@@ -90,7 +88,6 @@ export default async function PublishingPage() {
       executionTimeMs: pub.executionTimeMs,
       error: pub.error,
       isContentOnly: false,
-      mediaUrl: pub.content.media?.[0]?.url ?? null,
     });
   }
 
@@ -108,7 +105,6 @@ export default async function PublishingPage() {
       executionTimeMs: null,
       error: null,
       isContentOnly: true,
-      mediaUrl: content.media?.[0]?.url ?? null,
     });
   }
 
@@ -210,23 +206,6 @@ export default async function PublishingPage() {
                         className="grid grid-cols-[minmax(0,1fr)_110px_120px_220px_160px_100px] items-center px-5 py-4"
                       >
                         <div className="flex min-w-0 items-center gap-3 pr-6">
-                          {row.mediaUrl ? (
-                            <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-black">
-                              {row.mediaUrl.endsWith(".mp4") ||
-                              row.mediaUrl.endsWith(".webm") ? (
-                                <VideoWithFallback
-                                  src={row.mediaUrl}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <img
-                                  src={row.mediaUrl}
-                                  alt=""
-                                  className="h-full w-full object-cover"
-                                />
-                              )}
-                            </div>
-                          ) : null}
                           <div className="min-w-0">
                             <p className="truncate text-sm font-medium text-white">
                               {row.title}

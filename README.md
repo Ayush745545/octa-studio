@@ -83,6 +83,123 @@
 
 ---
 
+## 🎬 AI Creator Studio — Video Captioning Pipeline
+
+**Octa Studio** ships a full AI video creator pipeline (inspired by modern creator tools like Captions.ai) that turns a single long-form upload into captioned, platform-ready shorts. It is built on top of the existing **ContentJob / Media** system and does **not** replace any working upload, scheduling, or publishing code.
+
+### End-to-end flow
+
+```
+VIDEO ──▶ AUDIO ──▶ WHISPER ──▶ TRANSCRIPT ──▶ CAPTION SEGMENTS
+   │                                                          │
+   └──────────────────────────────────────────────────────────┘
+                          │
+                   CAPTION GROUPS ──▶ CAPTION RENDERING ──▶ CREATOR STUDIO PREVIEW
+```
+
+The pipeline is modeled as 10 resumable stages (`lib/creator/stages.ts`), each persisted to the database so a failed job can be retried from the exact point of failure:
+
+| # | Stage | Progress | What it does |
+|---|-------|----------|--------------|
+| 1 | `VALIDATE` | 5% | Probe source with `ffprobe` (duration, dimensions, video/audio streams), extract a thumbnail |
+| 2 | `EXTRACT_AUDIO` | 10% | Pull a mono 16 kHz WAV via FFmpeg |
+| 3 | `TRANSCRIBE` | 25% | Speech-to-text (local Whisper if installed, AI-inferred fallback otherwise) |
+| 4 | `ANALYZE` | 40% | Detect real speech regions with `silencedetect`, score candidate moments |
+| 5 | `FIND_MOMENTS` | 50% | Rank candidates by overall score, pick the best moments |
+| 6 | `PLAN_CLIPS` | 60% | Plan vertical clips + assign caption styles & platforms |
+| 7 | `RENDER_CLIPS` | 80% | Cut real 9:16 (1080×1920) shorts with `h264_videotoolbox` |
+| 8 | `GENERATE_METADATA` | 90% | AI title/caption/hashtags + per-clip SRT caption track |
+| 9 | `QUALITY_CHECK` | 97% | Validate video integrity & 9:16 aspect ratio, require title/caption/hashtags |
+| 10 | `FINALIZE` | 100% | Build a schedule plan, mark job `READY_FOR_REVIEW` |
+
+The runner lives in `lib/creator/pipeline.ts` and is driven by a persistent, idempotent worker (`lib/creator/worker.ts`) that claims jobs with an optimistic DB lock (`lockedAt` / `workerId`) and reclaims stale-locked jobs across restarts.
+
+### Whisper / transcription
+
+- **Local Whisper** is used when the `whisper` CLI is available (`whisper --model base --output_format json`). Whisper output is written next to `audio.wav` as `<name>.json` and parsed into `TranscriptSegment[]` (`{ start, end, text }`).
+- **Fallback:** when no STT is installed, the pipeline keeps the *real* speech-region timestamps produced by FFmpeg `silencedetect` and asks the local LLM to infer plausible narration for each region. This is clearly logged so it is never mistaken for a verbatim transcript.
+- The active transcription provider is Ollama (`qwen2.5-coder:7b`) for AI-inferred text and metadata.
+
+### Caption data model
+
+Defined in `lib/creator/captions/types.ts`:
+
+```ts
+export type CaptionWord = {
+  word: string;
+  start: number; // seconds
+  end: number;   // seconds
+};
+
+export type CaptionSegment = {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+  words: CaptionWord[];
+};
+```
+
+### Word-timing limitation & estimate
+
+The current Whisper JSON contains **segment-level** timestamps only (start, end, text) — it does **not** expose native word-level timestamps. To drive word-level caption animation, the segment duration is distributed evenly across its words:
+
+```ts
+// lib/creator/captions/parse-whisper.ts  (splitWords)
+const duration = Math.max(0.01, end - start);
+const wordDuration = duration / words.length;
+// each word -> start + i*wordDuration ... start + (i+1)*wordDuration
+```
+
+This estimated timing is acceptable for the first caption renderer. Real word-level timestamps can replace the estimate later without changing the data model.
+
+### Caption segmentation & grouping
+
+- `parse-whisper.ts` → `parseWhisperTranscript()` converts a Whisper transcript into `CaptionSegment[]`.
+- `segmenter.ts` → `buildCaptionSegments()` further splits long segments into readable chunks (default **5 words per line**).
+- `group-captions.ts` → `groupCaptions()` merges words into display groups capped at **`MAX_WORDS = 4`** and **`MAX_CHARS = 24`** so captions stay short and readable on mobile.
+- `render-captions.ts` → `renderCaptions()` burns uppercase captions onto the video with FFmpeg `drawtext` (Arial Bold, white fill, black border + shadow, bottom-anchored), enabled per group via `between(t,start,end)`.
+
+### Caption styles
+
+Two style catalogs exist:
+
+- `lib/creator/captions/styles.ts` — `CAPTION_STYLES` record with `captions` (pop), `clean` (none), `gaming` (bounce). Each defines font, size, color, active color, stroke, position, `maxWordsPerLine`, uppercase flag, and animation (`none | pop | bounce | highlight`).
+- `lib/creator-studio/types.ts` — the broader UI `CAPTION_STYLES` array used by the planner: `Clean, Bold, Viral, Podcast, Minimal, Gaming, Cinematic`.
+
+### Supported platforms
+
+Clips are planned for vertical, short-form distribution: **Instagram, YouTube, TikTok, Facebook** (`lib/creator-studio/types.ts`).
+
+### Key modules
+
+| File | Responsibility |
+|------|----------------|
+| `lib/creator/pipeline.ts` | Stage handlers & resumable runner |
+| `lib/creator/stages.ts` | Canonical stage definitions + UI mapping |
+| `lib/creator/worker.ts` | Persistent job worker with DB lock |
+| `lib/creator/db.ts` | Job/stage/clip/bundle persistence |
+| `lib/creator-studio/ffmpeg.ts` | `extractAudio`, `detectSpeech`, `cutVerticalClip`, `probeFull` |
+| `lib/creator-studio/ai.ts` | LLM calls (transcript/metadata inference) |
+| `lib/creator-studio/content.ts` | Candidate scoring & clip detail generation |
+| `lib/creator/captions/*` | Caption parsing, segmentation, grouping, rendering, styles |
+
+### API routes
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/creator/jobs` | POST | Create a ContentJob from a media asset |
+| `/api/creator/jobs/[id]` | GET | Job status + stage progress |
+| `/api/creator/jobs/[id]/approve` | POST | Approve a `READY_FOR_REVIEW` job |
+| `/api/creator/jobs/[id]/retry` | POST | Retry a failed/cancelled job |
+| `/api/creator/schedule` | POST | Schedule generated clips |
+| `/api/creator-studio/analyze` | POST | Analyze an uploaded video |
+| `/api/creator-studio/projects` | GET, POST | List / create projects |
+| `/api/creator-studio/clips/[id]` | GET | Get a generated clip |
+| `/api/creator-studio/clips/[id]/regenerate` | POST | Re-render one clip from its real source segment |
+
+---
+
 ## 📦 Dependencies & Setup Commands
 
 ### System Prerequisites
@@ -124,6 +241,15 @@ ollama pull qwen2.5-coder:7b
 curl -fsSL https://ollama.com/install.sh | sh
 ollama serve
 ollama pull qwen2.5-coder:7b
+
+# Local Whisper (optional — enables verbatim transcription in the Creator Studio)
+# macOS (Homebrew):
+brew install whisper
+
+# Whisper needs ffmpeg (already required) and a model:
+whisper --model base "path/to/audio.wav" --output_format json
+# If whisper is unavailable, the pipeline falls back to AI-inferred captions
+# from real speech regions detected via ffmpeg silencedetect.
 ```
 
 ---

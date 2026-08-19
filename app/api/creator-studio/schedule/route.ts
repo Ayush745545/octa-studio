@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
 
     const result = await scheduleJob({
       jobId: projectId,
-      userId,
       clipIds: slots.map((s: { clipId: string }) => s.clipId),
       strategy: "ai",
       slots: slots.map(

@@ -40,6 +40,7 @@ type Template = {
   tool: string;
   prompt: string;
   img: string;
+  category?: string;
 };
 
 const TEMPLATES: Template[] = [
@@ -99,12 +100,100 @@ const TEMPLATES: Template[] = [
     prompt: "Upload a photo of a person and your product to see them holding.",
     img: "/ai/templates/thumbnail-540062.avif",
   },
+  {
+    key: "auto-captions",
+    name: "Auto Captions",
+    tagline: "Transcribe speech into accurate captions",
+    tool: "Video",
+    category: "caption",
+    prompt: "Transcribe the speech in this video and generate accurate, well-timed captions with natural punctuation.",
+    img: "/ai/templates/thumbnail-7ed26e.webm",
+  },
+  {
+    key: "caption-styles",
+    name: "Caption Styles",
+    tagline: "Trendy, animated caption looks",
+    tool: "Video",
+    category: "caption",
+    prompt: "Add stylish, animated captions to this video using a modern social-media caption style with bold highlights.",
+    img: "/ai/templates/product-spin.webm",
+  },
+  {
+    key: "translate-captions",
+    name: "Caption + Translate",
+    tagline: "Caption and localize in one pass",
+    tool: "Video",
+    category: "caption",
+    prompt: "Generate captions for this video and translate them into a new language for a wider audience.",
+    img: "/ai/templates/thumbnail-c7dbbe (2).webm",
+  },
   ];
 
 const platforms = ["Instagram", "YouTube", "LinkedIn", "X", "Blog"];
 const contentTypes = ["Post", "Reel", "Video", "Article", "Thread", "Caption"];
 const tones = ["Professional", "Casual", "Educational", "Engaging", "Viral"];
 const lengths = ["Short", "Medium", "Long"];
+
+// Live creation-tool selector shown above the composer.
+type CreationToolOption = {
+  label: string;
+  description: string;
+  divider?: boolean;
+};
+
+const CREATION_TOOL_OPTIONS: CreationToolOption[] = [
+  { label: "Edit", description: "Upload a video to start" },
+  { label: "Avatar", description: "Create a talking video" },
+  { label: "Voiceover", description: "Add voiceover to faceless video" },
+  { label: "Captions", description: "Add captions to a video" },
+  { label: "Translate", description: "Translate or dub a video" },
+  { label: "Property Video", description: "Turn your listing into a video", divider: true },
+  { label: "Clips", description: "Turn long-form videos into viral clips" },
+];
+
+type CreationComposerState = {
+  title: string;
+  description: string;
+  button: string;
+};
+
+const CREATION_STATES: Record<string, CreationComposerState> = {
+  Edit: {
+    title: "Upload a video to start",
+    description: "",
+    button: "Upload video",
+  },
+  Avatar: {
+    title: "Create talking videos with AI.",
+    description: "Create your talking video from a prompt, link or script.",
+    button: "Add avatar",
+  },
+  Voiceover: {
+    title: "Give your videos a voice.",
+    description: "Add a voiceover to your faceless video.",
+    button: "Add voiceover",
+  },
+  Captions: {
+    title: "Add captions automatically.",
+    description: "Turn your video's speech into accurate captions.",
+    button: "Add captions",
+  },
+  Translate: {
+    title: "Translate your video.",
+    description: "Translate or dub your video for a new audience.",
+    button: "Translate video",
+  },
+  "Property Video": {
+    title: "Turn your listing into a video.",
+    description: "Create engaging property videos from your listing.",
+    button: "Create property video",
+  },
+  Clips: {
+    title: "Turn long videos into viral clips.",
+    description: "Find the best moments and create short-form clips.",
+    button: "Create clips",
+  },
+};
 
 const AI_CLICHES = [
   "in today's",
@@ -297,6 +386,24 @@ export default function AIStudioPage() {
   // Post image attachment (preview only)
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Live creation-tool selector state
+  const [creationTool, setCreationTool] = useState("Edit");
+  const [creationMediaName, setCreationMediaName] = useState<string | null>(null);
+  const creationFileRef = useRef<HTMLInputElement>(null);
+
+  const creationState = CREATION_STATES[creationTool] ?? CREATION_STATES.Edit;
+  const visibleTemplates =
+    creationTool === "Captions"
+      ? TEMPLATES.filter((template) => template.category === "caption")
+      : TEMPLATES;
+
+  function handleCreationMedia(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setCreationMediaName(file.name);
+    event.target.value = "";
+  }
 
   function handleImageAttach(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -1073,9 +1180,13 @@ if (contentType in ['image', 'video']) {
                     AI EDITOR
                   </span>
 
-                  <span className="ml-auto hidden text-[11px] text-white/30 sm:block">
-                    Describe what you want to create
-                  </span>
+                  <PromptDropdown
+                    value={creationTool}
+                    options={CREATION_TOOL_OPTIONS}
+                    onChange={setCreationTool}
+                    ariaLabel="Creation tool"
+                    className="ml-auto"
+                  />
                 </div>
 
                 {/* Prompt / upload / generate */}
@@ -1233,17 +1344,55 @@ if (contentType in ['image', 'video']) {
               </div>
             </div>
 
+            {/* --- LIVE CREATION TOOL COMPOSER (updates with the selector in the bar) --- */}
+            <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6">
+              <h3 className="text-2xl font-semibold leading-tight text-white sm:text-3xl">
+                {creationState.title}
+              </h3>
+              <p className="mt-2 max-w-xl text-sm text-zinc-400">{creationState.description}</p>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => creationFileRef.current?.click()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16.5V4.5m0 0L7.5 9m4.5-4.5L16.5 9M3 15v3.75A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V15" />
+                  </svg>
+                  {creationState.button}
+                </button>
+                {creationMediaName && (
+                  <span className="text-xs text-zinc-500">
+                    Selected: <span className="text-zinc-300">{creationMediaName}</span>
+                  </span>
+                )}
+              </div>
+
+              <input
+                ref={creationFileRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={handleCreationMedia}
+              />
+            </section>
+
             <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-5">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-white">Image Templates</h2>
+                    <h2 className="text-sm font-semibold text-white">
+                      {creationTool === "Captions" ? "Caption Templates" : "Image Templates"}
+                    </h2>
                     <span className="rounded-full border border-[#C7E34F]/40 bg-[#C7E34F]/10 px-2 py-0.5 text-[10px] font-medium text-[#C7E34F]">
-                      {TEMPLATES.length} templates
+                      {visibleTemplates.length} templates
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-zinc-500">
-                    Pick a template to load the prompt and jump straight into AI image generation.
+                    {creationTool === "Captions"
+                      ? "Pick a caption template to load the prompt and add captions to your video."
+                      : "Pick a template to load the prompt and jump straight into AI image generation."}
                   </p>
                 </div>
                 <button
@@ -1257,7 +1406,7 @@ if (contentType in ['image', 'video']) {
               </div>
 
               <div className="mt-4 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">
-                {TEMPLATES.map((tpl) => (
+                {visibleTemplates.map((tpl) => (
                   <button
                     key={tpl.key}
                     type="button"
@@ -1297,13 +1446,14 @@ if (contentType in ['image', 'video']) {
                 ))}
               </div>
 
-              {selectedTemplate && (
+              {selectedTemplate && visibleTemplates.some((t) => t.key === selectedTemplate) && (
                 <p className="mt-3 text-xs text-zinc-500">
                   Template loaded{" "}
                   <span className="font-medium text-[#C7E34F]">
-                    {TEMPLATES.find((template) => template.key === selectedTemplate)?.name}
+                    {visibleTemplates.find((template) => template.key === selectedTemplate)?.name}
                   </span>
-                  . Update the prompt if needed, then press Generate Image.
+                  . Update the prompt if needed, then{" "}
+                  {creationTool === "Captions" ? "press Add captions" : "press Generate Image"}.
                 </p>
               )}
             </section>

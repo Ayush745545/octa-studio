@@ -26,7 +26,12 @@ export async function POST(request: Request) {
     const uploadId = request.headers.get("x-upload-id");
     const chunkIndex = Number(request.headers.get("x-chunk-index"));
     const totalChunks = Number(request.headers.get("x-total-chunks"));
-    const filename = request.headers.get("x-file-name") || "video.mp4";
+    const encodedFilename =
+      request.headers.get("x-file-name");
+
+    const filename = encodedFilename
+      ? decodeURIComponent(encodedFilename)
+      : "video.mp4";
     const totalSize = Number(request.headers.get("x-file-size"));
 
     if (!uploadId) {

@@ -1,38 +1,41 @@
 "use client";
 
-import { useTransition } from "react";
-import { togglePublishingChannel } from "@/app/publishing/actions/toggle-channel";
+import { useState } from "react";
 
-const channels = [
+type Channel = {
+  name: string;
+  description: string;
+  color: string;
+  icon: string;
+  oauthPath?: string;
+};
+
+const CHANNELS: Channel[] = [
   {
     name: "Instagram",
-    short: "IG",
-    description: "Publish posts and reels.",
-    connectable: true,
+    description: "Publish photos, reels and captions",
+    color: "#E4405F",
+    icon: "ig",
+    oauthPath: "/api/publishing/instagram/connect",
   },
   {
     name: "LinkedIn",
-    short: "in",
-    description: "Publish professional content.",
-    connectable: true,
+    description: "Publish professional content",
+    color: "#0A66C2",
+    icon: "in",
+    oauthPath: "/api/publishing/linkedin/connect",
   },
   {
     name: "YouTube",
-    short: "YT",
-    description: "Publish videos and shorts.",
-    connectable: false,
+    description: "Publish videos and Shorts",
+    color: "#FF0000",
+    icon: "▶",
   },
   {
     name: "TikTok",
-    short: "TT",
-    description: "Publish videos and short-form content.",
-    connectable: false,
-  },
-  {
-    name: "X",
-    short: "X",
-    description: "Publish posts and threads.",
-    connectable: false,
+    description: "Publish short-form videos",
+    color: "#ffffff",
+    icon: "♪",
   },
 ];
 
@@ -43,119 +46,173 @@ interface PublishingChannelsProps {
 export default function PublishingChannels({
   connectedPlatforms,
 }: PublishingChannelsProps) {
-  const [isPending, startTransition] = useTransition();
+  const [connecting, setConnecting] = useState<string | null>(null);
 
-  const connectedChannels = channels.filter((channel) =>
-    connectedPlatforms.includes(channel.name),
-  );
+  function connect(platform: Channel) {
+    if (!platform.oauthPath || connecting) return;
 
-  function connectChannel(platform: string) {
-    if (platform === "Instagram") {
-      window.location.href = "/api/publishing/instagram/connect";
-      return;
-    }
+    setConnecting(platform.name);
 
-    startTransition(async () => {
-      await togglePublishingChannel(platform);
-    });
-  }
-
-  function disconnectChannel(platform: string) {
-    startTransition(async () => {
-      await togglePublishingChannel(platform);
-    });
+    window.location.assign(platform.oauthPath);
   }
 
   return (
-    <>
-      <div className="flex items-end justify-between">
-        <div>
-          <h2 className="text-sm font-semibold text-zinc-950">
+    <section id="channels">
+      {/* Header */}
+      <div className="mb-6 flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-semibold tracking-tight text-white">
             Publishing channels
           </h2>
 
-          <p className="mt-1 text-xs text-zinc-400">
-            Connect your social accounts to publish directly.
-          </p>
+          <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[10px] font-medium text-zinc-500">
+            {connectedPlatforms.length} connected
+          </span>
         </div>
 
-        <span className="text-xs text-zinc-400">
-          {connectedChannels.length} connected
-        </span>
+        <p className="text-sm text-zinc-500">
+          Connect your social accounts to publish directly from ContentOS.
+        </p>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        {channels.map((channel) => {
-          const connected = connectedPlatforms.includes(channel.name);
+      {/* Channel list */}
+      <div className="space-y-3">
+        {CHANNELS.map((platform) => {
+          const connected = connectedPlatforms.includes(platform.name);
+          const isConnecting = connecting === platform.name;
+          const available = Boolean(platform.oauthPath);
 
           return (
             <div
-              key={channel.name}
-              className={`rounded-2xl border bg-white p-4 transition ${
+              key={platform.name}
+              className={[
+                "group relative overflow-hidden rounded-2xl border transition-all duration-200",
                 connected
-                  ? "border-zinc-950"
-                  : "border-zinc-200"
-              }`}
+                  ? "border-emerald-500/20 bg-emerald-500/[0.025]"
+                  : "border-zinc-800 bg-zinc-950/70 hover:border-zinc-700",
+              ].join(" ")}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-950 bg-zinc-950 text-xs font-semibold text-white">
-                    {channel.short}
+              <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
+                {/* Left */}
+                <div className="flex min-w-0 items-center gap-4">
+                  {/* Icon */}
+                  <div
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold"
+                    style={{
+                      backgroundColor: `${platform.color}12`,
+                      borderColor: `${platform.color}30`,
+                      color: platform.color,
+                    }}
+                  >
+                    {platform.icon}
                   </div>
 
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-950">
-                      {channel.name}
+                  {/* Info */}
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-sm font-semibold text-white">
+                        {platform.name}
+                      </h3>
+
+                      {connected && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                          Connected
+                        </span>
+                      )}
+
+                      {!connected && available && (
+                        <span className="rounded-full bg-zinc-800 px-2 py-1 text-[10px] font-medium text-zinc-500">
+                          Not connected
+                        </span>
+                      )}
+
+                      {!available && (
+                        <span className="rounded-full bg-zinc-800 px-2 py-1 text-[10px] font-medium text-zinc-500">
+                          Coming soon
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-1 text-xs text-zinc-500">
+                      {platform.description}
                     </p>
 
-                    <p className="mt-0.5 text-xs text-zinc-400">
-                      {channel.description}
-                    </p>
+                    {connected && (
+                      <p className="mt-2 text-[11px] text-emerald-400/70">
+                        Ready to publish automatically
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {connected && (
-                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                )}
-              </div>
+                {/* Right */}
+                <div className="flex shrink-0 items-center gap-2">
+                  {connected ? (
+                    <>
+                      {available && (
+                        <button
+                          type="button"
+                          onClick={() => connect(platform)}
+                          disabled={Boolean(connecting)}
+                          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-600 hover:bg-zinc-800 hover:text-white disabled:cursor-wait disabled:opacity-50"
+                        >
+                          {isConnecting ? "Opening…" : "Reconnect"}
+                        </button>
+                      )}
 
-              <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-4">
-                {connected ? (
-                  <>
-                    <span className="text-xs font-medium text-emerald-600">
-                      Connected
-                    </span>
-
+                      <button
+                        type="button"
+                        disabled
+                        className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-2.5 text-xs font-medium text-emerald-400"
+                      >
+                        Connected
+                      </button>
+                    </>
+                  ) : available ? (
                     <button
                       type="button"
-                      disabled={isPending}
-                      onClick={() => disconnectChannel(channel.name)}
-                      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-600 transition hover:border-red-200 hover:text-red-600 disabled:cursor-wait disabled:opacity-50"
+                      onClick={() => connect(platform)}
+                      disabled={Boolean(connecting)}
+                      className="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-wait disabled:opacity-60"
                     >
-                      Disconnect
+                      {isConnecting ? (
+                        <>
+                          <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-400 border-t-black" />
+                          Connecting…
+                        </>
+                      ) : (
+                        `Connect ${platform.name}`
+                      )}
                     </button>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-xs font-medium text-zinc-400">
-                      Not connected
-                    </span>
-
-                    <button
-                      type="button"
-                      disabled={isPending || !channel.connectable}
-                      onClick={() => connectChannel(channel.name)}
-                      className="rounded-lg bg-zinc-950 px-3 py-2 text-xs font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Connect
-                    </button>
-                  </>
-                )}
+                  ) : (
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-2.5 text-xs font-medium text-zinc-600">
+                      Coming soon
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Connected accent */}
+              {connected && (
+                <div className="absolute bottom-0 left-0 top-0 w-px bg-emerald-400/60" />
+              )}
             </div>
           );
         })}
       </div>
-    </>
+
+      {/* Help text */}
+      <div className="mt-5 flex items-start gap-3 rounded-xl border border-zinc-800/70 bg-zinc-950/40 px-4 py-3">
+        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-[10px] text-zinc-400">
+          ?
+        </div>
+
+        <p className="text-[11px] leading-5 text-zinc-500">
+          Connecting an account gives ContentOS permission to publish on your
+          behalf. You can disconnect your account at any time.
+        </p>
+      </div>
+    </section>
   );
 }

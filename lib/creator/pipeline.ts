@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdir, writeFile, stat, readFile, rm } from "node:fs/promises";
+import { mkdir, unlink, writeFile, stat, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 
 import { prisma } from "@/lib/prisma";
@@ -86,12 +86,13 @@ async function sourcePathFor(jobId: string): Promise<string> {
 /* Job lifecycle                                                       */
 /* ------------------------------------------------------------------ */
 
-export async function createJob(mediaId: string): Promise<string> {
+export async function createJob(mediaId: string, userId: string): Promise<string> {
   const media = await prisma.media.findUnique({ where: { id: mediaId } });
   if (!media) throw new Error(`Media not found for id ${mediaId}.`);
 
   const job = await prisma.contentJob.create({
     data: {
+      userId,
       sourceMediaId: media.id,
       sourceUrl: media.url,
       sourceFilename: media.filename,
@@ -626,6 +627,10 @@ async function handleRenderClips(jobId: string) {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Clip render failed.";
+
+      await unlink(video).catch(() => {});
+      await unlink(thumb).catch(() => {});
+
       await updateClip(clip.id, { status: "FAILED", error: message });
       log(jobId, "RENDER_CLIPS", `Clip ${clipName} FAILED: ${message}`);
     }

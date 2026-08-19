@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createJob } from "@/lib/creator/pipeline";
+import { getSessionUserId } from "@/lib/auth";
 import {
   listJobs,
   toUiProject,
@@ -22,8 +23,16 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const userId = getSessionUserId(request);
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "You must be logged in." },
+        { status: 401 },
+      );
+    }
     const body = await request.json();
     const mediaId = String(body.mediaId || "");
 
@@ -48,7 +57,7 @@ export async function POST(request: Request) {
       resolvedMediaId = media.id;
     }
 
-    const jobId = await createJob(resolvedMediaId);
+    const jobId = await createJob(resolvedMediaId, userId);
     const job = await prisma.contentJob.findUnique({ where: { id: jobId } });
     return NextResponse.json({ project: toUiProject(job as never) });
   } catch (error) {

@@ -37,7 +37,8 @@ export async function publishPublication(publicationId: string) {
 
   if (
     publication.status !== "QUEUED" &&
-    publication.status !== "SCHEDULED"
+    publication.status !== "SCHEDULED" &&
+    publication.status !== "PROCESSING"
   ) {
     throw new Error(
       `Publication cannot be published from ${publication.status}.`,

@@ -241,7 +241,7 @@ export default function CreatorStudioPage() {
             "x-upload-id": uploadId,
             "x-chunk-index": String(index),
             "x-total-chunks": String(totalChunks),
-            "x-file-name": file.name,
+            "x-file-name": encodeURIComponent(file.name),
             "x-file-size": String(file.size),
           },
           body: chunk,
