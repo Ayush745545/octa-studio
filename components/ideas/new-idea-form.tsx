@@ -50,7 +50,7 @@ export default function NewIdeaForm({ onCreated }: NewIdeaFormProps) {
       <div>
         <label
           htmlFor="title"
-          className="mb-2 block text-sm font-medium text-zinc-900"
+          className="mb-2 block text-sm font-medium text-zinc-300"
         >
           Idea title
         </label>
@@ -60,14 +60,14 @@ export default function NewIdeaForm({ onCreated }: NewIdeaFormProps) {
           name="title"
           required
           placeholder="What do you want to create?"
-          className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-zinc-400"
+          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-[#7FFB50] focus:ring-1 focus:ring-[#7FFB50]/30"
         />
       </div>
 
       <div>
         <label
           htmlFor="description"
-          className="mb-2 block text-sm font-medium text-zinc-900"
+          className="mb-2 block text-sm font-medium text-zinc-300"
         >
           Description
         </label>
@@ -77,12 +77,12 @@ export default function NewIdeaForm({ onCreated }: NewIdeaFormProps) {
           name="description"
           rows={4}
           placeholder="Describe the idea..."
-          className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-zinc-400"
+          className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-[#7FFB50] focus:ring-1 focus:ring-[#7FFB50]/30"
         />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-900">
+        <label className="mb-2 block text-sm font-medium text-zinc-300">
           Category
         </label>
 
@@ -96,8 +96,8 @@ export default function NewIdeaForm({ onCreated }: NewIdeaFormProps) {
               onClick={() => setCategory((current) => (current === option ? "" : option))}
               className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
                 category === option
-                  ? "border-zinc-950 bg-zinc-950 text-white"
-                  : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
+                  ? "border-[#7FFB50] bg-[#7FFB50]/10 text-[#7FFB50]"
+                  : "border-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-white"
               }`}
             >
               {option}
@@ -107,7 +107,7 @@ export default function NewIdeaForm({ onCreated }: NewIdeaFormProps) {
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+        <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
           {error}
         </p>
       )}
@@ -115,7 +115,7 @@ export default function NewIdeaForm({ onCreated }: NewIdeaFormProps) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-xl bg-[#7FFB50] px-4 py-3 text-sm font-semibold text-[#0a0a0c] transition hover:bg-[#7FFB50]/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? "Creating..." : "Create Idea"}
       </button>

@@ -23,7 +23,7 @@ export default function TurnIntoContentButton({
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="mt-5 rounded-lg bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+      className="mt-5 rounded-lg bg-[#7FFB50] px-4 py-2.5 text-sm font-semibold text-[#0a0a0c] transition hover:bg-[#7FFB50]/90 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {isPending ? "Creating..." : "Turn into Content"}
     </button>

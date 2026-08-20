@@ -61,9 +61,9 @@ export default function PublicationSelector({
   }
 
   return (
-    <section className="mt-6 border-t border-zinc-100 pt-6">
+    <section className="mt-6 border-t border-zinc-800 pt-6">
       <div>
-        <p className="text-sm font-medium text-zinc-700">
+        <p className="text-sm font-medium text-zinc-300">
           Publishing channels
         </p>
 
@@ -73,8 +73,8 @@ export default function PublicationSelector({
       </div>
 
       {channels.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-4">
-          <p className="text-sm font-medium text-zinc-700">
+        <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-4">
+          <p className="text-sm font-medium text-white">
             No connected channels
           </p>
 
@@ -95,12 +95,22 @@ export default function PublicationSelector({
             return (
               <div
                 key={channel.id}
-                className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium text-zinc-800">
-                    {channel.platform}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-white">
+                      {channel.platform}
+                    </p>
+
+                    {queued && (
+                      <span
+                        className="h-2 w-2 rounded-full bg-[#7FFB50]"
+                        title="Connected"
+                        aria-label="Connected"
+                      />
+                    )}
+                  </div>
 
                   {publication && (
                     <p className="mt-0.5 text-xs text-zinc-400">
@@ -113,7 +123,7 @@ export default function PublicationSelector({
                   type="button"
                   disabled={disabled || queued || isPending}
                   onClick={() => queuePublication(channel.id)}
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg border border-zinc-800 px-3 py-2 text-xs font-medium text-zinc-400 transition hover:border-[#7FFB50]/50 hover:text-[#7FFB50] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {queued
                     ? statusLabel(publication!.status)
@@ -128,7 +138,7 @@ export default function PublicationSelector({
       )}
 
       {error && (
-        <p className="mt-3 text-xs font-medium text-red-600">
+        <p className="mt-3 text-xs font-medium text-red-400">
           {error}
         </p>
       )}

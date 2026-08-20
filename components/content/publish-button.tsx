@@ -34,7 +34,7 @@ export default function PublishButton({
 
   if (status === "PUBLISHED") {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
+      <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-500">
         Published
       </div>
     );
@@ -74,13 +74,13 @@ export default function PublishButton({
         type="button"
         onClick={handlePublish}
         disabled={isPending}
-        className="rounded-xl bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-wait disabled:opacity-50"
+        className="rounded-xl bg-[#7FFB50] px-5 py-3 text-sm font-semibold text-[#0a0a0c] transition hover:bg-[#7FFB50]/90 disabled:cursor-wait disabled:opacity-50"
       >
         {isPending ? "Publishing..." : "Publish"}
       </button>
 
       {error && (
-        <p className="mt-3 text-xs font-medium text-red-600">
+        <p className="mt-3 text-xs font-medium text-red-400">
           {error}
         </p>
       )}
@@ -92,8 +92,8 @@ export default function PublishButton({
               key={toast.id}
               className={`flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg transition ${
                 toast.type === "success"
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                  : "border-red-200 bg-red-50 text-red-900"
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                  : "border-red-500/30 bg-red-500/10 text-red-300"
               }`}
             >
               <div className="flex-1 min-w-0">

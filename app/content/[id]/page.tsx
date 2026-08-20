@@ -3,10 +3,6 @@ import Link from "next/link";
 
 import WorkspaceLayout from "@/components/layout/workspace-layout";
 import ContentEditor from "@/components/content/content-editor";
-import ContentStatusSelector from "@/components/content/content-status-selector";
-import PublishButton from "@/components/content/publish-button";
-import DeleteContentButton from "@/components/content/delete-content-button";
-import PublicationSelector from "@/components/content/publication-selector";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +73,14 @@ export default async function ContentPage({
             initialTitle={content.title}
             initialBody={content.body ?? ""}
             initialPlatform={content.platform ?? ""}
+            idea={content.idea}
+            status={content.status}
+            scheduledAt={content.scheduledAt}
+            channels={connectedChannels}
+            publications={content.publications.map((publication) => ({
+              channelId: publication.channelId,
+              status: publication.status,
+            }))}
             initialMedia={content.media.map((media) => ({
               id: media.id,
               url: media.url,
@@ -85,62 +89,8 @@ export default async function ContentPage({
               size: media.size,
               type: media.type,
             }))}
+            disabled={content.status === "PUBLISHED"}
           />
-
-          <div className="mt-8 border-t border-zinc-800 pt-6">
-            {content.status === "PUBLISHED" ? (
-              <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
-                <p className="text-xs font-medium text-zinc-600">Status</p>
-
-                <p className="mt-1 text-sm font-medium text-zinc-700">Published</p>
-              </div>
-            ) : (
-              <ContentStatusSelector
-                id={content.id}
-                status={content.status}
-                scheduledAt={content.scheduledAt}
-              />
-            )}
-
-            <div className="mt-6 border-t border-zinc-800 pt-6">
-              <PublicationSelector
-                contentId={content.id}
-                channels={connectedChannels}
-                publications={content.publications.map((publication) => ({
-                  channelId: publication.channelId,
-                  status: publication.status,
-                }))}
-                disabled={content.status === "PUBLISHED"}
-              />
-
-              <div className="mt-4 flex items-center gap-3">
-                <PublishButton
-                  id={content.id}
-                  status={content.status}
-                />
-
-                <DeleteContentButton
-                  id={content.id}
-                  status={content.status}
-                />
-              </div>
-
-              {content.status === "PUBLISHED" &&
-                content.publishedAt && (
-                  <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
-                    <p className="text-xs font-medium text-zinc-600">Published</p>
-
-                    <p className="mt-1 text-sm font-medium text-zinc-700">
-                      {new Intl.DateTimeFormat("en-US", {
-                        timeZone: "Asia/Kolkata",
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      }).format(content.publishedAt)}
-                    </p>
-                  </div>
-                )}
-            </div>
-          </div>
         </main>
       </div>
     </WorkspaceLayout>

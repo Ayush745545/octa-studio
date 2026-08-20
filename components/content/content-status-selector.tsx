@@ -32,9 +32,9 @@ export default function ContentStatusSelector({
 
   if (status === "PUBLISHED") {
     return (
-      <div className="max-w-md rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-        <p className="text-xs font-medium text-zinc-400">Status</p>
-        <p className="mt-1 text-sm font-medium text-zinc-800">
+      <div className="max-w-md rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
+        <p className="text-xs font-medium text-zinc-600">Status</p>
+        <p className="mt-1 text-sm font-medium text-white">
           Published
         </p>
       </div>
@@ -95,9 +95,9 @@ export default function ContentStatusSelector({
     <div className="max-w-md">
       <label
         htmlFor="content-status"
-        className="text-sm font-medium text-zinc-700"
+        className="text-sm font-medium text-zinc-300"
       >
-        Status
+        Status<span className="ml-0.5 text-red-400/90">*</span>
       </label>
 
       <select
@@ -107,7 +107,7 @@ export default function ContentStatusSelector({
         onChange={(event) =>
           handleChange(event.target.value as ContentStatus)
         }
-        className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-800 outline-none transition focus:border-zinc-400 disabled:cursor-wait disabled:opacity-60"
+        className="mt-2 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-[#7FFB50] focus:ring-1 focus:ring-[#7FFB50]/30 disabled:cursor-wait disabled:opacity-60"
       >
         {STATUSES.map((item) => (
           <option key={item} value={item}>
@@ -116,9 +116,9 @@ export default function ContentStatusSelector({
         ))}
       </select>
 
-      <div className="mt-5 space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
+      <div className="mt-5 space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
         <div>
-          <p className="text-sm font-medium text-zinc-800">
+          <p className="text-sm font-medium text-white">
             Schedule content
           </p>
 
@@ -130,7 +130,7 @@ export default function ContentStatusSelector({
         <div>
           <label
             htmlFor="schedule-date"
-            className="text-sm font-medium text-zinc-700"
+            className="text-sm font-medium text-zinc-300"
           >
             Schedule date
           </label>
@@ -141,14 +141,14 @@ export default function ContentStatusSelector({
             value={scheduleDate}
             disabled={isPending}
             onChange={(event) => setScheduleDate(event.target.value)}
-            className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400 disabled:opacity-60"
+            className="mt-2 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white outline-none focus:border-[#7FFB50] focus:ring-1 focus:ring-[#7FFB50]/30 disabled:opacity-60"
           />
         </div>
 
         <div>
           <label
             htmlFor="schedule-time"
-            className="text-sm font-medium text-zinc-700"
+            className="text-sm font-medium text-zinc-300"
           >
             Schedule time
           </label>
@@ -159,12 +159,12 @@ export default function ContentStatusSelector({
             value={scheduleTime}
             disabled={isPending}
             onChange={(event) => setScheduleTime(event.target.value)}
-            className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 outline-none focus:border-zinc-400 disabled:opacity-60"
+            className="mt-2 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white outline-none focus:border-[#7FFB50] focus:ring-1 focus:ring-[#7FFB50]/30 disabled:opacity-60"
           />
         </div>
 
         {error && (
-          <p className="text-xs font-medium text-red-600">
+          <p className="text-xs font-medium text-red-400">
             {error}
           </p>
         )}
@@ -173,7 +173,7 @@ export default function ContentStatusSelector({
           type="button"
           disabled={isPending || !scheduleDate || !scheduleTime}
           onClick={handleSchedule}
-          className="w-full rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-xl bg-[#7FFB50] px-4 py-3 text-sm font-semibold text-[#0a0a0c] transition hover:bg-[#7FFB50]/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? "Scheduling..." : "Schedule Content"}
         </button>

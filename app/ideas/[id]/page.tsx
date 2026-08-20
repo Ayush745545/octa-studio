@@ -45,7 +45,7 @@ export default async function IdeaDetailPage({
             <div className="flex items-center gap-2">
               {idea.category && <CategoryBadge category={idea.category} />}
 
-              <span className="text-xs text-zinc-500">{idea.status}</span>
+              <span className="rounded-full border border-zinc-800 px-2.5 py-0.5 text-xs text-zinc-500">{idea.status}</span>
             </div>
 
             <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">{idea.title}</h1>
@@ -70,10 +70,13 @@ export default async function IdeaDetailPage({
               </div>
             </div>
 
-            <div className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
-              <p className="text-sm font-semibold text-white">Next step</p>
+            <div className="mt-10 overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-[#7FFB50]/[0.06] to-zinc-950 p-6">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#7FFB50]" />
+                <p className="text-sm font-semibold text-white">Next step</p>
+              </div>
 
-              <p className="mt-2 text-sm leading-6 text-zinc-500">
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
                 Turn this idea into a piece of content and move it into the
                 octa-studio pipeline.
               </p>

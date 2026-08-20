@@ -63,56 +63,60 @@ export function PostPreviewPanel({
             <div className="flex items-center gap-1 rounded-lg bg-zinc-900/80 p-0.5 border border-zinc-800/50">
               <button
                 type="button"
+                title="Phone"
+                aria-label="Phone preview"
                 onClick={() => setDeviceView('phone')}
-                className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
+                className={`flex items-center justify-center rounded-md px-2.5 py-1.5 transition-all ${
                   deviceView === 'phone'
                     ? 'bg-zinc-800 text-white shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
-                Phone
               </button>
               <button
                 type="button"
+                title="Tablet"
+                aria-label="Tablet preview"
                 onClick={() => setDeviceView('tablet')}
-                className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
+                className={`flex items-center justify-center rounded-md px-2.5 py-1.5 transition-all ${
                   deviceView === 'tablet'
                     ? 'bg-zinc-800 text-white shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2-2v14a2 2 0 002 2z" />
                 </svg>
-                Tablet
               </button>
               <button
                 type="button"
+                title="MacBook"
+                aria-label="MacBook preview"
                 onClick={() => setDeviceView('macbook')}
-                className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
+                className={`flex items-center justify-center rounded-md px-2.5 py-1.5 transition-all ${
                   deviceView === 'macbook'
                     ? 'bg-zinc-800 text-white shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 5h16a1 1 0 011 1v10H3V6a1 1 0 011-1zM2 18h20l-1-2H3l-1 2z" />
                 </svg>
-                MacBook
               </button>
               {/* Full-screen toggle */}
               <button
                 type="button"
+                title="Full Screen"
+                aria-label="Full screen preview"
                 onClick={() => setIsFullScreen(true)}
-                className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all text-zinc-500 hover:text-zinc-300"
+                className="flex items-center justify-center rounded-md px-2.5 py-1.5 transition-all text-zinc-500 hover:text-zinc-300"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 012 2v3m-18 0h-3a2 2 0 01-2-2v-3" />
                 </svg>
-                Full Screen
               </button>
             </div>
           </>
