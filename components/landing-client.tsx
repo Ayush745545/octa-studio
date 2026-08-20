@@ -884,6 +884,7 @@ export function LandingClient({
             <a href="#calendar" className="text-[13px] text-zinc-500 transition hover:text-white">Calendar</a>
             <a href="#ai-steps" className="text-[13px] text-zinc-500 transition hover:text-white">AI Automation</a>
             <a href="#pricing" className="text-[13px] text-zinc-500 transition hover:text-white">Pricing</a>
+            <Link href="/docs" className="text-[13px] text-zinc-500 transition hover:text-white">Docs</Link>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/calendar" className="rounded-full border border-zinc-800 px-5 py-2 text-[13px] font-medium text-zinc-300 transition hover:border-zinc-600 hover:text-white">Open App</Link>

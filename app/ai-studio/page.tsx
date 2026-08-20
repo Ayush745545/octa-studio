@@ -137,18 +137,17 @@ const lengths = ["Short", "Medium", "Long"];
 // Live creation-tool selector shown above the composer.
 type CreationToolOption = {
   label: string;
+  value: string;
   description: string;
   divider?: boolean;
 };
 
 const CREATION_TOOL_OPTIONS: CreationToolOption[] = [
-  { label: "Edit", description: "Upload a video to start" },
-  { label: "Avatar", description: "Create a talking video" },
-  { label: "Voiceover", description: "Add voiceover to faceless video" },
-  { label: "Captions", description: "Add captions to a video" },
-  { label: "Translate", description: "Translate or dub a video" },
-  { label: "Property Video", description: "Turn your listing into a video", divider: true },
-  { label: "Clips", description: "Turn long-form videos into viral clips" },
+  { label: "Auto edit", value: "Edit", description: "Upload a video to start" },
+  { label: "Generate video", value: "Generate video", description: "Create a video from a prompt" },
+  { label: "Generate image", value: "Generate image", description: "Create an image from a prompt" },
+  { label: "Add captions", value: "Captions", description: "Add captions to a video" },
+  { label: "Smart Cut", value: "Smart Cut", description: "Turn long videos into viral clips", divider: true },
 ];
 
 type CreationComposerState = {
@@ -159,39 +158,29 @@ type CreationComposerState = {
 
 const CREATION_STATES: Record<string, CreationComposerState> = {
   Edit: {
-    title: "Upload a video to start",
-    description: "",
+    title: "AI that edits like a professional editor would.",
+    description: "Upload a video to start",
     button: "Upload video",
   },
-  Avatar: {
-    title: "Create talking videos with AI.",
-    description: "Create your talking video from a prompt, link or script.",
-    button: "Add avatar",
+  "Generate video": {
+    title: "Create a video from a prompt.",
+    description: "Describe the video you want and let AI generate it.",
+    button: "Generate video",
   },
-  Voiceover: {
-    title: "Give your videos a voice.",
-    description: "Add a voiceover to your faceless video.",
-    button: "Add voiceover",
+  "Generate image": {
+    title: "Create an image from a prompt.",
+    description: "Describe the image and let AI bring it to life.",
+    button: "Generate image",
   },
   Captions: {
     title: "Add captions automatically.",
     description: "Turn your video's speech into accurate captions.",
     button: "Add captions",
   },
-  Translate: {
-    title: "Translate your video.",
-    description: "Translate or dub your video for a new audience.",
-    button: "Translate video",
-  },
-  "Property Video": {
-    title: "Turn your listing into a video.",
-    description: "Create engaging property videos from your listing.",
-    button: "Create property video",
-  },
-  Clips: {
+  "Smart Cut": {
     title: "Turn long videos into viral clips.",
     description: "Find the best moments and create short-form clips.",
-    button: "Create clips",
+    button: "Smart Cut",
   },
 };
 
@@ -211,6 +200,19 @@ const AI_CLICHES = [
 function toLocalInputValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function formatBytes(bytes: number | null): string {
+  if (bytes == null) return "—";
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  return `${value.toFixed(value < 10 ? 1 : 0)} ${units[unit]}`;
 }
 
 // Parses API responses without crashing on non-JSON bodies
@@ -392,16 +394,62 @@ export default function AIStudioPage() {
   const [creationMediaName, setCreationMediaName] = useState<string | null>(null);
   const creationFileRef = useRef<HTMLInputElement>(null);
 
+  // Captions upload + processing foundation (isolated to the Captions tool).
+  type CaptionStage = "idle" | "uploading" | "processing" | "ready" | "error";
+  type CaptionMedia = {
+    id: string;
+    url: string;
+    filename: string;
+    mimeType: string;
+    size: number;
+  };
+  const [captionStage, setCaptionStage] = useState<CaptionStage>("idle");
+  const [captionFileName, setCaptionFileName] = useState<string | null>(null);
+  const [captionFileSize, setCaptionFileSize] = useState<number | null>(null);
+  const [captionMedia, setCaptionMedia] = useState<CaptionMedia | null>(null);
+  const [captionError, setCaptionError] = useState<string | null>(null);
+
   const creationState = CREATION_STATES[creationTool] ?? CREATION_STATES.Edit;
   const visibleTemplates =
     creationTool === "Captions"
       ? TEMPLATES.filter((template) => template.category === "caption")
       : TEMPLATES;
 
+  async function uploadCaptionVideo(file: File) {
+    setCaptionFileName(file.name);
+    setCaptionFileSize(file.size);
+    setCaptionError(null);
+    setCaptionStage("uploading");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/media/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error ?? "Upload failed.");
+      }
+      setCaptionMedia(data.media as CaptionMedia);
+      setCaptionStage("ready");
+    } catch (err) {
+      setCaptionError(err instanceof Error ? err.message : "Upload failed.");
+      setCaptionStage("error");
+    }
+  }
+
+  function handleGenerateCaptions() {
+    // Step 4 placeholder: no transcription yet. Transition into the
+    // processing state so the next step has a clear entry point.
+    setCaptionStage("processing");
+  }
+
   function handleCreationMedia(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    setCreationMediaName(file.name);
+    if (creationTool === "Captions") {
+      void uploadCaptionVideo(file);
+    } else {
+      setCreationMediaName(file.name);
+    }
     event.target.value = "";
   }
 
@@ -946,6 +994,12 @@ if (contentType in ['image', 'video']) {
   }
 
   function handleTemplateSelect(template: Template) {
+    if (creationTool === "Captions") {
+      setSelectedTemplate(template.key);
+      setPrompt(template.prompt);
+      return;
+    }
+
     setActiveTab("image");
     setSelectedTemplate(template.key);
     setPrompt(template.prompt);
@@ -1185,6 +1239,7 @@ if (contentType in ['image', 'video']) {
                     options={CREATION_TOOL_OPTIONS}
                     onChange={setCreationTool}
                     ariaLabel="Creation tool"
+                    align="right"
                     className="ml-auto"
                   />
                 </div>
@@ -1351,23 +1406,101 @@ if (contentType in ['image', 'video']) {
               </h3>
               <p className="mt-2 max-w-xl text-sm text-zinc-400">{creationState.description}</p>
 
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => creationFileRef.current?.click()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16.5V4.5m0 0L7.5 9m4.5-4.5L16.5 9M3 15v3.75A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V15" />
-                  </svg>
-                  {creationState.button}
-                </button>
-                {creationMediaName && (
-                  <span className="text-xs text-zinc-500">
-                    Selected: <span className="text-zinc-300">{creationMediaName}</span>
-                  </span>
-                )}
-              </div>
+              {creationTool === "Captions" ? (
+                <div className="mt-5 space-y-3">
+                  {captionStage === "idle" && (
+                    <button
+                      type="button"
+                      onClick={() => creationFileRef.current?.click()}
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16.5V4.5m0 0L7.5 9m4.5-4.5L16.5 9M3 15v3.75A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V15" />
+                      </svg>
+                      Add captions
+                    </button>
+                  )}
+
+                  {captionStage === "uploading" && (
+                    <div className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-black/30 p-4">
+                      <svg className="h-4 w-4 shrink-0 animate-spin text-[#C7E34F]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white">Uploading…</p>
+                        <p className="truncate text-xs text-zinc-400">{captionFileName} · {formatBytes(captionFileSize)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {captionStage === "ready" && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#C7E34F]/40 bg-[#C7E34F]/5 p-4">
+                      <div className="flex items-center gap-3">
+                        <video
+                          src={captionMedia?.url}
+                          muted
+                          playsInline
+                          className="h-12 w-12 shrink-0 rounded-lg border border-white/10 object-cover"
+                        />
+                        <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#C7E34F] text-zinc-900">
+                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-white">Video ready</p>
+                          <p className="truncate text-xs text-zinc-400">{captionFileName} · {formatBytes(captionFileSize)}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleGenerateCaptions}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
+                      >
+                        Generate captions
+                      </button>
+                    </div>
+                  )}
+
+                  {captionStage === "processing" && (
+                    <div className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-black/30 p-4">
+                      <svg className="h-4 w-4 shrink-0 animate-spin text-[#C7E34F]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white">Processing captions…</p>
+                        <p className="truncate text-xs text-zinc-400">{captionFileName} · preparing caption generation</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {captionStage === "error" && (
+                    <div className="rounded-xl border border-red-500/40 bg-red-500/5 p-4">
+                      <p className="text-sm font-medium text-red-300">Upload failed</p>
+                      <p className="mt-1 text-xs text-zinc-400">{captionError}</p>
+                      <button
+                        type="button"
+                        onClick={() => creationFileRef.current?.click()}
+                        className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-500/50 px-3 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/10"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => creationFileRef.current?.click()}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#C7E34F] px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-[#C7E34F]"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16.5V4.5m0 0L7.5 9m4.5-4.5L16.5 9M3 15v3.75A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V15" />
+                    </svg>
+                    {creationState.button}
+                  </button>
+                  {creationMediaName && (
+                    <span className="text-xs text-zinc-500">
+                      Selected: <span className="text-zinc-300">{creationMediaName}</span>
+                    </span>
+                  )}
+                </div>
+              )}
 
               <input
                 ref={creationFileRef}

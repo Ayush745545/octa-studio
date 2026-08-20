@@ -17,6 +17,7 @@ export interface PromptDropdownProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  align?: "left" | "right";
   onChange?: (value: string) => void;
   onSelect?: (value: string) => void;
   ariaLabel?: string;
@@ -41,6 +42,7 @@ export function PromptDropdown({
   placeholder = "Select",
   className = "",
   disabled = false,
+  align = "left",
   onChange,
   onSelect,
   ariaLabel,
@@ -173,7 +175,7 @@ export function PromptDropdown({
           aria-label={ariaLabel ?? label ?? "Options"}
           tabIndex={-1}
           onKeyDown={handleMenuKeyDown}
-          className="absolute z-30 mt-2 max-h-80 w-60 overflow-y-auto rounded-2xl border border-white/10 bg-zinc-950 p-1 shadow-2xl outline-none"
+          className={`absolute z-30 mt-2 max-h-80 w-60 overflow-y-auto rounded-2xl border border-white/10 bg-zinc-950 p-1 shadow-2xl outline-none ${align === "right" ? "right-0" : "left-0"}`}
         >
           {options.map(normalize).map((item, index) => {
             if (item.divider) {
