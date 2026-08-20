@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, type ChangeEvent } from "react";
+import { Suspense, useState, useEffect, useRef, type ChangeEvent } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import VideoWithFallback from "@/components/video-with-fallback";
@@ -26,7 +26,7 @@ function tsOf(g: Generation): number {
   return g.timestamp || g.createdAt || 0;
 }
 
-export default function AICreationPage() {
+function AICreationPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -768,5 +768,14 @@ export default function AICreationPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+
+export default function AICreationPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <AICreationPageContent />
+    </Suspense>
   );
 }
