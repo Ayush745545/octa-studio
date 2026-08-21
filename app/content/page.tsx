@@ -18,6 +18,46 @@ export default async function ContentPage() {
 
   return (
     <WorkspaceLayout activeItem="content">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .content-pickup-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.625rem 1.25rem;
+          border-radius: 30em;
+          font-size: 0.875rem;
+          font-weight: 500;
+          font-family: inherit;
+          border: 1px solid rgba(255,255,255,0.07);
+          position: relative;
+          overflow: hidden;
+          z-index: 1;
+          color: #fff;
+          cursor: pointer;
+          background: linear-gradient(145deg, #16161b, #0c0c10);
+          box-shadow: 6px 6px 14px rgba(0,0,0,0.6), -6px -6px 14px rgba(255,255,255,0.06), inset 0 1px 1px rgba(255,255,255,0.06);
+          transition: color 0.5s ease;
+        }
+        .content-pickup-btn::before {
+          content: '';
+          height: 100%;
+          width: 0;
+          border-radius: 30em;
+          position: absolute;
+          top: 0;
+          left: 0;
+          background-image: linear-gradient(to right, #0fd850 0%, #f9f047 100%);
+          transition: 0.5s ease;
+          display: block;
+          z-index: -1;
+        }
+        .content-pickup-btn:hover::before {
+          width: 100%;
+        }
+        .content-pickup-btn:hover {
+          color: #06210a;
+        }
+      ` }} />
       <div className="min-h-screen bg-[#0a0a0c]">
         <header className="flex h-16 items-center justify-between border-b border-zinc-800 bg-[#0a0a0c] px-4 sm:px-6 lg:px-8">
           <div>
@@ -26,7 +66,7 @@ export default async function ContentPage() {
 
           <Link
             href="/ideas"
-            className="rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
+            className="content-pickup-btn"
           >
             + New from Idea
           </Link>
@@ -49,10 +89,7 @@ export default async function ContentPage() {
                 Turn an idea into content and it will appear here.
               </p>
 
-              <Link
-                href="/ideas"
-                className="mt-6 inline-flex rounded-xl bg-[#7FFB50] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#7FFB50]"
-              >
+              <Link href="/ideas" className="content-pickup-btn mt-6">
                 Go to Ideas
               </Link>
             </div>

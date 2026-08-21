@@ -4,54 +4,33 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import NewIdeaForm from "./new-idea-form";
 
-export default function NewIdeaModal() {
+export default function IdeaInbox({ count }: { count: number }) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        .idea-pickup-btn {
-          width: 9em;
-          height: 3em;
-          border-radius: 30em;
-          font-size: 15px;
-          font-family: inherit;
-          border: 1px solid rgba(255,255,255,0.07);
-          position: relative;
-          overflow: hidden;
-          z-index: 1;
-          color: #fff;
-          cursor: pointer;
-          background: linear-gradient(145deg, #16161b, #0c0c10);
-          box-shadow: 6px 6px 14px rgba(0,0,0,0.6), -6px -6px 14px rgba(255,255,255,0.06), inset 0 1px 1px rgba(255,255,255,0.06);
-          transition: color 0.5s ease;
-        }
-        .idea-pickup-btn::before {
-          content: '';
-          width: 0;
-          height: 3em;
-          border-radius: 30em;
-          position: absolute;
-          top: 0;
-          left: 0;
-          background-image: linear-gradient(to right, #0fd850 0%, #f9f047 100%);
-          transition: 0.5s ease;
-          display: block;
-          z-index: -1;
-        }
-        .idea-pickup-btn:hover::before {
-          width: 9em;
-        }
-        .idea-pickup-btn:hover {
-          color: #06210a;
-        }
-      ` }} />
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="idea-pickup-btn"
+        className="idea-folder idea-folder--lg"
+        aria-label="New idea"
+        title="New idea"
       >
-        + New Idea
+        <span className="idea-folder__shape">
+          <span className="idea-folder__back" />
+          <span className="idea-folder__papers">
+            <span className="idea-paper idea-paper--1" />
+            <span className="idea-paper idea-paper--2" />
+            <span className="idea-paper idea-paper--3" />
+          </span>
+          <span className="idea-folder__front" />
+        </span>
+        <span className="idea-folder__meta">
+          <span className="idea-folder__title">Idea Inbox</span>
+          <span className="idea-folder__count">
+            {count} {count === 1 ? "idea" : "ideas"}
+          </span>
+        </span>
       </button>
 
       <AnimatePresence>

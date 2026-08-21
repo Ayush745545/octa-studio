@@ -9,7 +9,6 @@ import { TextPlugin } from "gsap/TextPlugin";
 import { useSmoothScroll } from "@/lib/animations/smooth-scroll";
 import { prefersReducedMotion } from "@/lib/animations/scroll";
 import DockText from "@/components/registry/eldoraui/dock-text";
-import MotionFillableButton from "@/components/registry/paceui/motion-fillable-button";
 
 /* ─── Animated Components ─── */
 
@@ -865,6 +864,59 @@ export function LandingClient({
           100% { opacity: 1; transform: translateY(0); }
         }
         .price-pop { animation: pricePop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+        /* Apple-style glass CTA (transparent → lime fill) — size set per-use */
+        .octa-glass-btn {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0;
+          font-family: inherit;
+          font-weight: 600;
+          letter-spacing: 0.01em;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          background: rgba(255, 255, 255, 0.05);
+          -webkit-backdrop-filter: blur(14px) saturate(160%);
+          backdrop-filter: blur(14px) saturate(160%);
+          box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 40px -16px rgba(0, 0, 0, 0.7);
+          overflow: hidden;
+          isolation: isolate;
+          cursor: pointer;
+          transition: color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.2s ease;
+        }
+        .octa-glass-btn span {
+          position: relative;
+          z-index: 2;
+        }
+        .octa-glass-btn::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+          opacity: 0.7;
+        }
+        .octa-glass-btn::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          background: #66ff66;
+          transform: translateY(101%);
+          transition: transform 0.45s cubic-bezier(0.3, 1, 0.8, 1);
+        }
+        .octa-glass-btn:hover {
+          color: #05210a;
+          border-color: rgba(102, 255, 102, 0.5);
+          box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 14px 50px -16px rgba(102, 255, 102, 0.45);
+        }
+        .octa-glass-btn:hover::after {
+          transform: translateY(0);
+        }
       `}} />
 
       {/* ━━━ Navigation ━━━ */}
@@ -887,8 +939,8 @@ export function LandingClient({
             <Link href="/docs" className="text-[13px] text-zinc-500 transition hover:text-white">Docs</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/calendar" className="rounded-full border border-zinc-800 px-5 py-2 text-[13px] font-medium text-zinc-300 transition hover:border-zinc-600 hover:text-white">Open App</Link>
-            <MotionFillableButton href="/login" className="h-9 px-6 text-[13px]">Get Started</MotionFillableButton>
+            <Link href="/calendar" className="octa-glass-btn px-5 py-2 text-[13px] font-medium"><span>Open App</span></Link>
+            <Link href="/login" className="octa-glass-btn h-9 px-6 text-[13px] font-medium"><span>Get Started</span></Link>
           </div>
         </div>
       </nav>
@@ -916,9 +968,9 @@ export function LandingClient({
             octa-studio brings your idea inbox, AI composer, visual calendar, publishing queue, and analytics into a single workspace built for modern content creators.
           </p>
           <div data-reveal className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <MotionFillableButton href="/calendar">
-                Open Calendar <span>→</span>
-              </MotionFillableButton>
+              <Link href="/calendar" className="octa-glass-btn px-8 py-3.5 text-[16px]">
+                <span>Open Calendar</span>
+              </Link>
           </div>
         </div>
       </section>
@@ -983,9 +1035,11 @@ export function LandingClient({
                    ))}
                  </ul>
                </div>
-               <div>
-                 <img src="/images/hompage.png" alt="AI Creative Workspace" className="rounded-2xl border border-zinc-800 shadow-2xl shadow-black/60 w-full object-cover" />
-               </div>
+                <img
+                  src="/images/hompage.png"
+                  alt="Octa AI Creative Workspace"
+                  className="w-full"
+                />
              </div>
            </div>
 
